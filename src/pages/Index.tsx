@@ -1,7 +1,7 @@
-import { TripFeedback } from "@/components/TripFeedback";
+import { RetroApp } from "@/components/RetroApp";
 
 const Index = () => {
-  return <TripFeedback />;
+  return <RetroApp />;
 };
 
 export default Index;
