@@ -8,35 +8,63 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.1 76.2% 36.3%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Feedback categories */
+    --positive: 142.1 76.2% 36.3%;
+    --positive-foreground: 0 0% 98%;
+    --positive-muted: 142.1 76.2% 36.3% / 0.1;
+
+    --negative: 0 84.2% 60.2%;
+    --negative-foreground: 0 0% 98%;
+    --negative-muted: 0 84.2% 60.2% / 0.1;
+
+    --opportunity: 217.2 91.2% 59.8%;
+    --opportunity-foreground: 0 0% 98%;
+    --opportunity-muted: 217.2 91.2% 59.8% / 0.1;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(142.1 76.2% 28%));
+    --gradient-positive: linear-gradient(135deg, hsl(var(--positive)), hsl(142.1 76.2% 28%));
+    --gradient-negative: linear-gradient(135deg, hsl(var(--negative)), hsl(0 84.2% 45%));
+    --gradient-opportunity: linear-gradient(135deg, hsl(var(--opportunity)), hsl(217.2 91.2% 45%));
+
+    /* Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(0 0% 0% / 0.3);
+    --shadow-glow-positive: 0 0 20px hsl(var(--positive) / 0.3);
+    --shadow-glow-negative: 0 0 20px hsl(var(--negative) / 0.3);
+    --shadow-glow-opportunity: 0 0 20px hsl(var(--opportunity) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
 

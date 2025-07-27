@@ -18,6 +18,21 @@ export default {
 			}
 		},
 		extend: {
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-positive': 'var(--gradient-positive)',
+				'gradient-negative': 'var(--gradient-negative)',
+				'gradient-opportunity': 'var(--gradient-opportunity)',
+			},
+			boxShadow: {
+				'elegant': 'var(--shadow-elegant)',
+				'glow-positive': 'var(--shadow-glow-positive)',
+				'glow-negative': 'var(--shadow-glow-negative)',
+				'glow-opportunity': 'var(--shadow-glow-opportunity)',
+			},
+			transitionProperty: {
+				'smooth': 'var(--transition-smooth)',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -51,6 +66,21 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				positive: {
+					DEFAULT: 'hsl(var(--positive))',
+					foreground: 'hsl(var(--positive-foreground))',
+					muted: 'hsl(var(--positive-muted))'
+				},
+				negative: {
+					DEFAULT: 'hsl(var(--negative))',
+					foreground: 'hsl(var(--negative-foreground))',
+					muted: 'hsl(var(--negative-muted))'
+				},
+				opportunity: {
+					DEFAULT: 'hsl(var(--opportunity))',
+					foreground: 'hsl(var(--opportunity-foreground))',
+					muted: 'hsl(var(--opportunity-muted))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
