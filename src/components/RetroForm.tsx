@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, MessageCircle, Send } from "lucide-react";
+import { X, Plus, MessageCircle, Send, MapPin } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
 
 interface RetroFormProps {
@@ -168,6 +168,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
   const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
+  const [locationName, setLocationName] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
   const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
   const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
   const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
@@ -232,6 +235,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
       roses: processItems(roses),
       buds: processItems(buds),
       thorns: processItems(thorns),
+      locationName: locationName.trim() || undefined,
+      city: city.trim() || undefined,
+      state: state.trim() || undefined,
     };
 
     onSave(retroData);
@@ -314,6 +320,46 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
               placeholder="e.g., John Doe, Jane Smith"
               className="mt-1"
             />
+          </div>
+
+          {/* Location Section */}
+          <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4" />
+              <Label className="text-base font-semibold">Location (Optional)</Label>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="locationName">Location Name</Label>
+                <Input
+                  id="locationName"
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder="e.g., Disneyland"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="e.g., Anaheim"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="e.g., CA"
+                  className="mt-1"
+                />
+              </div>
+            </div>
           </div>
 
           {/* RBT Sections */}

@@ -11,6 +11,40 @@ export interface UserProfile {
   updated_at: string;
 }
 
+export interface Retrospective {
+  id: string;
+  user_id: string;
+  title: string;
+  event_type: string;
+  date: string;
+  attendees: string[];
+  roses: RBTItem[];
+  buds: RBTItem[];
+  thorns: RBTItem[];
+  location_name?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RBTItem {
+  id: string;
+  text: string;
+  tags: string[];
+  comments: Comment[];
+}
+
+export interface Comment {
+  id: string;
+  text: string;
+  authorName: string;
+  timestamp: string;
+}
+
 export interface Friendship {
   id: string;
   user_id: string;

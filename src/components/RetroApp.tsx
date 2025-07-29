@@ -4,26 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Plus, Filter, User, Calendar, Tag } from "lucide-react";
+import { Search, Plus, Filter, User, Calendar, Tag, MapPin } from "lucide-react";
 import { SocialHeader } from "@/components/SocialHeader";
 import { RetroForm } from "./RetroForm";
 import { RetroCard } from "./RetroCard";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useRetros } from "@/hooks/useRetros";
+import { useAuth } from "@/hooks/useAuth";
+import { Retrospective, RBTItem, Comment } from "@/lib/supabase";
 
-export interface RBTItem {
-  id: string;
-  text: string;
-  tags: string[];
-  comments: Comment[];
-}
-
-export interface Comment {
-  id: string;
-  text: string;
-  authorName: string;
-  timestamp: string;
-}
-
+// Legacy type for compatibility with existing components
 export interface Retro {
   id: string;
   title: string;
@@ -38,117 +28,59 @@ export interface Retro {
   updatedAt?: Date;
 }
 
-// Sample data for initial state
-const sampleRetros: Retro[] = [
-  {
-    id: "1",
-    title: "Hawaii Vacation",
-    eventType: "Trip",
-    date: "2024-07-15",
-    ownerName: "Ben",
-    attendees: ["Ben", "Ashley Harrison"],
-    roses: [
-      { 
-        id: "r1", 
-        text: "Saw two sea turtles", 
-        tags: ["wildlife", "ocean"], 
-        comments: [] 
-      },
-      { 
-        id: "r2", 
-        text: "Overwhelming sense of gratitude for family", 
-        tags: ["family", "emotions"], 
-        comments: [
-          {
-            id: "c1",
-            text: "This was such a beautiful moment!",
-            authorName: "Ashley Harrison",
-            timestamp: new Date().toISOString()
-          }
-        ]
-      }
-    ],
-    buds: [
-      { 
-        id: "b1", 
-        text: "Getting heads down on pursuing a business venture", 
-        tags: ["business", "future"], 
-        comments: [] 
-      }
-    ],
-    thorns: [
-      { 
-        id: "t1", 
-        text: "Stressing in line at the airport", 
-        tags: ["travel", "airport"], 
-        comments: [] 
-      }
-    ],
-    createdAt: new Date("2024-07-15"),
-  },
-  {
-    id: "2",
-    title: "BNP Paribas Tennis Tournament",
-    eventType: "Event",
-    date: "2024-03-10",
-    ownerName: "Ben",
-    attendees: ["Ben", "Elwood", "Alex"],
-    roses: [
-      { 
-        id: "r3", 
-        text: "Dinner and spending time with the Pierotti family", 
-        tags: ["social", "family"], 
-        comments: [] 
-      },
-      { 
-        id: "r4", 
-        text: "Late night match with Elwood making friends in the crowd", 
-        tags: ["tennis", "social", "kids"], 
-        comments: [] 
-      }
-    ],
-    buds: [
-      { 
-        id: "b2", 
-        text: "Hawaii in 1 week!", 
-        tags: ["travel", "excitement"], 
-        comments: [] 
-      }
-    ],
-    thorns: [
-      { 
-        id: "t2", 
-        text: "Parking was a nightmare, arrived too late", 
-        tags: ["parking", "event"], 
-        comments: [] 
-      }
-    ],
-    createdAt: new Date("2024-03-10"),
-  }
-];
+// Export types for other components
+export type { RBTItem, Comment };
 
 export const RetroApp = () => {
-  const [retros, setRetros] = useState<Retro[]>(() => {
-    const saved = localStorage.getItem('retros');
-    return saved ? JSON.parse(saved) : sampleRetros;
-  });
-  const [editingRetro, setEditingRetro] = useState<Retro | null>(null);
+  const { retros, loading, createRetro, updateRetro, deleteRetro, searchRetrosByLocation } = useRetros();
+  const { user, profile } = useAuth();
+  const [editingRetro, setEditingRetro] = useState<Retrospective | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchKeywords, setSearchKeywords] = useState('');
   const [filterTags, setFilterTags] = useState('');
   const [searchUser, setSearchUser] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [showUserRetros, setShowUserRetros] = useState(false);
-  const [retroToDelete, setRetroToDelete] = useState<Retro | null>(null);
+  const [retroToDelete, setRetroToDelete] = useState<Retrospective | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [currentUserName] = useState('My Name');
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
+  const [locationResults, setLocationResults] = useState<Retrospective[]>([]);
 
   const { toast } = useToast();
+  const currentUserName = profile?.display_name || 'You';
 
-  // Save to localStorage whenever retros change
-  useEffect(() => {
-    localStorage.setItem('retros', JSON.stringify(retros));
-  }, [retros]);
+  // Convert Retrospective to legacy Retro for existing components
+  const convertToLegacy = (retro: Retrospective): Retro => ({
+    id: retro.id,
+    title: retro.title,
+    eventType: retro.event_type,
+    date: retro.date,
+    ownerName: currentUserName, // Since it's from database, it's always current user's or friend's
+    attendees: retro.attendees,
+    roses: retro.roses,
+    buds: retro.buds,
+    thorns: retro.thorns,
+    createdAt: new Date(retro.created_at),
+    updatedAt: retro.updated_at ? new Date(retro.updated_at) : undefined,
+  });
+
+  // Search by location
+  const handleLocationSearch = async () => {
+    if (!locationSearch.trim()) {
+      setLocationResults([]);
+      setShowLocationSearch(false);
+      return;
+    }
+
+    const parts = locationSearch.split(',').map(p => p.trim());
+    const city = parts[0];
+    const state = parts[1];
+    
+    const results = await searchRetrosByLocation(city, state);
+    setLocationResults(results);
+    setShowLocationSearch(true);
+  };
 
   // Filter logic
   const filteredRetros = retros.filter(retro => {
@@ -163,6 +95,9 @@ export const RetroApp = () => {
       searchKeywords.toLowerCase().split(' ').filter(Boolean).every(keyword =>
         retro.title.toLowerCase().includes(keyword) ||
         retro.date.includes(keyword) ||
+        (retro.location_name && retro.location_name.toLowerCase().includes(keyword)) ||
+        (retro.city && retro.city.toLowerCase().includes(keyword)) ||
+        (retro.state && retro.state.toLowerCase().includes(keyword)) ||
         retro.attendees.some(attendee => attendee.toLowerCase().includes(keyword)) ||
         retro.roses.some(r => r.text.toLowerCase().includes(keyword) || r.tags?.some(t => t.toLowerCase().includes(keyword))) ||
         retro.buds.some(b => b.text.toLowerCase().includes(keyword) || b.tags?.some(t => t.toLowerCase().includes(keyword))) ||
@@ -170,19 +105,20 @@ export const RetroApp = () => {
       ) : true;
 
     const matchesUser = searchUser ?
-      retro.attendees.some(attendee => attendee.toLowerCase().includes(searchUser.toLowerCase())) ||
-      retro.ownerName.toLowerCase().includes(searchUser.toLowerCase())
+      retro.attendees.some(attendee => attendee.toLowerCase().includes(searchUser.toLowerCase()))
       : true;
 
     return matchesTags && matchesKeywords && matchesUser;
   });
 
-  const retrosToDisplay = showUserRetros && selectedUser
-    ? filteredRetros.filter(retro => retro.attendees.includes(selectedUser) || retro.ownerName === selectedUser)
-    : filteredRetros;
+  const retrosToDisplay = showLocationSearch && locationResults.length > 0 
+    ? locationResults 
+    : (showUserRetros && selectedUser
+      ? filteredRetros.filter(retro => retro.attendees.includes(selectedUser))
+      : filteredRetros);
 
-  // Get all unique users
-  const allUsers = [...new Set(retros.flatMap(r => [...r.attendees, r.ownerName]))].sort();
+  // Get all unique users from attendees
+  const allUsers = [...new Set(retros.flatMap(r => r.attendees))].sort();
 
   const handleOpenCreateModal = () => {
     setEditingRetro(null);
@@ -190,7 +126,27 @@ export const RetroApp = () => {
   };
 
   const handleEditRetro = (retro: Retro) => {
-    setEditingRetro(retro);
+    // Convert legacy retro back to Retrospective
+    const dbRetro: Retrospective = {
+      id: retro.id,
+      user_id: user?.id || '',
+      title: retro.title,
+      event_type: retro.eventType,
+      date: retro.date,
+      attendees: retro.attendees,
+      roses: retro.roses,
+      buds: retro.buds,
+      thorns: retro.thorns,
+      location_name: undefined,
+      city: undefined,
+      state: undefined,
+      country: undefined,
+      latitude: undefined,
+      longitude: undefined,
+      created_at: retro.createdAt.toISOString(),
+      updated_at: retro.updatedAt?.toISOString() || '',
+    };
+    setEditingRetro(dbRetro);
     setShowCreateModal(true);
   };
 
@@ -199,47 +155,46 @@ export const RetroApp = () => {
     setEditingRetro(null);
   };
 
-  const handleSaveRetro = (retroData: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveRetro = async (legacyRetroData: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'>) => {
+    // Convert legacy data to database format
+    const retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
+      title: legacyRetroData.title,
+      event_type: legacyRetroData.eventType,
+      date: legacyRetroData.date,
+      attendees: legacyRetroData.attendees,
+      roses: legacyRetroData.roses,
+      buds: legacyRetroData.buds,
+      thorns: legacyRetroData.thorns,
+      location_name: undefined,
+      city: undefined,
+      state: undefined,
+      country: undefined,
+      latitude: undefined,
+      longitude: undefined,
+    };
+
     if (editingRetro) {
       // Update existing retro
-      setRetros(prev => prev.map(r => 
-        r.id === editingRetro.id 
-          ? { ...retroData, id: editingRetro.id, createdAt: editingRetro.createdAt, updatedAt: new Date() }
-          : r
-      ));
-      toast({
-        title: "Retro updated!",
-        description: "Your retrospective has been successfully updated.",
-      });
+      await updateRetro(editingRetro.id, retroData);
     } else {
       // Create new retro
-      const newRetro: Retro = {
-        ...retroData,
-        id: Date.now().toString(),
-        createdAt: new Date(),
-      };
-      setRetros(prev => [newRetro, ...prev]);
-      toast({
-        title: "Retro created!",
-        description: "Your new retrospective has been created.",
-      });
+      await createRetro(retroData);
     }
     handleCloseCreateModal();
   };
 
   const handleDeleteConfirm = (retro: Retro) => {
-    setRetroToDelete(retro);
-    setShowConfirmModal(true);
+    // Find the corresponding Retrospective
+    const dbRetro = retros.find(r => r.id === retro.id);
+    if (dbRetro) {
+      setRetroToDelete(dbRetro);
+      setShowConfirmModal(true);
+    }
   };
 
-  const handleActualDelete = () => {
+  const handleActualDelete = async () => {
     if (retroToDelete) {
-      setRetros(prev => prev.filter(r => r.id !== retroToDelete.id));
-      toast({
-        title: "Retro deleted",
-        description: "Your retrospective has been removed.",
-        variant: "destructive",
-      });
+      await deleteRetro(retroToDelete.id);
     }
     setShowConfirmModal(false);
     setRetroToDelete(null);
@@ -254,21 +209,31 @@ export const RetroApp = () => {
     setShowUserRetros(false);
     setSelectedUser(null);
     setSearchUser('');
+    setShowLocationSearch(false);
+    setLocationSearch('');
   };
 
-  const handleUpdateRetroItem = (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => {
-    setRetros(prev => prev.map(retro => 
-      retro.id === retroId 
-        ? {
-            ...retro,
-            [itemType]: retro[itemType].map(item => 
-              item.id === itemId ? updatedItem : item
-            ),
-            updatedAt: new Date()
-          }
-        : retro
-    ));
+  const handleUpdateRetroItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => {
+    const retro = retros.find(r => r.id === retroId);
+    if (!retro) return;
+
+    const updatedRetro = {
+      ...retro,
+      [itemType]: retro[itemType].map(item => 
+        item.id === itemId ? updatedItem : item
+      ),
+    };
+
+    await updateRetro(retroId, updatedRetro);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -308,7 +273,7 @@ export const RetroApp = () => {
                 Create New Retro
               </Button>
 
-              {showUserRetros && selectedUser && (
+              {(showUserRetros && selectedUser) || showLocationSearch ? (
                 <Button
                   onClick={handleBackToAllRetros}
                   variant="outline"
@@ -317,11 +282,11 @@ export const RetroApp = () => {
                 >
                   ← Back to All Retros
                 </Button>
-              )}
+              ) : null}
             </div>
 
             {/* Search and Filter Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -367,6 +332,25 @@ export const RetroApp = () => {
                   </div>
                 )}
               </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <div className="flex">
+                  <Input
+                    placeholder="City, State..."
+                    className="pl-10 rounded-r-none"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
+                  />
+                  <Button
+                    onClick={handleLocationSearch}
+                    className="rounded-l-none px-3"
+                    variant="outline"
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -382,12 +366,26 @@ export const RetroApp = () => {
           </Card>
         )}
 
+        {showLocationSearch && (
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
+                <MapPin className="w-6 h-6" />
+                Retros near {locationSearch}
+                <Badge variant="secondary" className="ml-2">
+                  {locationResults.length} found
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        )}
+
         {/* Retros Grid */}
         {retrosToDisplay.length === 0 ? (
           <Card className="shadow-elegant">
             <CardContent className="p-10 text-center">
               <p className="text-xl text-muted-foreground">
-                {searchKeywords || filterTags || searchUser ? "No matching retros found." : "No retros yet. Start by creating one!"}
+                {searchKeywords || filterTags || searchUser || showLocationSearch ? "No matching retros found." : "No retros yet. Start by creating one!"}
               </p>
             </CardContent>
           </Card>
@@ -396,7 +394,7 @@ export const RetroApp = () => {
             {retrosToDisplay.map(retro => (
               <RetroCard
                 key={retro.id}
-                retro={retro}
+                retro={convertToLegacy(retro)}
                 onEdit={handleEditRetro}
                 onDelete={handleDeleteConfirm}
                 onUpdateItem={handleUpdateRetroItem}
@@ -409,7 +407,7 @@ export const RetroApp = () => {
 
       {showCreateModal && (
         <RetroForm
-          retro={editingRetro}
+          retro={editingRetro ? convertToLegacy(editingRetro) : null}
           onClose={handleCloseCreateModal}
           onSave={handleSaveRetro}
           currentUserName={currentUserName}
