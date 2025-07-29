@@ -242,6 +242,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
       roses: processItems(roses),
       buds: processItems(buds),
       thorns: processItems(thorns),
+      photos: photos, // Include photos in the saved data
       locationName: locationName.trim() || undefined,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
