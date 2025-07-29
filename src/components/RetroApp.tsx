@@ -241,9 +241,13 @@ export const RetroApp = () => {
   };
 
   if (loading) {
+    console.log('RetroApp: Loading retros...');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Loading your retrospectives...</p>
+        </div>
       </div>
     );
   }
