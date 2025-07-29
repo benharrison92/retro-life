@@ -27,9 +27,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
   const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
-  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: Date.now().toString(), text: '', tags: [], comments: [] }]);
-  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: Date.now().toString(), text: '', tags: [], comments: [] }]);
-  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: Date.now().toString(), text: '', tags: [], comments: [] }]);
+  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
+  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
+  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
 
   const updateRBTItem = (type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
