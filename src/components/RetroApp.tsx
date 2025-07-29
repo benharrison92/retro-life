@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Plus, Filter, User, Calendar, Tag } from "lucide-react";
+import { SocialHeader } from "@/components/SocialHeader";
 import { RetroForm } from "./RetroForm";
 import { RetroCard } from "./RetroCard";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -275,12 +276,24 @@ export const RetroApp = () => {
         {/* Header */}
         <Card className="shadow-elegant">
           <CardHeader className="bg-gradient-primary text-primary-foreground rounded-t-lg">
-            <CardTitle className="text-3xl md:text-4xl font-bold text-center tracking-tight">
-              Retro App
-            </CardTitle>
-            <p className="text-center text-lg opacity-90">Reflect, Learn, Optimize Your Experiences</p>
+            <div className="flex justify-between items-center">
+              <div className="flex-1">
+                <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Retro App
+                </CardTitle>
+                <p className="text-lg opacity-90">Reflect, Learn, Optimize Your Experiences</p>
+              </div>
+              <div className="hidden md:block">
+                <SocialHeader />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-6">
+            {/* Mobile social header */}
+            <div className="md:hidden mb-6 flex justify-center">
+              <SocialHeader />
+            </div>
+            
             <div className="text-center text-sm text-muted-foreground mb-6 p-3 bg-muted/50 rounded-lg">
               Current User: <span className="font-semibold text-foreground">{currentUserName}</span>
             </div>
