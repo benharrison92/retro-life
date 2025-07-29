@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,94 +21,30 @@ const eventTypes = [
   'Social', 'Fitness', 'Home', 'Outdoor'
 ];
 
-export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroFormProps) => {
-  const [title, setTitle] = useState(retro?.title || '');
-  const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
-  const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
-  const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
-  const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
-  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
-  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
-  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
-
-  const updateRBTItem = (type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => {
-    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
-    setters[type](prevItems => {
-      const newItems = [...prevItems];
-      newItems[index] = { ...newItems[index], [field]: value };
-      return newItems;
-    });
-  };
-
-  const addRBTItem = (type: 'roses' | 'buds' | 'thorns') => {
-    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
-    setters[type](prevItems => [...prevItems, { 
-      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
-      text: '', 
-      tags: [], 
-      comments: [] 
-    }]);
-  };
-
-  const removeRBTItem = (type: 'roses' | 'buds' | 'thorns', index: number) => {
-    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
-    setters[type](prevItems => prevItems.filter((_, i) => i !== index));
-  };
-
-  const addComment = (type: 'roses' | 'buds' | 'thorns', itemIndex: number, commentText: string) => {
-    if (!commentText.trim()) return;
-
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      text: commentText,
-      authorName: currentUserName,
-      timestamp: new Date().toISOString(),
-    };
-
-    const currentItems = type === 'roses' ? roses : type === 'buds' ? buds : thorns;
-    const currentComments = currentItems[itemIndex].comments || [];
-    
-    updateRBTItem(type, itemIndex, 'comments', [...currentComments, newComment]);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const parsedAttendees = attendees.split(',').map(a => a.trim()).filter(Boolean);
-
-    const processItems = (items: RBTItem[]) => 
-      items.filter(item => item.text.trim()).map(item => ({
-        ...item,
-        tags: item.tags.filter(tag => tag.trim())
-      }));
-
-    const retroData = {
-      title,
-      eventType,
-      date,
-      ownerName,
-      attendees: parsedAttendees,
-      roses: processItems(roses),
-      buds: processItems(buds),
-      thorns: processItems(thorns),
-    };
-
-    onSave(retroData);
-  };
-
-  const RBTSection = React.memo(({ 
-    type, 
-    items, 
-    title: sectionTitle,
-    colorClass 
-  }: { 
-    type: 'roses' | 'buds' | 'thorns'; 
-    items: RBTItem[]; 
-    title: string;
-    colorClass: string;
-  }) => {
-    console.log(`RBTSection ${type} rendering with ${items.length} items`);
-    return (
+// Move RBTSection outside of RetroForm to prevent re-creation on every render
+const RBTSection = React.memo(({ 
+  type, 
+  items, 
+  title: sectionTitle,
+  colorClass,
+  updateRBTItem,
+  addRBTItem,
+  removeRBTItem,
+  addComment,
+  currentUserName
+}: { 
+  type: 'roses' | 'buds' | 'thorns'; 
+  items: RBTItem[]; 
+  title: string;
+  colorClass: string;
+  updateRBTItem: (type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => void;
+  addRBTItem: (type: 'roses' | 'buds' | 'thorns') => void;
+  removeRBTItem: (type: 'roses' | 'buds' | 'thorns', index: number) => void;
+  addComment: (type: 'roses' | 'buds' | 'thorns', itemIndex: number, commentText: string) => void;
+  currentUserName: string;
+}) => {
+  console.log(`RBTSection ${type} rendering with ${items.length} items`);
+  return (
     <Card className="shadow-md">
       <CardHeader className={`${colorClass} text-white rounded-t-lg`}>
         <CardTitle className="text-xl">{sectionTitle}</CardTitle>
@@ -223,8 +159,83 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
         </Button>
       </CardContent>
     </Card>
-    );
-  });
+  );
+});
+
+export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroFormProps) => {
+  const [title, setTitle] = useState(retro?.title || '');
+  const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
+  const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
+  const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
+  const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
+  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
+  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
+  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
+
+  const updateRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => {
+    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
+    setters[type](prevItems => {
+      const newItems = [...prevItems];
+      newItems[index] = { ...newItems[index], [field]: value };
+      return newItems;
+    });
+  }, []);
+
+  const addRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns') => {
+    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
+    setters[type](prevItems => [...prevItems, { 
+      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
+      text: '', 
+      tags: [], 
+      comments: [] 
+    }]);
+  }, []);
+
+  const removeRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number) => {
+    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
+    setters[type](prevItems => prevItems.filter((_, i) => i !== index));
+  }, []);
+
+  const addComment = useCallback((type: 'roses' | 'buds' | 'thorns', itemIndex: number, commentText: string) => {
+    if (!commentText.trim()) return;
+
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      text: commentText,
+      authorName: currentUserName,
+      timestamp: new Date().toISOString(),
+    };
+
+    const currentItems = type === 'roses' ? roses : type === 'buds' ? buds : thorns;
+    const currentComments = currentItems[itemIndex].comments || [];
+    
+    updateRBTItem(type, itemIndex, 'comments', [...currentComments, newComment]);
+  }, [roses, buds, thorns, currentUserName, updateRBTItem]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const parsedAttendees = attendees.split(',').map(a => a.trim()).filter(Boolean);
+
+    const processItems = (items: RBTItem[]) => 
+      items.filter(item => item.text.trim()).map(item => ({
+        ...item,
+        tags: item.tags.filter(tag => tag.trim())
+      }));
+
+    const retroData = {
+      title,
+      eventType,
+      date,
+      ownerName,
+      attendees: parsedAttendees,
+      roses: processItems(roses),
+      buds: processItems(buds),
+      thorns: processItems(thorns),
+    };
+
+    onSave(retroData);
+  };
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
@@ -312,18 +323,33 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
               items={roses} 
               title="Roses" 
               colorClass="bg-gradient-positive"
+              updateRBTItem={updateRBTItem}
+              addRBTItem={addRBTItem}
+              removeRBTItem={removeRBTItem}
+              addComment={addComment}
+              currentUserName={currentUserName}
             />
             <RBTSection 
               type="buds" 
               items={buds} 
               title="Buds" 
               colorClass="bg-gradient-opportunity"
+              updateRBTItem={updateRBTItem}
+              addRBTItem={addRBTItem}
+              removeRBTItem={removeRBTItem}
+              addComment={addComment}
+              currentUserName={currentUserName}
             />
             <RBTSection 
               type="thorns" 
               items={thorns} 
               title="Thorns" 
               colorClass="bg-gradient-negative"
+              updateRBTItem={updateRBTItem}
+              addRBTItem={addRBTItem}
+              removeRBTItem={removeRBTItem}
+              addComment={addComment}
+              currentUserName={currentUserName}
             />
           </div>
 
