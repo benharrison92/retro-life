@@ -128,6 +128,7 @@ export type Database = {
           latitude: number | null
           location_name: string | null
           longitude: number | null
+          photos: Json | null
           roses: Json | null
           state: string | null
           thorns: Json | null
@@ -147,6 +148,7 @@ export type Database = {
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
+          photos?: Json | null
           roses?: Json | null
           state?: string | null
           thorns?: Json | null
@@ -166,6 +168,7 @@ export type Database = {
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
+          photos?: Json | null
           roses?: Json | null
           state?: string | null
           thorns?: Json | null
