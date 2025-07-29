@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
+import { PhotoDisplay } from "./PhotoDisplay";
+import { RetroPhoto } from "@/lib/supabase";
 
 interface RetroCardProps {
   retro: Retro & {
@@ -179,6 +181,12 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
       </CardHeader>
 
       <CardContent className="flex-grow space-y-4">
+        {/* Photos - Mock data for now until we migrate to new Retrospective type */}
+        <PhotoDisplay
+          photos={[]}
+          readonly={true}
+          showAsGrid={true}
+        />
         {/* Roses */}
         {retro.roses && retro.roses.length > 0 && (
           <div>

@@ -24,6 +24,7 @@ export const useRetros = () => {
     roses: (dbRetro.roses as unknown as RBTItem[]) || [],
     buds: (dbRetro.buds as unknown as RBTItem[]) || [],
     thorns: (dbRetro.thorns as unknown as RBTItem[]) || [],
+    photos: (dbRetro.photos as any) || [],
     location_name: dbRetro.location_name || undefined,
     city: dbRetro.city || undefined,
     state: dbRetro.state || undefined,
@@ -43,6 +44,7 @@ export const useRetros = () => {
     roses: appRetro.roses as any,
     buds: appRetro.buds as any,
     thorns: appRetro.thorns as any,
+    photos: appRetro.photos as any,
     location_name: appRetro.location_name,
     city: appRetro.city,
     state: appRetro.state,
@@ -124,6 +126,7 @@ export const useRetros = () => {
       if (updates.roses !== undefined) dbUpdates.roses = updates.roses;
       if (updates.buds !== undefined) dbUpdates.buds = updates.buds;
       if (updates.thorns !== undefined) dbUpdates.thorns = updates.thorns;
+      if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
       if (updates.location_name !== undefined) dbUpdates.location_name = updates.location_name;
       if (updates.city !== undefined) dbUpdates.city = updates.city;
       if (updates.state !== undefined) dbUpdates.state = updates.state;

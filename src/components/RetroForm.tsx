@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, MessageCircle, Send, MapPin } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
+import { PhotoUpload } from "./PhotoUpload";
+import { RetroPhoto } from "@/lib/supabase";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -178,6 +180,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
   const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
   const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
   const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
+  const [photos, setPhotos] = useState<RetroPhoto[]>([]);
 
   const updateRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
@@ -365,6 +368,13 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
               </div>
             </div>
           </div>
+
+          {/* Photos Section */}
+          <PhotoUpload
+            photos={photos}
+            onPhotosChange={setPhotos}
+            maxPhotos={3}
+          />
 
           {/* RBT Sections */}
           <div className="space-y-6">

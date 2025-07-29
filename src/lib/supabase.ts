@@ -21,6 +21,7 @@ export interface Retrospective {
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];
+  photos: RetroPhoto[];
   location_name?: string;
   city?: string;
   state?: string;
@@ -29,6 +30,30 @@ export interface Retrospective {
   longitude?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface PhotoReaction {
+  id: string;
+  user_id: string;
+  user_name: string;
+  type: 'heart';
+  timestamp: string;
+}
+
+export interface PhotoComment {
+  id: string;
+  user_id: string;
+  user_name: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface RetroPhoto {
+  id: string;
+  url: string;
+  caption?: string;
+  reactions: PhotoReaction[];
+  comments: PhotoComment[];
 }
 
 export interface RBTItem {
