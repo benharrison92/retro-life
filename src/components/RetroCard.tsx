@@ -3,11 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
+import { LocationBadge, LocationInfo } from "./LocationDisplay";
 
 interface RetroCardProps {
-  retro: Retro;
+  retro: Retro & {
+    locationName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
   onEdit: (retro: Retro) => void;
   onDelete: (retro: Retro) => void;
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
@@ -129,16 +135,28 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
   };
 
   return (
-    <Card className="shadow-elegant hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+    <Card className="shadow-elegant hover:shadow-xl transition-all duration-300 flex flex-col h-full border-l-4 border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between mb-2">
-          <Badge variant="secondary">{retro.eventType}</Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary">{retro.eventType}</Badge>
+            <LocationBadge 
+              locationName={retro.locationName}
+              city={retro.city}
+              state={retro.state}
+              country={retro.country}
+              variant="outline"
+              className="text-xs"
+            />
+          </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
             {retro.date}
           </div>
         </div>
-        <CardTitle className="text-xl">{retro.title}</CardTitle>
+        <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          {retro.title}
+        </CardTitle>
         <div className="text-sm text-muted-foreground space-y-1">
           <div className="flex items-center gap-1">
             <User className="w-3 h-3" />
@@ -150,6 +168,13 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
               <span className="font-medium">Attendees:</span> {retro.attendees.join(', ')}
             </div>
           )}
+          <LocationInfo
+            locationName={retro.locationName}
+            city={retro.city}
+            state={retro.state}
+            country={retro.country}
+            className="text-xs"
+          />
         </div>
       </CardHeader>
 

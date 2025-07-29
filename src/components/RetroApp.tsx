@@ -51,7 +51,12 @@ export const RetroApp = () => {
   const currentUserName = profile?.display_name || 'You';
 
   // Convert Retrospective to legacy Retro for existing components
-  const convertToLegacy = (retro: Retrospective): Retro => ({
+  const convertToLegacy = (retro: Retrospective): Retro & {
+    locationName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  } => ({
     id: retro.id,
     title: retro.title,
     eventType: retro.event_type,
@@ -63,6 +68,10 @@ export const RetroApp = () => {
     thorns: retro.thorns,
     createdAt: new Date(retro.created_at),
     updatedAt: retro.updated_at ? new Date(retro.updated_at) : undefined,
+    locationName: retro.location_name,
+    city: retro.city,
+    state: retro.state,
+    country: retro.country,
   });
 
   // Search by location
@@ -155,7 +164,11 @@ export const RetroApp = () => {
     setEditingRetro(null);
   };
 
-  const handleSaveRetro = async (legacyRetroData: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveRetro = async (legacyRetroData: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'> & {
+    locationName?: string;
+    city?: string;
+    state?: string;
+  }) => {
     // Convert legacy data to database format
     const retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
       title: legacyRetroData.title,
@@ -165,10 +178,10 @@ export const RetroApp = () => {
       roses: legacyRetroData.roses,
       buds: legacyRetroData.buds,
       thorns: legacyRetroData.thorns,
-      location_name: undefined,
-      city: undefined,
-      state: undefined,
-      country: undefined,
+      location_name: legacyRetroData.locationName,
+      city: legacyRetroData.city,
+      state: legacyRetroData.state,
+      country: 'US', // Default to US for now
       latitude: undefined,
       longitude: undefined,
     };
@@ -367,14 +380,25 @@ export const RetroApp = () => {
         )}
 
         {showLocationSearch && (
-          <Card className="shadow-elegant">
+          <Card className="shadow-elegant bg-gradient-to-r from-primary/5 to-primary/10 border-l-4 border-primary">
             <CardHeader>
-              <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-                <MapPin className="w-6 h-6" />
-                Retros near {locationSearch}
-                <Badge variant="secondary" className="ml-2">
-                  {locationResults.length} found
-                </Badge>
+              <CardTitle className="text-2xl text-center flex items-center justify-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <MapPin className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span>Retros near {locationSearch}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="secondary" className="text-sm">
+                      {locationResults.length} {locationResults.length === 1 ? 'retro' : 'retros'} found
+                    </Badge>
+                    {locationResults.length > 0 && (
+                      <Badge variant="outline" className="text-sm">
+                        Discover experiences in your area
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </CardTitle>
             </CardHeader>
           </Card>
@@ -390,17 +414,45 @@ export const RetroApp = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {retrosToDisplay.map(retro => (
-              <RetroCard
-                key={retro.id}
-                retro={convertToLegacy(retro)}
-                onEdit={handleEditRetro}
-                onDelete={handleDeleteConfirm}
-                onUpdateItem={handleUpdateRetroItem}
-                currentUserName={currentUserName}
-              />
-            ))}
+          <div className="space-y-6">
+            {/* Special location-based layout */}
+            {showLocationSearch && locationResults.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {retrosToDisplay.map((retro, index) => (
+                  <div key={retro.id} className="relative">
+                    <RetroCard
+                      retro={convertToLegacy(retro)}
+                      onEdit={handleEditRetro}
+                      onDelete={handleDeleteConfirm}
+                      onUpdateItem={handleUpdateRetroItem}
+                      currentUserName={currentUserName}
+                    />
+                    {/* Special location indicator for search results */}
+                    {index === 0 && (
+                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                        Closest Match
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Regular grid layout */}
+            {!showLocationSearch && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {retrosToDisplay.map(retro => (
+                  <RetroCard
+                    key={retro.id}
+                    retro={convertToLegacy(retro)}
+                    onEdit={handleEditRetro}
+                    onDelete={handleDeleteConfirm}
+                    onUpdateItem={handleUpdateRetroItem}
+                    currentUserName={currentUserName}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

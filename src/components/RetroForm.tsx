@@ -12,7 +12,11 @@ import { RBTItem, Comment, Retro } from "./RetroApp";
 interface RetroFormProps {
   retro: Retro | null;
   onClose: () => void;
-  onSave: (retro: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (retro: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'> & {
+    locationName?: string;
+    city?: string;
+    state?: string;
+  }) => void;
   currentUserName: string;
 }
 
