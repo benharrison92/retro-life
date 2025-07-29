@@ -115,6 +115,74 @@ export type Database = {
         }
         Relationships: []
       }
+      retrospectives: {
+        Row: {
+          attendees: string[] | null
+          buds: Json | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          date: string
+          event_type: string
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          roses: Json | null
+          state: string | null
+          thorns: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attendees?: string[] | null
+          buds?: Json | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date: string
+          event_type: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          roses?: Json | null
+          state?: string | null
+          thorns?: Json | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attendees?: string[] | null
+          buds?: Json | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date?: string
+          event_type?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          roses?: Json | null
+          state?: string | null
+          thorns?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retrospectives_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
