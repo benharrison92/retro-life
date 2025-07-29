@@ -192,38 +192,42 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Photos ({photos.length}/{maxPhotos})</h3>
         {photos.length < maxPhotos && (
-          <div className="relative">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="sr-only"
-              id="photo-upload"
-              disabled={uploading}
-            />
-            <label htmlFor="photo-upload" className="cursor-pointer">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={uploading}
-                type="button"
-              >
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Add Photos
-                  </>
-                )}
-              </Button>
-            </label>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={uploading}
+            type="button"
+            onClick={() => {
+              console.log('Add Photos button clicked');
+              const input = document.getElementById('photo-upload') as HTMLInputElement;
+              console.log('File input element:', input);
+              if (input) {
+                input.click();
+              }
+            }}
+          >
+            {uploading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2" />
+                Add Photos
+              </>
+            )}
+          </Button>
         )}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileSelect}
+          className="sr-only"
+          id="photo-upload"
+          disabled={uploading}
+        />
       </div>
 
       {photos.length === 0 ? (
