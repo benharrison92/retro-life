@@ -43,7 +43,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
   const addRBTItem = (type: 'roses' | 'buds' | 'thorns') => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
     setters[type](prevItems => [...prevItems, { 
-      id: Date.now().toString(), 
+      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
       text: '', 
       tags: [], 
       comments: [] 
@@ -113,7 +113,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
       </CardHeader>
       <CardContent className="p-4 space-y-4">
         {items.map((item, index) => (
-          <Card key={item.id} className="border-2">
+          <Card key={item.id || `${type}-${index}`} className="border-2">
             <CardContent className="p-4 space-y-3">
               <Textarea
                 placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
