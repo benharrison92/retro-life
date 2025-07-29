@@ -55,7 +55,12 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || !user) return;
+    console.log('Files selected:', files);
+    console.log('User:', user);
+    if (!files || !user) {
+      console.log('No files or no user, returning');
+      return;
+    }
 
     if (photos.length + files.length > maxPhotos) {
       toast({
