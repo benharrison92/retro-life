@@ -96,7 +96,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
     onSave(retroData);
   };
 
-  const RBTSection = ({ 
+  const RBTSection = React.memo(({ 
     type, 
     items, 
     title: sectionTitle,
@@ -106,7 +106,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
     items: RBTItem[]; 
     title: string;
     colorClass: string;
-  }) => (
+  }) => {
+    console.log(`RBTSection ${type} rendering with ${items.length} items`);
+    return (
     <Card className="shadow-md">
       <CardHeader className={`${colorClass} text-white rounded-t-lg`}>
         <CardTitle className="text-xl">{sectionTitle}</CardTitle>
@@ -221,7 +223,8 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
         </Button>
       </CardContent>
     </Card>
-  );
+    );
+  });
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
