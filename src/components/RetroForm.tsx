@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, MessageCircle, Send, MapPin } from "lucide-react";
+import { X, Plus, MessageCircle, Send, MapPin, Flower } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
 import { PhotoUpload } from "./PhotoUpload";
 import { RetroPhoto } from "@/lib/supabase";
@@ -53,7 +53,12 @@ const RBTSection = React.memo(({
   return (
     <Card className="shadow-md">
       <CardHeader className={`${colorClass} text-white rounded-t-lg`}>
-        <CardTitle className="text-xl">{sectionTitle}</CardTitle>
+        <CardTitle className="text-xl flex items-center gap-2">
+          {type === 'roses' && <span>🌹</span>}
+          {type === 'buds' && <Flower className="w-5 h-5" />}
+          {type === 'thorns' && <span>🌿</span>}
+          {sectionTitle}
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-4 space-y-4">
         {items.map((item, index) => (
@@ -382,7 +387,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             <RBTSection 
               type="roses" 
               items={roses} 
-              title="Roses" 
+              title="Rose (what went well)" 
               colorClass="bg-gradient-positive"
               updateRBTItem={updateRBTItem}
               addRBTItem={addRBTItem}
@@ -393,7 +398,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             <RBTSection 
               type="buds" 
               items={buds} 
-              title="Buds" 
+              title="Bud (what's something you look forward to next)" 
               colorClass="bg-gradient-opportunity"
               updateRBTItem={updateRBTItem}
               addRBTItem={addRBTItem}
@@ -404,7 +409,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             <RBTSection 
               type="thorns" 
               items={thorns} 
-              title="Thorns" 
+              title="Thorn (what could have been improved)" 
               colorClass="bg-gradient-negative"
               updateRBTItem={updateRBTItem}
               addRBTItem={addRBTItem}
