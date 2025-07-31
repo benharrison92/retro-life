@@ -91,6 +91,57 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_spaces: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          owner_id: string
+          state: string | null
+          title: string
+          unique_code: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          owner_id: string
+          state?: string | null
+          title: string
+          unique_code: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          owner_id?: string
+          state?: string | null
+          title?: string
+          unique_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       friend_invitations: {
         Row: {
           created_at: string | null
@@ -201,6 +252,7 @@ export type Database = {
           created_at: string | null
           date: string
           event_type: string
+          feedback_space_id: string | null
           id: string
           latitude: number | null
           location_name: string | null
@@ -221,6 +273,7 @@ export type Database = {
           created_at?: string | null
           date: string
           event_type: string
+          feedback_space_id?: string | null
           id?: string
           latitude?: number | null
           location_name?: string | null
@@ -241,6 +294,7 @@ export type Database = {
           created_at?: string | null
           date?: string
           event_type?: string
+          feedback_space_id?: string | null
           id?: string
           latitude?: number | null
           location_name?: string | null
@@ -254,6 +308,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "retrospectives_feedback_space_id_fkey"
+            columns: ["feedback_space_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_spaces"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "retrospectives_user_id_fkey"
             columns: ["user_id"]
@@ -298,7 +359,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_unique_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
