@@ -23,7 +23,8 @@ import {
   LogIn,
   MessageCircle,
   Bell,
-  BookOpen
+  BookOpen,
+  QrCode
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -104,6 +105,15 @@ export function SocialHeader() {
         My Catalogues
       </Button>
 
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate('/feedback-spaces')}
+      >
+        <QrCode className="h-4 w-4 mr-2" />
+        Feedback Spaces
+      </Button>
+
       {/* User dropdown menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -137,6 +147,14 @@ export function SocialHeader() {
           <DropdownMenuItem onClick={() => setFriendFinderOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
             Find Friends
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/feedback-spaces')}>
+            <QrCode className="mr-2 h-4 w-4" />
+            Feedback Spaces
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/catalogues')}>
+            <BookOpen className="mr-2 h-4 w-4" />
+            My Catalogues
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
