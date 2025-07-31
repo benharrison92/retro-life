@@ -375,12 +375,6 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             </div>
           </div>
 
-          {/* Photos Section */}
-          <PhotoUpload
-            photos={photos}
-            onPhotosChange={setPhotos}
-            maxPhotos={3}
-          />
 
           {/* RBT Sections */}
           <div className="space-y-6">
@@ -398,7 +392,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             <RBTSection 
               type="buds" 
               items={buds} 
-              title="Bud (what's something you look forward to next)" 
+              title="Bud (What are the opportunities?)" 
               colorClass="bg-gradient-opportunity"
               updateRBTItem={updateRBTItem}
               addRBTItem={addRBTItem}
@@ -409,7 +403,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
             <RBTSection 
               type="thorns" 
               items={thorns} 
-              title="Thorn (what could have been improved)" 
+              title="Thorn (what were the challenges?)" 
               colorClass="bg-gradient-negative"
               updateRBTItem={updateRBTItem}
               addRBTItem={addRBTItem}
@@ -418,6 +412,13 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
               currentUserName={currentUserName}
             />
           </div>
+
+          {/* Photos Section */}
+          <PhotoUpload
+            photos={photos}
+            onPhotosChange={setPhotos}
+            maxPhotos={3}
+          />
 
           {/* Actions */}
           <div className="flex gap-4 pt-4 border-t">
