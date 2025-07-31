@@ -8,6 +8,7 @@ import { CreateFeedbackSpaceDialog } from './CreateFeedbackSpaceDialog';
 import { QRCodeDisplay } from './QRCodeDisplay';
 import { format } from 'date-fns';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { AppHeader } from '@/components/AppHeader';
 
 export const FeedbackSpaceManager = () => {
   const { feedbackSpaces, loading, deleteFeedbackSpace } = useFeedbackSpaces();
@@ -26,29 +27,34 @@ export const FeedbackSpaceManager = () => {
 
   if (loading) {
     return (
-      <div className="container max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">My Feedback Spaces</h1>
+      <>
+        <AppHeader />
+        <div className="container max-w-4xl mx-auto p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">My Feedback Spaces</h1>
+          </div>
+          <div className="grid gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-6 bg-muted rounded w-1/3"></div>
+                  <div className="h-4 bg-muted rounded w-2/3"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-1/3"></div>
-                <div className="h-4 bg-muted rounded w-2/3"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-4 bg-muted rounded w-1/2"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-6">
+    <>
+      <AppHeader />
+      <div className="container max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">My Feedback Spaces</h1>
@@ -162,5 +168,6 @@ export const FeedbackSpaceManager = () => {
         />
       )}
     </div>
+    </>
   );
 };

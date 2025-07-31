@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Plus, Filter, User, Calendar, Tag, MapPin } from "lucide-react";
-import { SocialHeader } from "@/components/SocialHeader";
+import { AppHeader } from "@/components/AppHeader";
 import { RetroForm } from "./RetroForm";
 import { RetroCard } from "./RetroCard";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -255,32 +255,26 @@ export const RetroApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <Card className="shadow-elegant">
-          <CardHeader className="bg-gradient-primary text-primary-foreground rounded-t-lg">
-            <div className="flex justify-between items-center">
-              <div className="flex-1">
-                <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Retro App
-                </CardTitle>
-                <p className="text-lg opacity-90">Reflect, Learn, Optimize Your Experiences</p>
+    <>
+      <AppHeader />
+      <div className="min-h-screen bg-background p-4 md:p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <Card className="shadow-elegant">
+            <CardHeader className="bg-gradient-primary text-primary-foreground rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight">
+                    Retro App
+                  </CardTitle>
+                  <p className="text-lg opacity-90">Reflect, Learn, Optimize Your Experiences</p>
+                </div>
               </div>
-              <div className="hidden md:block">
-                <SocialHeader />
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="text-center text-sm text-muted-foreground mb-6 p-3 bg-muted/50 rounded-lg">
+                Current User: <span className="font-semibold text-foreground">{currentUserName}</span>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-6">
-            {/* Mobile social header */}
-            <div className="md:hidden mb-6 flex justify-center">
-              <SocialHeader />
-            </div>
-            
-            <div className="text-center text-sm text-muted-foreground mb-6 p-3 bg-muted/50 rounded-lg">
-              Current User: <span className="font-semibold text-foreground">{currentUserName}</span>
-            </div>
             
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0 sm:space-x-4">
               <Button
@@ -479,7 +473,8 @@ export const RetroApp = () => {
           onConfirm={handleActualDelete}
           onCancel={() => setShowConfirmModal(false)}
         />
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
