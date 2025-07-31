@@ -191,6 +191,13 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
   const [photos, setPhotos] = useState<RetroPhoto[]>([]);
 
+  // Load existing attendee users when editing
+  React.useEffect(() => {
+    if (retro?.attendeeUsers) {
+      setAttendeeUsers(retro.attendeeUsers);
+    }
+  }, [retro]);
+
   const updateRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number, field: keyof RBTItem, value: any) => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
     setters[type](prevItems => {

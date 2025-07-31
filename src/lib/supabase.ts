@@ -18,6 +18,7 @@ export interface Retrospective {
   event_type: string;
   date: string;
   attendees: string[];
+  attendeeUsers?: UserProfile[]; // Tagged user attendees
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];

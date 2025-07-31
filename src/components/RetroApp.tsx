@@ -21,6 +21,7 @@ export interface Retro {
   date: string;
   ownerName: string;
   attendees: string[];
+  attendeeUsers?: UserProfile[]; // Tagged user attendees
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];
@@ -63,6 +64,7 @@ export const RetroApp = () => {
     date: retro.date,
     ownerName: currentUserName, // Since it's from database, it's always current user's or friend's
     attendees: retro.attendees,
+    attendeeUsers: retro.attendeeUsers, // Include tagged users
     roses: retro.roses,
     buds: retro.buds,
     thorns: retro.thorns,

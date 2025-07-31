@@ -62,19 +62,52 @@ export const useRetros = () => {
     feedback_space_id: appRetro.feedback_space_id,
   });
 
-  // Fetch retros (own + friends')
+  // Fetch retros (own + friends') with attendee users
   const fetchRetros = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // First fetch retros
+      const { data: retrosData, error: retrosError } = await supabase
         .from('retrospectives')
         .select('*')
         .order('date', { ascending: false });
 
-      if (error) throw error;
-      setRetros((data || []).map(convertDbToApp));
+      if (retrosError) throw retrosError;
+
+      // Then fetch attendees for each retro
+      const retrosWithAttendees = await Promise.all(
+        (retrosData || []).map(async (retro) => {
+          const convertedRetro = convertDbToApp(retro);
+          
+          // Fetch attendee users for this retro
+          const { data: attendeesData, error: attendeesError } = await supabase
+            .from('retro_attendees')
+            .select(`
+              user_profiles (
+                id,
+                email,
+                display_name,
+                avatar_url
+              )
+            `)
+            .eq('retro_id', retro.id);
+
+          if (!attendeesError && attendeesData) {
+            convertedRetro.attendeeUsers = attendeesData
+              .map((attendee: any) => attendee.user_profiles)
+              .filter(Boolean);
+          } else {
+            convertedRetro.attendeeUsers = [];
+          }
+
+          return convertedRetro;
+        })
+      );
+
+      setRetros(retrosWithAttendees);
     } catch (error) {
       console.error('Error fetching retros:', error);
       toast({
