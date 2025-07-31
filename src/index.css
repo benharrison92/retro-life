@@ -8,60 +8,60 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 98%;
+    --foreground: 220 20% 15%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
 
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
+    --primary: 150 65% 42%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 150 25% 92%;
+    --secondary-foreground: 150 70% 25%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 150 15% 95%;
+    --muted-foreground: 150 15% 45%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 150 30% 88%;
+    --accent-foreground: 150 70% 20%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142.1 76.2% 36.3%;
+    --border: 150 20% 85%;
+    --input: 150 15% 90%;
+    --ring: 150 65% 42%;
 
     --radius: 0.75rem;
 
     /* Feedback categories */
-    --positive: 142.1 76.2% 36.3%;
-    --positive-foreground: 0 0% 98%;
-    --positive-muted: 142.1 76.2% 36.3% / 0.1;
+    --positive: 150 65% 42%;
+    --positive-foreground: 0 0% 100%;
+    --positive-muted: 150 40% 90%;
 
-    --negative: 0 84.2% 60.2%;
-    --negative-foreground: 0 0% 98%;
-    --negative-muted: 0 84.2% 60.2% / 0.1;
+    --negative: 0 70% 55%;
+    --negative-foreground: 0 0% 100%;
+    --negative-muted: 0 40% 92%;
 
-    --opportunity: 217.2 91.2% 59.8%;
-    --opportunity-foreground: 0 0% 98%;
-    --opportunity-muted: 217.2 91.2% 59.8% / 0.1;
+    --opportunity: 210 75% 60%;
+    --opportunity-foreground: 0 0% 100%;
+    --opportunity-muted: 210 40% 92%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(142.1 76.2% 28%));
-    --gradient-positive: linear-gradient(135deg, hsl(var(--positive)), hsl(142.1 76.2% 28%));
-    --gradient-negative: linear-gradient(135deg, hsl(var(--negative)), hsl(0 84.2% 45%));
-    --gradient-opportunity: linear-gradient(135deg, hsl(var(--opportunity)), hsl(217.2 91.2% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(150 65% 42%), hsl(150 70% 35%));
+    --gradient-positive: linear-gradient(135deg, hsl(150 65% 42%), hsl(150 70% 35%));
+    --gradient-negative: linear-gradient(135deg, hsl(0 70% 55%), hsl(0 75% 48%));
+    --gradient-opportunity: linear-gradient(135deg, hsl(210 75% 60%), hsl(210 80% 52%));
 
     /* Shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(0 0% 0% / 0.3);
-    --shadow-glow-positive: 0 0 20px hsl(var(--positive) / 0.3);
-    --shadow-glow-negative: 0 0 20px hsl(var(--negative) / 0.3);
-    --shadow-glow-opportunity: 0 0 20px hsl(var(--opportunity) / 0.3);
+    --shadow-elegant: 0 10px 30px -10px hsl(150 65% 42% / 0.2);
+    --shadow-glow-positive: 0 0 20px hsl(150 65% 42% / 0.3);
+    --shadow-glow-negative: 0 0 20px hsl(0 70% 55% / 0.3);
+    --shadow-glow-opportunity: 0 0 20px hsl(210 75% 60% / 0.3);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
