@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
@@ -192,6 +193,25 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
             <div className="flex items-center gap-1">
               <Users className="w-3 h-3" />
               <span className="font-medium">Attendees:</span> {retro.attendees.join(', ')}
+            </div>
+          )}
+          {retro.attendeeUsers && retro.attendeeUsers.length > 0 && (
+            <div className="flex items-center gap-2">
+              <UserCheck className="w-3 h-3" />
+              <span className="font-medium">Tagged:</span>
+              <div className="flex items-center gap-1">
+                {retro.attendeeUsers.map((attendeeUser, index) => (
+                  <div key={attendeeUser.id} className="flex items-center gap-1">
+                    <Avatar className="w-5 h-5">
+                      <AvatarFallback className="text-xs">
+                        {attendeeUser.display_name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs">{attendeeUser.display_name}</span>
+                    {index < retro.attendeeUsers.length - 1 && <span className="text-muted-foreground">,</span>}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
           <LocationInfo
