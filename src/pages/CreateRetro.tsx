@@ -37,6 +37,8 @@ const CreateRetro = () => {
 
   const handleSave = async (retroData) => {
     try {
+      console.log('CreateRetro: feedbackSpaceId from URL:', feedbackSpaceId);
+      
       const retroToSave = {
         title: retroData.title,
         event_type: retroData.eventType,
@@ -56,6 +58,7 @@ const CreateRetro = () => {
         ...(feedbackSpaceId && { feedback_space_id: feedbackSpaceId })
       };
 
+      console.log('CreateRetro: Saving retro with data:', retroToSave);
       const result = await createRetro(retroToSave);
       if (result) {
         toast.success('Feedback submitted successfully!');

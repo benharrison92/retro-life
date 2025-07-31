@@ -28,6 +28,7 @@ export interface Retrospective {
   country?: string;
   latitude?: number;
   longitude?: number;
+  feedback_space_id?: string;
   created_at: string;
   updated_at: string;
 }

@@ -31,6 +31,7 @@ export const useRetros = () => {
     country: dbRetro.country || undefined,
     latitude: dbRetro.latitude || undefined,
     longitude: dbRetro.longitude || undefined,
+    feedback_space_id: dbRetro.feedback_space_id || undefined,
     created_at: dbRetro.created_at || '',
     updated_at: dbRetro.updated_at || '',
   });
@@ -51,6 +52,7 @@ export const useRetros = () => {
     country: appRetro.country,
     latitude: appRetro.latitude,
     longitude: appRetro.longitude,
+    feedback_space_id: appRetro.feedback_space_id,
   });
 
   // Fetch retros (own + friends')
