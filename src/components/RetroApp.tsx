@@ -25,6 +25,12 @@ export interface Retro {
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];
+  locationName?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -68,12 +74,14 @@ export const RetroApp = () => {
     roses: retro.roses,
     buds: retro.buds,
     thorns: retro.thorns,
-    createdAt: new Date(retro.created_at),
-    updatedAt: retro.updated_at ? new Date(retro.updated_at) : undefined,
     locationName: retro.location_name,
     city: retro.city,
     state: retro.state,
     country: retro.country,
+    latitude: retro.latitude,
+    longitude: retro.longitude,
+    createdAt: new Date(retro.created_at),
+    updatedAt: retro.updated_at ? new Date(retro.updated_at) : undefined,
   });
 
   // Search by location
@@ -145,19 +153,21 @@ export const RetroApp = () => {
       event_type: retro.eventType,
       date: retro.date,
       attendees: retro.attendees,
+      // Skip attendeeUsers for edit conversion to avoid type conflicts
       roses: retro.roses,
       buds: retro.buds,
       thorns: retro.thorns,
       photos: [],
-      location_name: undefined,
-      city: undefined,
-      state: undefined,
-      country: undefined,
-      latitude: undefined,
-      longitude: undefined,
+      location_name: retro.locationName,
+      city: retro.city,
+      state: retro.state,
+      country: retro.country,
+      latitude: retro.latitude,
+      longitude: retro.longitude,
       created_at: retro.createdAt.toISOString(),
       updated_at: retro.updatedAt?.toISOString() || '',
     };
+    console.log('handleEditRetro: Setting editingRetro to:', dbRetro);
     setEditingRetro(dbRetro);
     setShowCreateModal(true);
   };
@@ -193,12 +203,15 @@ export const RetroApp = () => {
     console.log('handleSaveRetro: Legacy retro data:', legacyRetroData);
     console.log('handleSaveRetro: Attendee users:', attendeeUsers);
 
+    console.log('handleSaveRetro: editingRetro value:', editingRetro);
+
     if (editingRetro) {
       // Update existing retro
+      console.log('handleSaveRetro: Updating existing retro:', editingRetro.id);
       await updateRetro(editingRetro.id, retroData);
     } else {
       // Create new retro with attendees
-      console.log('handleSaveRetro: Creating retro with attendees:', attendeeUsers);
+      console.log('handleSaveRetro: Creating NEW retro with attendees:', attendeeUsers);
       try {
         await createRetro(retroData, attendeeUsers);
         console.log('handleSaveRetro: Retro created successfully');
