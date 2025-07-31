@@ -199,7 +199,12 @@ export const RetroApp = () => {
     } else {
       // Create new retro with attendees
       console.log('handleSaveRetro: Creating retro with attendees:', attendeeUsers);
-      await createRetro(retroData, attendeeUsers);
+      try {
+        await createRetro(retroData, attendeeUsers);
+        console.log('handleSaveRetro: Retro created successfully');
+      } catch (error) {
+        console.error('handleSaveRetro: Error creating retro:', error);
+      }
     }
     handleCloseCreateModal();
   };

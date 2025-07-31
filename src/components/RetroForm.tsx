@@ -264,6 +264,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       state: state.trim() || undefined,
     };
 
+    console.log('RetroForm: Submitting retro data:', retroData);
+    console.log('RetroForm: Submitting attendee users:', attendeeUsers);
+
     onSave(retroData, attendeeUsers);
   };
 
