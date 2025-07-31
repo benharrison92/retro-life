@@ -312,18 +312,17 @@ export const RetroApp = () => {
                 Current User: <span className="font-semibold text-foreground">{currentUserName}</span>
               </div>
             
-            <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <NotificationHub className="w-full sm:w-auto" />
               
-              <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button
-                  onClick={handleOpenCreateModal}
-                  className="w-full sm:w-auto px-6 py-3 text-lg font-bold"
-                  size="lg"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create New Retro
-                </Button>
+              <Button
+                onClick={handleOpenCreateModal}
+                className="w-full sm:w-auto px-6 py-3 text-lg font-bold"
+                size="lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create New Retro
+              </Button>
 
               {(showUserRetros && selectedUser) || showLocationSearch ? (
                 <Button
@@ -336,7 +335,6 @@ export const RetroApp = () => {
                 </Button>
                 ) : null}
               </div>
-            </div>
 
             {/* Search and Filter Section */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -495,6 +493,7 @@ export const RetroApp = () => {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {showCreateModal && (
@@ -514,7 +513,6 @@ export const RetroApp = () => {
           onCancel={() => setShowConfirmModal(false)}
         />
         )}
-      </div>
     </>
   );
 };
