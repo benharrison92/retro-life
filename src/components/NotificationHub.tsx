@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus, FolderOpen } from "lucide-react";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 
@@ -31,6 +31,8 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case 'friend_request':
         return <UserPlus className="w-4 h-4 text-green-500" />;
+      case 'catalogue_invitation':
+        return <FolderOpen className="w-4 h-4 text-purple-500" />;
       default:
         return <Bell className="w-4 h-4" />;
     }

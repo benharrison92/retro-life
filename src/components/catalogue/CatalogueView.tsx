@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useCatalogueItems } from '@/hooks/useCatalogues';
+import { CatalogueMembersDialog } from './CatalogueMembersDialog';
 import { Catalogue } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CatalogueViewProps {
   catalogue: Catalogue;
@@ -14,6 +16,9 @@ interface CatalogueViewProps {
 
 export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
   const { items, loading, removeItemFromCatalogue } = useCatalogueItems(catalogue.id);
+  const { user } = useAuth();
+  
+  const isOwner = user?.id === catalogue.user_id;
 
   const getItemTypeColor = (type: string) => {
     switch (type) {
@@ -39,17 +44,25 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Catalogues
-        </Button>
-        <div>
-          <h2 className="text-2xl font-bold">{catalogue.name}</h2>
-          {catalogue.description && (
-            <p className="text-muted-foreground">{catalogue.description}</p>
-          )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Catalogues
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold">{catalogue.name}</h2>
+            {catalogue.description && (
+              <p className="text-muted-foreground">{catalogue.description}</p>
+            )}
+          </div>
         </div>
+        
+        <CatalogueMembersDialog
+          catalogueId={catalogue.id}
+          catalogueName={catalogue.name}
+          isOwner={isOwner}
+        />
       </div>
 
       {items.length === 0 ? (
