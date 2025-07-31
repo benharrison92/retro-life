@@ -85,10 +85,11 @@ export const useRetros = () => {
           console.log('fetchRetros: Processing retro', retro.id, retro.title);
           
           // Fetch attendee users for this retro
+          console.log('fetchRetros: Fetching attendees for retro', retro.id, retro.title);
           const { data: attendeesData, error: attendeesError } = await supabase
             .from('retro_attendees')
             .select(`
-              user_profiles (
+              user_profiles!inner (
                 id,
                 email,
                 display_name,
