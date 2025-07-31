@@ -251,8 +251,8 @@ export const useRetros = () => {
     }
   };
 
-  // Update retro
-  const updateRetro = async (id: string, updates: Partial<Retrospective>) => {
+  // Update retro with attendees
+  const updateRetro = async (id: string, updates: Partial<Retrospective>, attendeeUsers?: UserProfile[]) => {
     try {
       const dbUpdates: any = {};
       
@@ -272,6 +272,8 @@ export const useRetros = () => {
       if (updates.latitude !== undefined) dbUpdates.latitude = updates.latitude;
       if (updates.longitude !== undefined) dbUpdates.longitude = updates.longitude;
 
+      console.log('updateRetro: Updating retro with attendeeUsers:', attendeeUsers);
+
       const { data, error } = await supabase
         .from('retrospectives')
         .update(dbUpdates)
@@ -280,6 +282,27 @@ export const useRetros = () => {
         .single();
 
       if (error) throw error;
+
+      // Handle attendee users if provided
+      if (attendeeUsers !== undefined) {
+        console.log('updateRetro: Managing attendees for retro:', id);
+        
+        // Remove existing attendees
+        const { error: deleteError } = await supabase
+          .from('retro_attendees')
+          .delete()
+          .eq('retro_id', id);
+
+        if (deleteError) {
+          console.error('updateRetro: Error removing existing attendees:', deleteError);
+        }
+
+        // Add new attendees
+        if (attendeeUsers.length > 0) {
+          console.log('updateRetro: Adding new attendees:', attendeeUsers);
+          await addAttendees(id, attendeeUsers);
+        }
+      }
 
       const convertedData = convertDbToApp(data);
       setRetros(prev => prev.map(retro => 

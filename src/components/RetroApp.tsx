@@ -208,7 +208,9 @@ export const RetroApp = () => {
     if (editingRetro) {
       // Update existing retro
       console.log('handleSaveRetro: Updating existing retro:', editingRetro.id);
-      await updateRetro(editingRetro.id, retroData);
+      await updateRetro(editingRetro.id, retroData, attendeeUsers);
+      // Refresh to get updated attendees
+      await refreshRetros();
     } else {
       // Create new retro with attendees
       console.log('handleSaveRetro: Creating NEW retro with attendees:', attendeeUsers);
