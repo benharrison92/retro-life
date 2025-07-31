@@ -9,9 +9,9 @@ import { AppHeader } from "@/components/AppHeader";
 import { RetroForm } from "./RetroForm";
 import { RetroCard } from "./RetroCard";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { useRetros, UserProfile } from "@/hooks/useRetros";
+import { useRetros } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
-import { Retrospective, RBTItem, Comment } from "@/lib/supabase";
+import { Retrospective, RBTItem, Comment, UserProfile } from "@/lib/supabase";
 
 // Legacy type for compatibility with existing components
 export interface Retro {
@@ -144,8 +144,14 @@ export const RetroApp = () => {
     setShowCreateModal(true);
   };
 
-  const handleEditRetro = (retro: Retro) => {
-    // Convert legacy retro back to Retrospective
+  const handleEditRetro = async (retro: Retro) => {
+    // Refresh retros first to get latest attendeeUsers data
+    await refreshRetros();
+    
+    // Find the updated retro with attendees
+    const updatedDbRetro = retros.find(r => r.id === retro.id);
+    
+    // Convert legacy retro back to Retrospective using the updated data if available
     const dbRetro: Retrospective = {
       id: retro.id,
       user_id: user?.id || '',
@@ -153,7 +159,7 @@ export const RetroApp = () => {
       event_type: retro.eventType,
       date: retro.date,
       attendees: retro.attendees,
-      // Skip attendeeUsers for edit conversion to avoid type conflicts
+      attendeeUsers: updatedDbRetro?.attendeeUsers || retro.attendeeUsers || [], // Include current attendeeUsers
       roses: retro.roses,
       buds: retro.buds,
       thorns: retro.thorns,
@@ -218,7 +224,8 @@ export const RetroApp = () => {
         await createRetro(retroData, attendeeUsers);
         console.log('handleSaveRetro: Retro created successfully');
         // Refresh the retros list to get the newly created attendees
-        await refreshRetros();
+    await refreshRetros();
+    console.log('handleSaveRetro: Retros refreshed after save');
       } catch (error) {
         console.error('handleSaveRetro: Error creating retro:', error);
       }

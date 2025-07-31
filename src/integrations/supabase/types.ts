@@ -262,7 +262,22 @@ export type Database = {
           retro_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_retro_attendees_retro_id"
+            columns: ["retro_id"]
+            isOneToOne: false
+            referencedRelation: "retrospectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_retro_attendees_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       retrospectives: {
         Row: {
