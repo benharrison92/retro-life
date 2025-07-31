@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalogue_items: {
+        Row: {
+          catalogue_id: string
+          created_at: string
+          id: string
+          item_tags: string[] | null
+          item_text: string
+          item_type: string
+          original_item_id: string
+          original_retro_id: string
+          saved_from_user_id: string
+          saved_from_user_name: string
+          user_id: string
+        }
+        Insert: {
+          catalogue_id: string
+          created_at?: string
+          id?: string
+          item_tags?: string[] | null
+          item_text: string
+          item_type: string
+          original_item_id: string
+          original_retro_id: string
+          saved_from_user_id: string
+          saved_from_user_name: string
+          user_id: string
+        }
+        Update: {
+          catalogue_id?: string
+          created_at?: string
+          id?: string
+          item_tags?: string[] | null
+          item_text?: string
+          item_type?: string
+          original_item_id?: string
+          original_retro_id?: string
+          saved_from_user_id?: string
+          saved_from_user_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogue_items_catalogue_id_fkey"
+            columns: ["catalogue_id"]
+            isOneToOne: false
+            referencedRelation: "catalogues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalogues: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       friend_invitations: {
         Row: {
           created_at: string | null

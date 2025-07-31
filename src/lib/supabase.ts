@@ -87,3 +87,26 @@ export interface FriendInvitation {
   created_at: string;
   updated_at: string;
 }
+
+export interface Catalogue {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CatalogueItem {
+  id: string;
+  catalogue_id: string;
+  user_id: string;
+  original_retro_id: string;
+  original_item_id: string;
+  item_type: 'rose' | 'bud' | 'thorn';
+  item_text: string;
+  item_tags: string[];
+  saved_from_user_id: string;
+  saved_from_user_name: string;
+  created_at: string;
+}

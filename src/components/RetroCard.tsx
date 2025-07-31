@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation } from "lucide-react";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
 import { RetroPhoto } from "@/lib/supabase";
+import { SaveToCatalogueDialog } from "./catalogue/SaveToCatalogueDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 interface RetroCardProps {
   retro: Retro & {
@@ -23,6 +25,7 @@ interface RetroCardProps {
 }
 
 export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserName }: RetroCardProps) => {
+  const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
 
@@ -78,16 +81,37 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
 
         {(hasComments || true) && (
           <div className="border-t pt-2 mt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleExpanded(item.id)}
-              className="flex items-center gap-1 text-xs p-1 h-auto"
-            >
-              <MessageCircle className="w-3 h-3" />
-              {item.comments?.length || 0} comment{(item.comments?.length || 0) !== 1 ? 's' : ''}
-              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleExpanded(item.id)}
+                className="flex items-center gap-1 text-xs p-1 h-auto"
+              >
+                <MessageCircle className="w-3 h-3" />
+                {item.comments?.length || 0} comment{(item.comments?.length || 0) !== 1 ? 's' : ''}
+                {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </Button>
+              
+              {user && (
+                <SaveToCatalogueDialog
+                  retroId={retro.id}
+                  item={item}
+                  itemType={type === 'roses' ? 'rose' : type === 'buds' ? 'bud' : 'thorn'}
+                  savedFromUserId={user.id} // We'll use a placeholder for now
+                  savedFromUserName={retro.ownerName}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-1 text-xs p-1 h-auto"
+                  >
+                    <BookmarkPlus className="w-3 h-3" />
+                    Save
+                  </Button>
+                </SaveToCatalogueDialog>
+              )}
+            </div>
 
             {isExpanded && (
               <div className="mt-2 space-y-2">
