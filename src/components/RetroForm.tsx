@@ -20,6 +20,7 @@ interface RetroFormProps {
     state?: string;
   }) => void;
   currentUserName: string;
+  feedbackSpaceMode?: boolean;
 }
 
 const eventTypes = [
@@ -173,7 +174,7 @@ const RBTSection = React.memo(({
   );
 });
 
-export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroFormProps) => {
+export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpaceMode = false }: RetroFormProps) => {
   const [title, setTitle] = useState(retro?.title || '');
   const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
@@ -262,7 +263,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
         <div className="sticky top-0 bg-card border-b p-6 rounded-t-xl">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">
-              {retro ? 'Edit Retrospective' : 'Create New Retrospective'}
+              {feedbackSpaceMode 
+                ? 'Add Feedback to Event' 
+                : retro ? 'Edit Retrospective' : 'Create New Retrospective'}
             </h2>
             <Button onClick={onClose} variant="ghost" size="sm">
               <X className="w-5 h-5" />
@@ -426,7 +429,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName }: RetroForm
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              {retro ? 'Update Retro' : 'Create Retro'}
+              {feedbackSpaceMode 
+                ? 'Submit Feedback' 
+                : retro ? 'Update Retro' : 'Create Retro'}
             </Button>
           </div>
         </form>

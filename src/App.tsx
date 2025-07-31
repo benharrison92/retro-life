@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import Catalogues from "./pages/Catalogues";
 import FeedbackSpaces from "./pages/FeedbackSpaces";
 import FeedbackSpace from "./pages/FeedbackSpace";
+import CreateRetro from "./pages/CreateRetro";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/catalogues" element={<Catalogues />} />
             <Route path="/feedback-spaces" element={<FeedbackSpaces />} />
             <Route path="/feedback/:code" element={<FeedbackSpace />} />
+            <Route path="/create-retro" element={<CreateRetro />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

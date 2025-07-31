@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, ArrowLeft, MapPin, Users } from 'lucide-react';
+import { Plus, ArrowLeft, MapPin, Users, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RetroCard } from '@/components/RetroCard';
+import { AggregatedFeedback } from '@/components/feedback/AggregatedFeedback';
 import { useFeedbackSpaces, type FeedbackSpace } from '@/hooks/useFeedbackSpaces';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -158,7 +160,7 @@ const FeedbackSpace = () => {
         </CardContent>
       </Card>
 
-      {/* Retros */}
+      {/* Retros and Aggregated View */}
       {retros.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
@@ -174,42 +176,65 @@ const FeedbackSpace = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Feedback ({retros.length})</h2>
-          <div className="grid gap-4">
-            {retros.map((retro) => {
-              // Convert database format to RetroCard expected format
-              const convertedRetro = {
-                id: retro.id,
-                title: retro.title,
-                eventType: retro.event_type,
-                date: retro.date,
-                attendees: retro.attendees || [],
-                roses: Array.isArray(retro.roses) ? retro.roses : [],
-                buds: Array.isArray(retro.buds) ? retro.buds : [],
-                thorns: Array.isArray(retro.thorns) ? retro.thorns : [],
-                photos: Array.isArray(retro.photos) ? retro.photos : [],
-                locationName: retro.location_name,
-                city: retro.city,
-                state: retro.state,
-                country: retro.country,
-                ownerName: retro.user_profiles?.display_name || 'Anonymous',
-                createdAt: retro.created_at,
-              };
-              
-              return (
-                <RetroCard
-                  key={retro.id}
-                  retro={convertedRetro}
-                  currentUserName={user?.email || 'Anonymous'}
-                  onEdit={() => {}} // View-only for feedback spaces
-                  onDelete={() => {}} // View-only for feedback spaces
-                  onUpdateItem={() => {}} // View-only for feedback spaces
-                />
-              );
-            })}
-          </div>
-        </div>
+        <Tabs defaultValue="individual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="individual" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Individual Feedback ({retros.length})
+            </TabsTrigger>
+            <TabsTrigger value="aggregated" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Aggregated View
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="individual" className="space-y-4 mt-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Individual Feedback</h2>
+              <Button onClick={handleCreateRetro} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Feedback
+              </Button>
+            </div>
+            <div className="grid gap-4">
+              {retros.map((retro) => {
+                // Convert database format to RetroCard expected format
+                const convertedRetro = {
+                  id: retro.id,
+                  title: retro.title,
+                  eventType: retro.event_type,
+                  date: retro.date,
+                  attendees: retro.attendees || [],
+                  roses: Array.isArray(retro.roses) ? retro.roses : [],
+                  buds: Array.isArray(retro.buds) ? retro.buds : [],
+                  thorns: Array.isArray(retro.thorns) ? retro.thorns : [],
+                  photos: Array.isArray(retro.photos) ? retro.photos : [],
+                  locationName: retro.location_name,
+                  city: retro.city,
+                  state: retro.state,
+                  country: retro.country,
+                  ownerName: retro.user_profiles?.display_name || 'Anonymous',
+                  createdAt: retro.created_at,
+                };
+                
+                return (
+                  <RetroCard
+                    key={retro.id}
+                    retro={convertedRetro}
+                    currentUserName={user?.email || 'Anonymous'}
+                    onEdit={() => {}} // View-only for feedback spaces
+                    onDelete={() => {}} // View-only for feedback spaces
+                    onUpdateItem={() => {}} // View-only for feedback spaces
+                  />
+                );
+              })}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="aggregated" className="mt-6">
+            <AggregatedFeedback retros={retros} />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
     </>
