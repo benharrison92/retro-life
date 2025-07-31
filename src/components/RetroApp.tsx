@@ -64,6 +64,8 @@ export const RetroApp = () => {
     city?: string;
     state?: string;
     country?: string;
+    feedbackSpaceName?: string;
+    feedbackSpaceId?: string;
   } => ({
     id: retro.id,
     title: retro.title,
@@ -81,6 +83,8 @@ export const RetroApp = () => {
     country: retro.country,
     latitude: retro.latitude,
     longitude: retro.longitude,
+    feedbackSpaceName: retro.feedbackSpaceName, // Include feedback space info
+    feedbackSpaceId: retro.feedback_space_id,
     createdAt: new Date(retro.created_at),
     updatedAt: retro.updated_at ? new Date(retro.updated_at) : undefined,
   });

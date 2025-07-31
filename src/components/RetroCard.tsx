@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck } from "lucide-react";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
@@ -18,6 +18,8 @@ interface RetroCardProps {
     city?: string;
     state?: string;
     country?: string;
+    feedbackSpaceName?: string;
+    feedbackSpaceId?: string;
   };
   onEdit: (retro: Retro) => void;
   onDelete: (retro: Retro) => void;
@@ -184,6 +186,19 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
         <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
           {retro.title}
         </CardTitle>
+        
+        {/* Feedback Space Tag - Display prominently when retro is part of a feedback space */}
+        {retro.feedbackSpaceName && (
+          <div className="mt-2 mb-1">
+            <Badge 
+              variant="default" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm px-3 py-1 shadow-md"
+            >
+              <Megaphone className="w-4 h-4 mr-2" />
+              Feedback Space: {retro.feedbackSpaceName}
+            </Badge>
+          </div>
+        )}
         <div className="text-sm text-muted-foreground space-y-1">
           <div className="flex items-center gap-1">
             <User className="w-3 h-3" />

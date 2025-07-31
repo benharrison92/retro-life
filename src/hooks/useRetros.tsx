@@ -69,18 +69,26 @@ export const useRetros = () => {
     try {
       setLoading(true);
       
-      // First fetch retros
+      // First fetch retros with feedback space information
       const { data: retrosData, error: retrosError } = await supabase
         .from('retrospectives')
-        .select('*')
+        .select(`
+          *,
+          feedback_spaces(title)
+        `)
         .order('date', { ascending: false });
 
       if (retrosError) throw retrosError;
 
-      // Then fetch attendees for each retro
+      // Then fetch attendees for each retro and add feedback space info
       const retrosWithAttendees = await Promise.all(
-        (retrosData || []).map(async (retro) => {
+        (retrosData || []).map(async (retro: any) => {
           const convertedRetro = convertDbToApp(retro);
+          
+          // Add feedback space information
+          if (retro.feedback_spaces) {
+            convertedRetro.feedbackSpaceName = retro.feedback_spaces.title;
+          }
           
           console.log('fetchRetros: Processing retro', retro.id, retro.title);
           

@@ -28,6 +28,7 @@ export interface Retrospective {
   latitude?: number;
   longitude?: number;
   feedback_space_id?: string;
+  feedbackSpaceName?: string; // Name of the feedback space if retro is part of one
   created_at: string;
   updated_at: string;
 }
