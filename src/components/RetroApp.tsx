@@ -33,7 +33,7 @@ export interface Retro {
 export type { RBTItem, Comment };
 
 export const RetroApp = () => {
-  const { retros, loading, createRetro, updateRetro, deleteRetro, searchRetrosByLocation } = useRetros();
+  const { retros, loading, createRetro, updateRetro, deleteRetro, searchRetrosByLocation, refreshRetros } = useRetros();
   const { user, profile } = useAuth();
   const [editingRetro, setEditingRetro] = useState<Retrospective | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -182,9 +182,9 @@ export const RetroApp = () => {
       buds: legacyRetroData.buds,
       thorns: legacyRetroData.thorns,
       photos: [],
-      location_name: legacyRetroData.locationName,
-      city: legacyRetroData.city,
-      state: legacyRetroData.state,
+      location_name: typeof legacyRetroData.locationName === 'string' ? legacyRetroData.locationName : undefined,
+      city: typeof legacyRetroData.city === 'string' ? legacyRetroData.city : undefined,
+      state: typeof legacyRetroData.state === 'string' ? legacyRetroData.state : undefined,
       country: 'US', // Default to US for now
       latitude: undefined,
       longitude: undefined,
@@ -202,6 +202,8 @@ export const RetroApp = () => {
       try {
         await createRetro(retroData, attendeeUsers);
         console.log('handleSaveRetro: Retro created successfully');
+        // Refresh the retros list to get the newly created attendees
+        await refreshRetros();
       } catch (error) {
         console.error('handleSaveRetro: Error creating retro:', error);
       }
