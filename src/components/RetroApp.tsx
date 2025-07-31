@@ -190,11 +190,15 @@ export const RetroApp = () => {
       longitude: undefined,
     };
 
+    console.log('handleSaveRetro: Legacy retro data:', legacyRetroData);
+    console.log('handleSaveRetro: Attendee users:', attendeeUsers);
+
     if (editingRetro) {
       // Update existing retro
       await updateRetro(editingRetro.id, retroData);
     } else {
       // Create new retro with attendees
+      console.log('handleSaveRetro: Creating retro with attendees:', attendeeUsers);
       await createRetro(retroData, attendeeUsers);
     }
     handleCloseCreateModal();

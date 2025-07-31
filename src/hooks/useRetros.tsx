@@ -82,6 +82,8 @@ export const useRetros = () => {
         (retrosData || []).map(async (retro) => {
           const convertedRetro = convertDbToApp(retro);
           
+          console.log('fetchRetros: Processing retro', retro.id, retro.title);
+          
           // Fetch attendee users for this retro
           const { data: attendeesData, error: attendeesError } = await supabase
             .from('retro_attendees')
@@ -95,18 +97,26 @@ export const useRetros = () => {
             `)
             .eq('retro_id', retro.id);
 
+          console.log('fetchRetros: Attendees query result for retro', retro.id, {
+            attendeesData,
+            attendeesError
+          });
+
           if (!attendeesError && attendeesData) {
             convertedRetro.attendeeUsers = attendeesData
               .map((attendee: any) => attendee.user_profiles)
               .filter(Boolean);
+            console.log('fetchRetros: Set attendeeUsers for retro', retro.id, convertedRetro.attendeeUsers);
           } else {
             convertedRetro.attendeeUsers = [];
+            console.log('fetchRetros: No attendees found for retro', retro.id);
           }
 
           return convertedRetro;
         })
       );
 
+      console.log('fetchRetros: Final retros with attendees:', retrosWithAttendees);
       setRetros(retrosWithAttendees);
     } catch (error) {
       console.error('Error fetching retros:', error);
@@ -125,18 +135,26 @@ export const useRetros = () => {
     if (!user) return;
 
     try {
+      console.log('addAttendees: Adding attendees to retro', retroId, attendeeUsers);
+      
       // Insert attendees into retro_attendees table
       const attendeeInserts = attendeeUsers.map(attendee => ({
         retro_id: retroId,
         user_id: attendee.id,
       }));
 
+      console.log('addAttendees: Inserting attendee data:', attendeeInserts);
+
       const { error } = await supabase
         .from('retro_attendees')
         .insert(attendeeInserts);
 
-      if (error) throw error;
+      if (error) {
+        console.error('addAttendees: Error inserting attendees:', error);
+        throw error;
+      }
 
+      console.log('addAttendees: Successfully added attendees');
       toast({
         title: "Success",
         description: "Attendees added successfully",
@@ -183,15 +201,16 @@ export const useRetros = () => {
 
     try {
       const dbData = convertAppToDb(retroData);
-      console.log('useRetros: Input retroData:', retroData);
-      console.log('useRetros: Converted dbData:', dbData);
+      console.log('createRetro: Input retroData:', retroData);
+      console.log('createRetro: Input attendeeUsers:', attendeeUsers);
+      console.log('createRetro: Converted dbData:', dbData);
       
       const insertData = {
         ...dbData,
         user_id: user.id,
       };
       
-      console.log('useRetros: Final insertData:', insertData);
+      console.log('createRetro: Final insertData:', insertData);
       
       const { data, error } = await supabase
         .from('retrospectives')
@@ -199,11 +218,19 @@ export const useRetros = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('createRetro: Error creating retro:', error);
+        throw error;
+      }
+      
+      console.log('createRetro: Retro created successfully:', data);
       
       // Add attendees if provided
       if (attendeeUsers && attendeeUsers.length > 0) {
+        console.log('createRetro: Adding attendees to retro:', data.id, attendeeUsers);
         await addAttendees(data.id, attendeeUsers);
+      } else {
+        console.log('createRetro: No attendees to add');
       }
       
       const convertedData = convertDbToApp(data);
