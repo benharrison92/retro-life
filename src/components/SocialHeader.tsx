@@ -22,12 +22,15 @@ import {
   LogOut, 
   LogIn,
   MessageCircle,
-  Bell 
+  Bell,
+  BookOpen
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function SocialHeader() {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [friendFinderOpen, setFriendFinderOpen] = useState(false);
@@ -90,6 +93,15 @@ export function SocialHeader() {
       >
         <Users className="h-4 w-4 mr-2" />
         Friends
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate('/catalogues')}
+      >
+        <BookOpen className="h-4 w-4 mr-2" />
+        My Catalogues
       </Button>
 
       {/* User dropdown menu */}
