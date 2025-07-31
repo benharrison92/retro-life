@@ -64,6 +64,47 @@ export type Database = {
           },
         ]
       }
+      catalogue_members: {
+        Row: {
+          catalogue_id: string
+          created_at: string
+          id: string
+          invited_by_user_id: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalogue_id: string
+          created_at?: string
+          id?: string
+          invited_by_user_id: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalogue_id?: string
+          created_at?: string
+          id?: string
+          invited_by_user_id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogue_members_catalogue_id_fkey"
+            columns: ["catalogue_id"]
+            isOneToOne: false
+            referencedRelation: "catalogues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalogues: {
         Row: {
           created_at: string
