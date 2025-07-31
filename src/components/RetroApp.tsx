@@ -312,9 +312,7 @@ export const RetroApp = () => {
                 Current User: <span className="font-semibold text-foreground">{currentUserName}</span>
               </div>
             
-            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <NotificationHub className="w-full sm:w-auto" />
-              
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
               <Button
                 onClick={handleOpenCreateModal}
                 className="w-full sm:w-auto px-6 py-3 text-lg font-bold"
@@ -324,17 +322,21 @@ export const RetroApp = () => {
                 Create New Retro
               </Button>
 
-              {(showUserRetros && selectedUser) || showLocationSearch ? (
-                <Button
-                  onClick={handleBackToAllRetros}
-                  variant="outline"
-                  className="w-full sm:w-auto px-6 py-3 text-lg font-bold"
-                  size="lg"
-                >
-                  ← Back to All Retros
-                </Button>
-                ) : null}
+              <div className="flex items-center gap-4">
+                <NotificationHub className="w-full sm:w-auto" />
+                
+                {(showUserRetros && selectedUser) || showLocationSearch ? (
+                  <Button
+                    onClick={handleBackToAllRetros}
+                    variant="outline"
+                    className="w-full sm:w-auto px-6 py-3 text-lg font-bold"
+                    size="lg"
+                  >
+                    ← Back to All Retros
+                  </Button>
+                  ) : null}
               </div>
+            </div>
 
             {/* Search and Filter Section */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
