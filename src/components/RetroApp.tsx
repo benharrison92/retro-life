@@ -9,7 +9,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { RetroForm } from "./RetroForm";
 import { RetroCard } from "./RetroCard";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { useRetros } from "@/hooks/useRetros";
+import { useRetros, UserProfile } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
 import { Retrospective, RBTItem, Comment } from "@/lib/supabase";
 
@@ -169,7 +169,7 @@ export const RetroApp = () => {
     locationName?: string;
     city?: string;
     state?: string;
-  }) => {
+  }, attendeeUsers?: UserProfile[]) => {
     // Convert legacy data to database format
     const retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
       title: legacyRetroData.title,
@@ -192,8 +192,8 @@ export const RetroApp = () => {
       // Update existing retro
       await updateRetro(editingRetro.id, retroData);
     } else {
-      // Create new retro
-      await createRetro(retroData);
+      // Create new retro with attendees
+      await createRetro(retroData, attendeeUsers);
     }
     handleCloseCreateModal();
   };

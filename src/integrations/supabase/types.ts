@@ -243,6 +243,27 @@ export type Database = {
         }
         Relationships: []
       }
+      retro_attendees: {
+        Row: {
+          created_at: string
+          id: string
+          retro_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          retro_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          retro_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       retrospectives: {
         Row: {
           attendees: string[] | null

@@ -4,6 +4,13 @@ import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import { Database } from '@/integrations/supabase/types';
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  display_name: string;
+  avatar_url?: string;
+}
+
 type DbRetrospective = Database['public']['Tables']['retrospectives']['Row'];
 type DbRetrospectiveInsert = Database['public']['Tables']['retrospectives']['Insert'];
 
@@ -80,8 +87,65 @@ export const useRetros = () => {
     }
   };
 
-  // Create new retro
-  const createRetro = async (retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  // Manage retro attendees
+  const addAttendees = async (retroId: string, attendeeUsers: UserProfile[]) => {
+    if (!user) return;
+
+    try {
+      // Insert attendees into retro_attendees table
+      const attendeeInserts = attendeeUsers.map(attendee => ({
+        retro_id: retroId,
+        user_id: attendee.id,
+      }));
+
+      const { error } = await supabase
+        .from('retro_attendees')
+        .insert(attendeeInserts);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Attendees added successfully",
+      });
+    } catch (error) {
+      console.error('Error adding attendees:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add attendees",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeAttendee = async (retroId: string, userId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('retro_attendees')
+        .delete()
+        .eq('retro_id', retroId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Attendee removed successfully",
+      });
+    } catch (error) {
+      console.error('Error removing attendee:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove attendee",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Create new retro with attendees
+  const createRetro = async (retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'>, attendeeUsers?: UserProfile[]) => {
     if (!user) return;
 
     try {
@@ -103,6 +167,11 @@ export const useRetros = () => {
         .single();
 
       if (error) throw error;
+      
+      // Add attendees if provided
+      if (attendeeUsers && attendeeUsers.length > 0) {
+        await addAttendees(data.id, attendeeUsers);
+      }
       
       const convertedData = convertDbToApp(data);
       setRetros(prev => [convertedData, ...prev]);
@@ -233,6 +302,8 @@ export const useRetros = () => {
     createRetro,
     updateRetro,
     deleteRetro,
+    addAttendees,
+    removeAttendee,
     searchRetrosByLocation,
     refreshRetros: fetchRetros,
   };

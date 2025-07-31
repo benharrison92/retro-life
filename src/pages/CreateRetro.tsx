@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import { RetroForm } from '@/components/RetroForm';
 import { useFeedbackSpaces } from '@/hooks/useFeedbackSpaces';
-import { useRetros } from '@/hooks/useRetros';
+import { useRetros, UserProfile } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -35,7 +35,7 @@ const CreateRetro = () => {
     loadFeedbackSpace();
   }, [feedbackSpaceId]);
 
-  const handleSave = async (retroData) => {
+  const handleSave = async (retroData, attendeeUsers?: UserProfile[]) => {
     try {
       console.log('CreateRetro: feedbackSpaceId from URL:', feedbackSpaceId);
       
@@ -59,7 +59,7 @@ const CreateRetro = () => {
       };
 
       console.log('CreateRetro: Saving retro with data:', retroToSave);
-      const result = await createRetro(retroToSave);
+      const result = await createRetro(retroToSave, attendeeUsers);
       if (result) {
         toast.success('Feedback submitted successfully!');
         

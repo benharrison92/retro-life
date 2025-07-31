@@ -10,6 +10,8 @@ import { X, Plus, MessageCircle, Send, MapPin, Flower } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
 import { PhotoUpload } from "./PhotoUpload";
 import { RetroPhoto } from "@/lib/supabase";
+import { UserSelector } from "./UserSelector";
+import { UserProfile } from "@/hooks/useRetros";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -18,7 +20,7 @@ interface RetroFormProps {
     locationName?: string;
     city?: string;
     state?: string;
-  }) => void;
+  }, attendeeUsers?: UserProfile[]) => void;
   currentUserName: string;
   feedbackSpaceMode?: boolean;
 }
@@ -180,6 +182,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
   const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
+  const [attendeeUsers, setAttendeeUsers] = useState<UserProfile[]>([]);
   const [locationName, setLocationName] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -254,7 +257,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       state: state.trim() || undefined,
     };
 
-    onSave(retroData);
+    onSave(retroData, attendeeUsers);
   };
 
   return (
@@ -328,12 +331,21 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
           </div>
 
           <div>
-            <Label htmlFor="attendees">Attendees (comma-separated)</Label>
+            <Label>Tagged Attendees</Label>
+            <UserSelector
+              selectedUsers={attendeeUsers}
+              onUsersChange={setAttendeeUsers}
+              placeholder="Search and tag users who attended..."
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="attendees">Additional Attendees (text only)</Label>
             <Input
               id="attendees"
               value={attendees}
               onChange={(e) => setAttendees(e.target.value)}
-              placeholder="e.g., John Doe, Jane Smith"
+              placeholder="e.g., John Doe, Jane Smith (for non-registered users)"
               className="mt-1"
             />
           </div>
