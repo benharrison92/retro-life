@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, QrCode, Users, MapPin, Calendar, Settings, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { AppHeader } from '@/components/AppHeader';
 
 export const FeedbackSpaceManager = () => {
+  const navigate = useNavigate();
   const { feedbackSpaces, loading, deleteFeedbackSpace } = useFeedbackSpaces();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showQRCode, setShowQRCode] = useState<string | null>(null);
@@ -19,6 +21,10 @@ export const FeedbackSpaceManager = () => {
   const handleDelete = async (id: string) => {
     await deleteFeedbackSpace(id);
     setDeleteConfirm(null);
+  };
+
+  const handleOpenSpace = (code: string) => {
+    navigate(`/feedback/${code}`);
   };
 
   const getQRCodeUrl = (code: string) => {
@@ -83,7 +89,11 @@ export const FeedbackSpaceManager = () => {
       ) : (
         <div className="grid gap-4">
           {feedbackSpaces.map((space) => (
-            <Card key={space.id} className="hover:shadow-md transition-shadow">
+            <Card 
+              key={space.id} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleOpenSpace(space.unique_code)}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -101,14 +111,20 @@ export const FeedbackSpaceManager = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowQRCode(space.unique_code)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click
+                        setShowQRCode(space.unique_code);
+                      }}
                     >
                       <QrCode className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setDeleteConfirm(space.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click
+                        setDeleteConfirm(space.id);
+                      }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -137,6 +153,9 @@ export const FeedbackSpaceManager = () => {
                     <span className="text-sm text-muted-foreground">
                       Share this code with attendees
                     </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted/30 rounded">
+                    💡 Click this card to view the event and manage feedback
                   </div>
                 </div>
               </CardContent>
