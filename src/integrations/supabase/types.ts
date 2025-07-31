@@ -384,6 +384,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      is_retro_attendee: {
+        Args: { retro_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
