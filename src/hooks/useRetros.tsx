@@ -86,12 +86,19 @@ export const useRetros = () => {
 
     try {
       const dbData = convertAppToDb(retroData);
+      console.log('useRetros: Input retroData:', retroData);
+      console.log('useRetros: Converted dbData:', dbData);
+      
+      const insertData = {
+        ...dbData,
+        user_id: user.id,
+      };
+      
+      console.log('useRetros: Final insertData:', insertData);
+      
       const { data, error } = await supabase
         .from('retrospectives')
-        .insert([{
-          ...dbData,
-          user_id: user.id,
-        }])
+        .insert([insertData])
         .select()
         .single();
 
