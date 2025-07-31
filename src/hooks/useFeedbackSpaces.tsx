@@ -66,9 +66,14 @@ export const useFeedbackSpaces = () => {
     }
 
     try {
+      console.log('Creating feedback space with data:', spaceData);
+      
       // Generate unique code
+      console.log('Calling generate_unique_code RPC...');
       const { data: codeData, error: codeError } = await supabase
         .rpc('generate_unique_code');
+
+      console.log('RPC response:', { codeData, codeError });
 
       if (codeError) {
         console.error('Error generating unique code:', codeError);
@@ -76,6 +81,7 @@ export const useFeedbackSpaces = () => {
         return null;
       }
 
+      console.log('Creating feedback space with code:', codeData);
       const { data, error } = await supabase
         .from('feedback_spaces')
         .insert({
@@ -85,6 +91,8 @@ export const useFeedbackSpaces = () => {
         })
         .select()
         .single();
+
+      console.log('Insert response:', { data, error });
 
       if (error) {
         console.error('Error creating feedback space:', error);
