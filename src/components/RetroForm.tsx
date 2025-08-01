@@ -67,6 +67,11 @@ const RBTSection = React.memo(({
         {items.map((item, index) => (
           <Card key={item.id} className="border-2">
             <CardContent className="p-4 space-y-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Created by: {item.ownerName || currentUserName}
+                </span>
+              </div>
               <Textarea
                 placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
                 value={item.text}
@@ -180,15 +185,15 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [title, setTitle] = useState(retro?.title || '');
   const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
-  const [ownerName, setOwnerName] = useState(retro?.ownerName || currentUserName);
+  const ownerName = currentUserName; // Always use current user as owner
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
   const [attendeeUsers, setAttendeeUsers] = useState<UserProfile[]>([]);
   const [locationName, setLocationName] = useState(retro?.locationName || '');
   const [city, setCity] = useState(retro?.city || '');
   const [state, setState] = useState(retro?.state || '');
-  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [] }]);
-  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [] }]);
-  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [] }]);
+  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
+  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
+  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
   const [photos, setPhotos] = useState<RetroPhoto[]>([]);
 
   // Load existing attendee users when editing
@@ -213,9 +218,10 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
       text: '', 
       tags: [], 
-      comments: [] 
+      comments: [],
+      ownerName: currentUserName
     }]);
-  }, []);
+  }, [currentUserName]);
 
   const removeRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number) => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
@@ -328,14 +334,12 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
             </div>
 
             <div>
-              <Label htmlFor="ownerName">Owner Name</Label>
+              <Label htmlFor="ownerName">Owner</Label>
               <Input
                 id="ownerName"
                 value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
-                placeholder="Enter owner name..."
-                required
-                className="mt-1"
+                disabled
+                className="mt-1 bg-muted"
               />
             </div>
           </div>

@@ -62,6 +62,7 @@ export interface RBTItem {
   text: string;
   tags: string[];
   comments: Comment[];
+  ownerName?: string;
 }
 
 export interface Comment {
