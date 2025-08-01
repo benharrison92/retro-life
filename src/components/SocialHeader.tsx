@@ -66,6 +66,14 @@ export function SocialHeader() {
           Sign In
         </Button>
         
+        <Button 
+          size="sm"
+          onClick={() => navigate('/auth')}
+        >
+          <UserPlus className="h-4 w-4 mr-2" />
+          Sign Up
+        </Button>
+        
         <AuthModal 
           open={authModalOpen} 
           onOpenChange={setAuthModalOpen} 
