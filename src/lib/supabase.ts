@@ -29,6 +29,7 @@ export interface Retrospective {
   longitude?: number;
   feedback_space_id?: string;
   feedbackSpaceName?: string; // Name of the feedback space if retro is part of one
+  ownerName?: string; // Display name of the user who created the retro
   created_at: string;
   updated_at: string;
 }

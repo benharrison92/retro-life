@@ -69,12 +69,13 @@ export const useRetros = () => {
     try {
       setLoading(true);
       
-      // First fetch retros with feedback space information
+      // First fetch retros with feedback space information and owner profile
       const { data: retrosData, error: retrosError } = await supabase
         .from('retrospectives')
         .select(`
           *,
-          feedback_spaces(title)
+          feedback_spaces(title),
+          user_profiles!retrospectives_user_id_fkey(display_name)
         `)
         .order('date', { ascending: false });
 
@@ -84,6 +85,11 @@ export const useRetros = () => {
       const retrosWithAttendees = await Promise.all(
         (retrosData || []).map(async (retro: any) => {
           const convertedRetro = convertDbToApp(retro);
+          
+          // Add owner name from user profile
+          if (retro.user_profiles) {
+            convertedRetro.ownerName = retro.user_profiles.display_name;
+          }
           
           // Add feedback space information
           if (retro.feedback_spaces) {
