@@ -43,8 +43,8 @@ export const useCatalogueMembers = (catalogueId?: string) => {
         .from('catalogue_members')
         .select(`
           *,
-          user_profile:user_id(display_name, email, avatar_url),
-          invited_by_profile:invited_by_user_id(display_name, email)
+          user_profile:user_profiles!user_id(display_name, email, avatar_url),
+          invited_by_profile:user_profiles!invited_by_user_id(display_name, email)
         `)
         .eq('catalogue_id', catalogueId)
         .order('created_at', { ascending: false });
@@ -72,7 +72,7 @@ export const useCatalogueMembers = (catalogueId?: string) => {
         .select(`
           *,
           catalogue:catalogues(name, description),
-          invited_by_profile:invited_by_user_id(display_name, email)
+          invited_by_profile:user_profiles!invited_by_user_id(display_name, email)
         `)
         .eq('user_id', user.id)
         .eq('status', 'pending')
