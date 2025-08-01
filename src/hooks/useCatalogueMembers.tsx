@@ -86,9 +86,14 @@ export const useCatalogueMembers = (catalogueId?: string) => {
   };
 
   const inviteUser = async (userEmail: string) => {
-    if (!catalogueId || !user) return false;
+    if (!catalogueId || !user) {
+      console.log('InviteUser: Missing catalogueId or user', { catalogueId, user: !!user });
+      return false;
+    }
     
     try {
+      console.log('InviteUser: Starting invitation process for email:', userEmail);
+      
       // First, find the user by email
       const { data: userProfile, error: userError } = await supabase
         .from('user_profiles')
@@ -96,7 +101,10 @@ export const useCatalogueMembers = (catalogueId?: string) => {
         .eq('email', userEmail)
         .single();
 
+      console.log('InviteUser: User lookup result:', { userProfile, userError });
+
       if (userError) {
+        console.error('InviteUser: User lookup error:', userError);
         toast({
           title: "Error",
           description: "User not found with that email address",
@@ -106,14 +114,22 @@ export const useCatalogueMembers = (catalogueId?: string) => {
       }
 
       // Check if user is already a member or has pending invitation
-      const { data: existingMember } = await supabase
+      const { data: existingMember, error: memberCheckError } = await supabase
         .from('catalogue_members')
         .select('id, status')
         .eq('catalogue_id', catalogueId)
         .eq('user_id', userProfile.id)
-        .single();
+        .maybeSingle();
+
+      console.log('InviteUser: Existing member check:', { existingMember, memberCheckError });
+
+      if (memberCheckError) {
+        console.error('InviteUser: Member check error:', memberCheckError);
+        throw memberCheckError;
+      }
 
       if (existingMember) {
+        console.log('InviteUser: User already exists as member:', existingMember);
         toast({
           title: "Error",
           description: existingMember.status === 'pending' 
@@ -125,6 +141,14 @@ export const useCatalogueMembers = (catalogueId?: string) => {
       }
 
       // Create the invitation
+      console.log('InviteUser: Creating invitation with data:', {
+        catalogue_id: catalogueId,
+        user_id: userProfile.id,
+        invited_by_user_id: user.id,
+        role: 'member',
+        status: 'pending'
+      });
+
       const { error: inviteError } = await supabase
         .from('catalogue_members')
         .insert({
@@ -135,7 +159,12 @@ export const useCatalogueMembers = (catalogueId?: string) => {
           status: 'pending'
         });
 
-      if (inviteError) throw inviteError;
+      console.log('InviteUser: Invitation creation result:', { inviteError });
+
+      if (inviteError) {
+        console.error('InviteUser: Invitation creation error:', inviteError);
+        throw inviteError;
+      }
 
       toast({
         title: "Success",
@@ -145,7 +174,7 @@ export const useCatalogueMembers = (catalogueId?: string) => {
       await fetchMembers();
       return true;
     } catch (error) {
-      console.error('Error inviting user:', error);
+      console.error('InviteUser: Caught error:', error);
       toast({
         title: "Error",
         description: "Failed to send invitation",
