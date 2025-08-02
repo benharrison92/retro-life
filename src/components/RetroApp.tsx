@@ -196,6 +196,7 @@ export const RetroApp = () => {
       country: retro.country,
       latitude: retro.latitude,
       longitude: retro.longitude,
+      is_private: (retro as any).is_private || false, // Default to public
       created_at: retro.createdAt.toISOString(),
       updated_at: retro.updatedAt?.toISOString() || '',
     };
@@ -213,6 +214,7 @@ export const RetroApp = () => {
     locationName?: string;
     city?: string;
     state?: string;
+    isPrivate?: boolean;
   }, attendeeUsers?: UserProfile[]) => {
     // Convert legacy data to database format
     const retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
@@ -231,6 +233,7 @@ export const RetroApp = () => {
       country: 'US', // Default to US for now
       latitude: undefined,
       longitude: undefined,
+      is_private: legacyRetroData.isPrivate || false, // Include privacy setting
     };
 
     console.log('handleSaveRetro: Legacy retro data:', legacyRetroData);

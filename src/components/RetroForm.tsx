@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, MessageCircle, Send, MapPin, Flower } from "lucide-react";
+import { X, Plus, MessageCircle, Send, MapPin, Flower, Lock, Users } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
 import { PhotoUpload } from "./PhotoUpload";
 import { RetroPhoto } from "@/lib/supabase";
@@ -20,6 +21,7 @@ interface RetroFormProps {
     locationName?: string;
     city?: string;
     state?: string;
+    isPrivate?: boolean;
   }, attendeeUsers?: UserProfile[]) => void;
   currentUserName: string;
   feedbackSpaceMode?: boolean;
@@ -195,6 +197,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const ownerName = currentUserName; // Always use current user as owner
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
   const [attendeeUsers, setAttendeeUsers] = useState<UserProfile[]>([]);
+  const [isPrivate, setIsPrivate] = useState((retro as any)?.is_private || false);
   const [locationName, setLocationName] = useState(retro?.locationName || '');
   const [city, setCity] = useState(retro?.city || '');
   const [state, setState] = useState(retro?.state || '');
@@ -310,6 +313,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       locationName: locationName.trim() || undefined,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
+      isPrivate, // Include privacy setting
     };
 
     console.log('RetroForm: Submitting retro data:', retroData);
@@ -443,6 +447,31 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
                   className="mt-1"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  {isPrivate ? <Lock className="w-4 h-4" /> : <Users className="w-4 h-4" />}
+                  <Label htmlFor="privacy-toggle" className="text-base font-semibold">
+                    Privacy Settings
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {isPrivate 
+                    ? "Private - Only you can view this retrospective" 
+                    : "Public - Your friends can view this retrospective"
+                  }
+                </p>
+              </div>
+              <Switch
+                id="privacy-toggle"
+                checked={isPrivate}
+                onCheckedChange={setIsPrivate}
+              />
             </div>
           </div>
 

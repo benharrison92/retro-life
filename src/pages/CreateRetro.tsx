@@ -54,6 +54,7 @@ const CreateRetro = () => {
         country: retroData.country || 'US',
         latitude: retroData.latitude,
         longitude: retroData.longitude,
+        is_private: retroData.isPrivate || false, // Include privacy setting
         // Include feedback_space_id if creating for a feedback space
         ...(feedbackSpaceId && { feedback_space_id: feedbackSpaceId })
       };

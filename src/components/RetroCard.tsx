@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone } from "lucide-react";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone, Lock } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
@@ -217,9 +217,19 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
               className="text-xs"
             />
           </div>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            {retro.date}
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            {/* Privacy indicator */}
+            <div className="flex items-center gap-1">
+              {(retro as any).is_private ? (
+                <Lock className="w-4 h-4 text-amber-600" />
+              ) : (
+                <Users className="w-4 h-4 text-green-600" />
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              {retro.date}
+            </div>
           </div>
         </div>
         <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">

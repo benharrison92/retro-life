@@ -40,6 +40,7 @@ export const useRetros = () => {
     latitude: dbRetro.latitude || undefined,
     longitude: dbRetro.longitude || undefined,
     feedback_space_id: dbRetro.feedback_space_id || undefined,
+    is_private: (dbRetro as any).is_private || false, // Default to public for backward compatibility
     created_at: dbRetro.created_at || '',
     updated_at: dbRetro.updated_at || '',
   });

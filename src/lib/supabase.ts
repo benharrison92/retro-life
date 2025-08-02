@@ -31,6 +31,7 @@ export interface Retrospective {
   feedback_space_id?: string;
   feedbackSpaceName?: string; // Name of the feedback space if retro is part of one
   ownerName?: string; // Display name of the user who created the retro
+  is_private: boolean; // Privacy setting - when true, only owner can view
   created_at: string;
   updated_at: string;
 }
