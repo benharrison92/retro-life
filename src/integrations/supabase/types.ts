@@ -421,6 +421,7 @@ export type Database = {
           location_name: string | null
           longitude: number | null
           photos: Json | null
+          primary_photo_url: string | null
           roses: Json | null
           state: string | null
           thorns: Json | null
@@ -442,6 +443,7 @@ export type Database = {
           location_name?: string | null
           longitude?: number | null
           photos?: Json | null
+          primary_photo_url?: string | null
           roses?: Json | null
           state?: string | null
           thorns?: Json | null
@@ -463,6 +465,7 @@ export type Database = {
           location_name?: string | null
           longitude?: number | null
           photos?: Json | null
+          primary_photo_url?: string | null
           roses?: Json | null
           state?: string | null
           thorns?: Json | null
