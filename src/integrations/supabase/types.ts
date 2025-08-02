@@ -529,6 +529,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      is_catalogue_member: {
+        Args: { catalogue_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
       is_retro_attendee: {
         Args: { retro_uuid: string; user_uuid: string }
         Returns: boolean
