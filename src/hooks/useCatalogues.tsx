@@ -13,14 +13,41 @@ export const useCatalogues = () => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Fetch owned catalogues
+      const { data: ownedCatalogues, error: ownedError } = await supabase
         .from('catalogues')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setCatalogues(data || []);
+      if (ownedError) throw ownedError;
+
+      // Fetch shared catalogues where user is an accepted member
+      const { data: sharedCatalogues, error: sharedError } = await supabase
+        .from('catalogue_members')
+        .select(`
+          catalogue_id,
+          catalogues!inner(*)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'accepted');
+
+      if (sharedError) throw sharedError;
+
+      // Combine and deduplicate catalogues
+      const allCatalogues = [
+        ...(ownedCatalogues || []),
+        ...(sharedCatalogues?.map(member => member.catalogues) || [])
+      ];
+
+      // Remove duplicates and sort by created_at
+      const uniqueCatalogues = allCatalogues
+        .filter((cat, index, self) => 
+          index === self.findIndex(c => c.id === cat.id)
+        )
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setCatalogues(uniqueCatalogues);
     } catch (error) {
       console.error('Error fetching catalogues:', error);
       toast.error('Failed to load catalogues');
