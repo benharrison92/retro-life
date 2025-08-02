@@ -29,7 +29,8 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (open && canvasRef.current) {
+    if (open && canvasRef.current && url) {
+      console.log('Generating QR code for URL:', url);
       QRCode.toCanvas(canvasRef.current, url, {
         width: 256,
         margin: 2,
@@ -41,8 +42,12 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
         if (error) {
           console.error('Error generating QR code:', error);
           toast.error('Failed to generate QR code');
+        } else {
+          console.log('QR code generated successfully');
         }
       });
+    } else {
+      console.log('QR code generation skipped:', { open, hasCanvas: !!canvasRef.current, url });
     }
   }, [open, url]);
 
@@ -97,7 +102,13 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
           {/* QR Code */}
           <div className="flex justify-center">
             <div className="p-4 bg-white rounded-lg shadow-sm border">
-              <canvas ref={canvasRef} className="block" />
+              <canvas 
+                ref={canvasRef} 
+                className="block" 
+                width={256} 
+                height={256}
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
             </div>
           </div>
 
