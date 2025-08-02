@@ -9,6 +9,8 @@ import { AppHeader } from "@/components/AppHeader";
 import { RetroForm } from "./RetroForm";
 import { NotificationHub } from "./NotificationHub";
 import { RetroCard } from "./RetroCard";
+import { RetroTileCard } from "./RetroTileCard";
+import { RetroDetailView } from "./RetroDetailView";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useRetros } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +46,7 @@ export const RetroApp = () => {
   const { user, profile } = useAuth();
   const [editingRetro, setEditingRetro] = useState<Retrospective | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedRetro, setSelectedRetro] = useState<Retrospective | null>(null);
   const [searchKeywords, setSearchKeywords] = useState('');
   const [filterTags, setFilterTags] = useState('');
   const [searchUser, setSearchUser] = useState('');
@@ -266,6 +269,15 @@ export const RetroApp = () => {
     setSearchUser('');
     setShowLocationSearch(false);
     setLocationSearch('');
+    setSelectedRetro(null);
+  };
+  
+  const handleRetroTileClick = (retro: Retrospective) => {
+    setSelectedRetro(retro);
+  };
+  
+  const handleBackFromDetail = () => {
+    setSelectedRetro(null);
   };
 
   const handleUpdateRetroItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => {
@@ -291,6 +303,27 @@ export const RetroApp = () => {
           <p className="text-muted-foreground">Loading your retrospectives...</p>
         </div>
       </div>
+    );
+  }
+
+  // If a retro is selected, show detail view
+  if (selectedRetro) {
+    return (
+      <>
+        <AppHeader />
+        <div className="min-h-screen bg-background p-4 md:p-6">
+          <div className="max-w-7xl mx-auto">
+            <RetroDetailView
+              retro={convertToLegacy(selectedRetro)}
+              onBack={handleBackFromDetail}
+              onEdit={handleEditRetro}
+              onDelete={handleDeleteConfirm}
+              onUpdateItem={handleUpdateRetroItem}
+              currentUserName={currentUserName}
+            />
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -459,44 +492,23 @@ export const RetroApp = () => {
           </Card>
         ) : (
           <div className="space-y-6">
-            {/* Special location-based layout */}
-            {showLocationSearch && locationResults.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {retrosToDisplay.map((retro, index) => (
-                  <div key={retro.id} className="relative">
-                    <RetroCard
-                      retro={convertToLegacy(retro)}
-                      onEdit={handleEditRetro}
-                      onDelete={handleDeleteConfirm}
-                      onUpdateItem={handleUpdateRetroItem}
-                      currentUserName={currentUserName}
-                    />
-                    {/* Special location indicator for search results */}
-                    {index === 0 && (
-                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                        Closest Match
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {/* Regular grid layout */}
-            {!showLocationSearch && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {retrosToDisplay.map(retro => (
-                  <RetroCard
-                    key={retro.id}
-                    retro={convertToLegacy(retro)}
-                    onEdit={handleEditRetro}
-                    onDelete={handleDeleteConfirm}
-                    onUpdateItem={handleUpdateRetroItem}
-                    currentUserName={currentUserName}
+            {/* Retro Tiles Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {retrosToDisplay.map((retro, index) => (
+                <div key={retro.id} className="relative">
+                  <RetroTileCard
+                    retro={retro}
+                    onClick={handleRetroTileClick}
                   />
-                ))}
-              </div>
-            )}
+                  {/* Special location indicator for search results */}
+                  {showLocationSearch && index === 0 && (
+                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                      Closest Match
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
         </div>
