@@ -12,33 +12,69 @@ export const useCatalogues = () => {
     if (!user) return;
     
     setLoading(true);
+    console.log('fetchCatalogues: Starting fetch for user:', user.id);
+    
     try {
       // Fetch owned catalogues
+      console.log('fetchCatalogues: Fetching owned catalogues...');
       const { data: ownedCatalogues, error: ownedError } = await supabase
         .from('catalogues')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (ownedError) throw ownedError;
+      console.log('fetchCatalogues: Owned catalogues result:', { data: ownedCatalogues, error: ownedError });
+      
+      if (ownedError) {
+        console.error('fetchCatalogues: Error fetching owned catalogues:', ownedError);
+        throw ownedError;
+      }
 
       // Fetch shared catalogues where user is an accepted member
-      const { data: sharedCatalogues, error: sharedError } = await supabase
+      console.log('fetchCatalogues: Fetching shared catalogues...');
+      
+      // First get the catalogue IDs where user is a member
+      const { data: membershipData, error: membershipError } = await supabase
         .from('catalogue_members')
-        .select(`
-          catalogue_id,
-          catalogues!inner(*)
-        `)
+        .select('catalogue_id')
         .eq('user_id', user.id)
         .eq('status', 'accepted');
 
-      if (sharedError) throw sharedError;
+      console.log('fetchCatalogues: Membership data:', { data: membershipData, error: membershipError });
+
+      if (membershipError) {
+        console.error('fetchCatalogues: Error fetching memberships:', membershipError);
+        throw membershipError;
+      }
+
+      // Then fetch the actual catalogues using the IDs
+      let sharedCatalogues = [];
+      if (membershipData && membershipData.length > 0) {
+        const catalogueIds = membershipData.map(m => m.catalogue_id);
+        console.log('fetchCatalogues: Fetching catalogues with IDs:', catalogueIds);
+        
+        const { data: sharedCatalogueData, error: sharedError } = await supabase
+          .from('catalogues')
+          .select('*')
+          .in('id', catalogueIds);
+
+        console.log('fetchCatalogues: Shared catalogue data:', { data: sharedCatalogueData, error: sharedError });
+
+        if (sharedError) {
+          console.error('fetchCatalogues: Error fetching shared catalogues:', sharedError);
+          throw sharedError;
+        }
+
+        sharedCatalogues = sharedCatalogueData || [];
+      }
 
       // Combine and deduplicate catalogues
       const allCatalogues = [
         ...(ownedCatalogues || []),
-        ...(sharedCatalogues?.map(member => member.catalogues) || [])
+        ...sharedCatalogues
       ];
+
+      console.log('fetchCatalogues: Combined catalogues before dedup:', allCatalogues);
 
       // Remove duplicates and sort by created_at
       const uniqueCatalogues = allCatalogues
@@ -47,9 +83,10 @@ export const useCatalogues = () => {
         )
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+      console.log('fetchCatalogues: Final unique catalogues:', uniqueCatalogues);
       setCatalogues(uniqueCatalogues);
     } catch (error) {
-      console.error('Error fetching catalogues:', error);
+      console.error('fetchCatalogues: Final error:', error);
       toast.error('Failed to load catalogues');
     } finally {
       setLoading(false);
