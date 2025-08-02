@@ -150,10 +150,29 @@ export const useRetros = () => {
 
   // Manage retro attendees
   const addAttendees = async (retroId: string, attendeeUsers: UserProfile[]) => {
-    if (!user) return;
+    if (!user) {
+      console.error('addAttendees: No authenticated user');
+      return;
+    }
 
     try {
-      console.log('addAttendees: Adding attendees to retro', retroId, attendeeUsers);
+      console.log('addAttendees: Starting to add attendees to retro', retroId, attendeeUsers);
+      
+      // Check if user has permission to add attendees to this retro
+      const { data: retroData, error: retroError } = await supabase
+        .from('retrospectives')
+        .select('user_id, title')
+        .eq('id', retroId)
+        .single();
+
+      if (retroError) {
+        console.error('addAttendees: Error fetching retro:', retroError);
+        throw retroError;
+      }
+
+      console.log('addAttendees: Retro data:', retroData);
+      console.log('addAttendees: Current user ID:', user.id);
+      console.log('addAttendees: Retro owner ID:', retroData.user_id);
       
       // Insert attendees into retro_attendees table
       const attendeeInserts = attendeeUsers.map(attendee => ({
@@ -163,19 +182,33 @@ export const useRetros = () => {
 
       console.log('addAttendees: Inserting attendee data:', attendeeInserts);
 
-      const { error } = await supabase
-        .from('retro_attendees')
-        .insert(attendeeInserts);
+      for (const attendeeInsert of attendeeInserts) {
+        console.log('addAttendees: Inserting individual attendee:', attendeeInsert);
+        
+        const { data: insertResult, error: insertError } = await supabase
+          .from('retro_attendees')
+          .insert([attendeeInsert])
+          .select();
 
-      if (error) {
-        console.error('addAttendees: Error inserting attendees:', error);
-        throw error;
+        if (insertError) {
+          console.error('addAttendees: Error inserting attendee:', insertError);
+          console.error('addAttendees: Failed attendee data:', attendeeInsert);
+          
+          // Continue with other attendees but log the error
+          toast({
+            title: "Warning",
+            description: `Failed to add attendee: ${attendeeUsers.find(u => u.id === attendeeInsert.user_id)?.display_name}`,
+            variant: "destructive",
+          });
+        } else {
+          console.log('addAttendees: Successfully inserted attendee:', insertResult);
+        }
       }
 
-      console.log('addAttendees: Successfully added attendees');
+      console.log('addAttendees: Finished processing all attendees');
       toast({
         title: "Success",
-        description: "Attendees added successfully",
+        description: "Attendees processed",
       });
     } catch (error) {
       console.error('Error adding attendees:', error);
