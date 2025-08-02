@@ -298,6 +298,9 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   }, [roses, buds, thorns, currentUserName, updateRBTItem]);
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log('🔥 HANDLE SUBMIT TRIGGERED! 🔥');
+    console.log('handleSubmit: Form submission started');
+    console.log('handleSubmit: Current attendeeUsers:', attendeeUsers);
     e.preventDefault();
 
     const parsedAttendees = attendees.split(',').map(a => a.trim()).filter(Boolean);
