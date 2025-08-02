@@ -25,10 +25,11 @@ interface RetroCardProps {
   onDelete: (retro: Retro) => void;
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
   onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
+  onUserClick?: (userName: string) => void;
   currentUserName: string;
 }
 
-export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, currentUserName }: RetroCardProps) => {
+export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, onUserClick, currentUserName }: RetroCardProps) => {
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
@@ -83,7 +84,21 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
 
     return (
       <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200`}>
-        <p className="text-sm mb-2">{item.text}</p>
+        {/* Creator info */}
+        <div className="flex justify-between items-start mb-2">
+          <p className="text-sm flex-1">{item.text}</p>
+          {item.ownerName && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onUserClick?.(item.ownerName!)}
+              className="text-xs h-auto p-1 ml-2 text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <User className="w-3 h-3" />
+              {item.ownerName}
+            </Button>
+          )}
+        </div>
         
         {/* Show photos for this item */}
         {hasPhotos && (

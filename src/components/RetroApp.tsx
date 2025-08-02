@@ -151,7 +151,14 @@ export const RetroApp = () => {
   const retrosToDisplay = showLocationSearch && locationResults.length > 0 
     ? locationResults 
     : (showUserRetros && selectedUser
-      ? filteredRetros.filter(retro => retro.attendees.includes(selectedUser))
+      ? filteredRetros.filter(retro => 
+          // Show retros where the selected user is owner or has contributed R/B/T items
+          retro.ownerName === selectedUser ||
+          retro.attendees.includes(selectedUser) ||
+          retro.roses.some(r => r.ownerName === selectedUser) ||
+          retro.buds.some(b => b.ownerName === selectedUser) ||
+          retro.thorns.some(t => t.ownerName === selectedUser)
+        )
       : filteredRetros);
 
   // Get all unique users from attendees
@@ -375,6 +382,14 @@ export const RetroApp = () => {
     }
   };
 
+  const handleUserClick = (userName: string) => {
+    console.log('handleUserClick called for:', userName);
+    // Set the selected user to show their retros
+    setSelectedUser(userName);
+    setShowUserRetros(true);
+    setSelectedRetro(null); // Go back to main view
+  };
+
   if (loading) {
     console.log('RetroApp: Loading retros...');
     return (
@@ -401,6 +416,7 @@ export const RetroApp = () => {
               onDelete={handleDeleteConfirm}
               onUpdateItem={handleUpdateRetroItem}
               onAddItem={handleAddRetroItem}
+              onUserClick={handleUserClick}
               currentUserName={currentUserName}
             />
           </div>
@@ -530,7 +546,26 @@ export const RetroApp = () => {
                      )}
                    </div>
                  )}
-               </div>
+        </div>
+
+        {/* User Profile Header */}
+        {showUserRetros && selectedUser && (
+          <Card className="shadow-elegant border-primary/20">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-primary">{selectedUser}'s Profile</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Showing retros created by or contributed to by {selectedUser}
+                  </p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        )}
                <div className="relative">
                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                  <div className="flex">
