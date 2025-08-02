@@ -302,7 +302,20 @@ export const RetroApp = () => {
 
   const handleAddRetroItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
     const retro = retros.find(r => r.id === retroId);
-    if (!retro) return;
+    if (!retro || !user) return;
+
+    // Check permissions: user must be owner or tagged attendee
+    const isOwner = retro.ownerName === currentUserName;
+    const isTaggedAttendee = retro.attendeeUsers?.some(attendee => attendee.id === user.id);
+    
+    if (!isOwner && !isTaggedAttendee) {
+      toast({
+        title: 'Permission denied',
+        description: 'Only the retro owner and tagged attendees can add new items.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const newItem: RBTItem = {
       id: `${itemType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

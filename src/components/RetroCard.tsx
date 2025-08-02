@@ -33,6 +33,17 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
 
+  // Check if current user can add items (owner or tagged attendee)
+  const canAddItems = user && (
+    // User is the owner
+    retro.ownerName === currentUserName ||
+    // User is in tagged attendees
+    retro.attendeeUsers?.some(attendee => attendee.id === user.id)
+  );
+
+  // Check if current user can edit/delete the retro (only owner)
+  const canEditRetro = user && retro.ownerName === currentUserName;
+
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
   };
@@ -253,6 +264,22 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
       </CardHeader>
 
       <CardContent className="flex-grow space-y-4">
+        {/* User Permissions Info */}
+        {user && (
+          <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded-lg flex items-center gap-2">
+            {canAddItems ? (
+              <>
+                <span className="text-green-600">✓</span>
+                <span>You can add new items, comment, and save</span>
+              </>
+            ) : (
+              <>
+                <span className="text-blue-600">👀</span>
+                <span>You can comment and save items</span>
+              </>
+            )}
+          </div>
+        )}
         {/* General Photos */}
         {retro.photos && retro.photos.length > 0 && (
           <PhotoDisplay
@@ -265,7 +292,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
         <div>
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-positive capitalize">Roses ({retro.roses?.length || 0})</h4>
-            {onAddItem && (
+            {onAddItem && canAddItems && (
               <Button
                 onClick={() => onAddItem(retro.id, 'roses')}
                 variant="outline"
@@ -297,7 +324,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
         <div>
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-opportunity capitalize">Buds ({retro.buds?.length || 0})</h4>
-            {onAddItem && (
+            {onAddItem && canAddItems && (
               <Button
                 onClick={() => onAddItem(retro.id, 'buds')}
                 variant="outline"
@@ -329,7 +356,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
         <div>
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-semibold text-negative capitalize">Thorns ({retro.thorns?.length || 0})</h4>
-            {onAddItem && (
+            {onAddItem && canAddItems && (
               <Button
                 onClick={() => onAddItem(retro.id, 'thorns')}
                 variant="outline"
@@ -358,25 +385,37 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, cu
         </div>
       </CardContent>
 
-      <div className="p-4 border-t flex justify-end gap-2">
-        <Button
-          onClick={() => onEdit(retro)}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          <Edit2 className="w-4 h-4" />
-          Edit
-        </Button>
-        <Button
-          onClick={() => onDelete(retro)}
-          variant="destructive"
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          <Trash2 className="w-4 h-4" />
-          Delete
-        </Button>
+      <div className="p-4 border-t flex justify-between items-center">
+        {/* Permission indicator for non-owners/non-attendees */}
+        {!canAddItems && user && (
+          <div className="text-sm text-muted-foreground italic">
+            You can comment and save items, but only attendees can add new ones
+          </div>
+        )}
+        
+        {/* Edit/Delete buttons - only for owner */}
+        {canEditRetro && (
+          <div className="flex gap-2 ml-auto">
+            <Button
+              onClick={() => onEdit(retro)}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <Edit2 className="w-4 h-4" />
+              Edit
+            </Button>
+            <Button
+              onClick={() => onDelete(retro)}
+              variant="destructive"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );
