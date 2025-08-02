@@ -17,6 +17,7 @@ interface RetroDetailViewProps {
   onEdit: (retro: Retro) => void;
   onDelete: (retro: Retro) => void;
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
+  onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
   currentUserName: string;
 }
 
@@ -26,6 +27,7 @@ export const RetroDetailView = ({
   onEdit, 
   onDelete, 
   onUpdateItem, 
+  onAddItem,
   currentUserName 
 }: RetroDetailViewProps) => {
   return (
@@ -70,6 +72,7 @@ export const RetroDetailView = ({
         onEdit={onEdit}
         onDelete={onDelete}
         onUpdateItem={onUpdateItem}
+        onAddItem={onAddItem}
         currentUserName={currentUserName}
       />
     </div>

@@ -14,7 +14,7 @@ import { RetroDetailView } from "./RetroDetailView";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useRetros } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
-import { Retrospective, RBTItem, Comment, UserProfile } from "@/lib/supabase";
+import { Retrospective, RBTItem, Comment, UserProfile, RetroPhoto } from "@/lib/supabase";
 
 // Legacy type for compatibility with existing components
 export interface Retro {
@@ -28,6 +28,7 @@ export interface Retro {
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];
+  photos: RetroPhoto[];
   primaryPhotoUrl?: string;
   locationName?: string;
   city?: string;
@@ -81,6 +82,7 @@ export const RetroApp = () => {
     roses: retro.roses,
     buds: retro.buds,
     thorns: retro.thorns,
+    photos: retro.photos,
     primaryPhotoUrl: retro.primaryPhotoUrl,
     locationName: retro.location_name,
     city: retro.city,
@@ -173,7 +175,7 @@ export const RetroApp = () => {
       roses: retro.roses,
       buds: retro.buds,
       thorns: retro.thorns,
-      photos: [],
+      photos: retro.photos,
       primaryPhotoUrl: retro.primaryPhotoUrl,
       location_name: retro.locationName,
       city: retro.city,
@@ -208,7 +210,7 @@ export const RetroApp = () => {
       roses: legacyRetroData.roses,
       buds: legacyRetroData.buds,
       thorns: legacyRetroData.thorns,
-      photos: [],
+      photos: legacyRetroData.photos,
       primaryPhotoUrl: legacyRetroData.primaryPhotoUrl,
       location_name: typeof legacyRetroData.locationName === 'string' ? legacyRetroData.locationName : undefined,
       city: typeof legacyRetroData.city === 'string' ? legacyRetroData.city : undefined,
@@ -298,6 +300,29 @@ export const RetroApp = () => {
     await updateRetro(retroId, updatedRetro);
   };
 
+  const handleAddRetroItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
+    const retro = retros.find(r => r.id === retroId);
+    if (!retro) return;
+
+    const newItem: RBTItem = {
+      id: `${itemType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      text: '',
+      tags: [],
+      comments: [],
+      ownerName: currentUserName,
+      photos: []
+    };
+
+    const updatedRetro = {
+      ...retro,
+      [itemType]: [...retro[itemType], newItem],
+    };
+
+    await updateRetro(retroId, updatedRetro);
+    // Refresh to see the new item
+    await refreshRetros();
+  };
+
   if (loading) {
     console.log('RetroApp: Loading retros...');
     return (
@@ -323,6 +348,7 @@ export const RetroApp = () => {
               onEdit={handleEditRetro}
               onDelete={handleDeleteConfirm}
               onUpdateItem={handleUpdateRetroItem}
+              onAddItem={handleAddRetroItem}
               currentUserName={currentUserName}
             />
           </div>

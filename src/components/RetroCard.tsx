@@ -24,10 +24,11 @@ interface RetroCardProps {
   onEdit: (retro: Retro) => void;
   onDelete: (retro: Retro) => void;
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
+  onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
   currentUserName: string;
 }
 
-export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserName }: RetroCardProps) => {
+export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, currentUserName }: RetroCardProps) => {
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
@@ -67,10 +68,22 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
   }) => {
     const isExpanded = expandedItems[item.id];
     const hasComments = item.comments && item.comments.length > 0;
+    const hasPhotos = item.photos && item.photos.length > 0;
 
     return (
       <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200`}>
         <p className="text-sm mb-2">{item.text}</p>
+        
+        {/* Show photos for this item */}
+        {hasPhotos && (
+          <div className="mb-3">
+            <PhotoDisplay
+              photos={item.photos || []}
+              readonly={true}
+              showAsGrid={true}
+            />
+          </div>
+        )}
         
         {item.tags && item.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2">
@@ -240,16 +253,31 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
       </CardHeader>
 
       <CardContent className="flex-grow space-y-4">
-        {/* Photos - Mock data for now until we migrate to new Retrospective type */}
-        <PhotoDisplay
-          photos={[]}
-          readonly={true}
-          showAsGrid={true}
-        />
+        {/* General Photos */}
+        {retro.photos && retro.photos.length > 0 && (
+          <PhotoDisplay
+            photos={retro.photos}
+            readonly={true}
+            showAsGrid={true}
+          />
+        )}
         {/* Roses */}
-        {retro.roses && retro.roses.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-positive mb-2 capitalize">Roses ({retro.roses.length})</h4>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-positive capitalize">Roses ({retro.roses?.length || 0})</h4>
+            {onAddItem && (
+              <Button
+                onClick={() => onAddItem(retro.id, 'roses')}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-xs h-7"
+              >
+                <span>🌹</span>
+                Add Rose
+              </Button>
+            )}
+          </div>
+          {retro.roses && retro.roses.length > 0 ? (
             <div className="space-y-2">
               {retro.roses.map((item) => (
                 <RBTItemDisplay 
@@ -260,13 +288,28 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
                 />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No roses yet</p>
+          )}
+        </div>
 
         {/* Buds */}
-        {retro.buds && retro.buds.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-opportunity mb-2 capitalize">Buds ({retro.buds.length})</h4>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-opportunity capitalize">Buds ({retro.buds?.length || 0})</h4>
+            {onAddItem && (
+              <Button
+                onClick={() => onAddItem(retro.id, 'buds')}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-xs h-7"
+              >
+                <span>🌱</span>
+                Add Bud
+              </Button>
+            )}
+          </div>
+          {retro.buds && retro.buds.length > 0 ? (
             <div className="space-y-2">
               {retro.buds.map((item) => (
                 <RBTItemDisplay 
@@ -277,13 +320,28 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
                 />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No buds yet</p>
+          )}
+        </div>
 
         {/* Thorns */}
-        {retro.thorns && retro.thorns.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-negative mb-2 capitalize">Thorns ({retro.thorns.length})</h4>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-negative capitalize">Thorns ({retro.thorns?.length || 0})</h4>
+            {onAddItem && (
+              <Button
+                onClick={() => onAddItem(retro.id, 'thorns')}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-xs h-7"
+              >
+                <span>🌿</span>
+                Add Thorn
+              </Button>
+            )}
+          </div>
+          {retro.thorns && retro.thorns.length > 0 ? (
             <div className="space-y-2">
               {retro.thorns.map((item) => (
                 <RBTItemDisplay 
@@ -294,8 +352,10 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, currentUserNa
                 />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No thorns yet</p>
+          )}
+        </div>
       </CardContent>
 
       <div className="p-4 border-t flex justify-end gap-2">
