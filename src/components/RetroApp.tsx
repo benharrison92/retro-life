@@ -84,7 +84,7 @@ export const RetroApp = () => {
     title: retro.title,
     eventType: retro.event_type,
     date: retro.date,
-    ownerName: currentUserName, // Since it's from database, it's always current user's or friend's
+    ownerName: retro.ownerName || currentUserName, // Use the actual owner name from database
     attendees: retro.attendees,
     attendeeUsers: retro.attendeeUsers, // Include tagged users
     roses: retro.roses,
