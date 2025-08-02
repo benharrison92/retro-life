@@ -79,6 +79,13 @@ const RBTSection = React.memo(({
                 className="min-h-[80px] resize-none"
               />
               
+              {/* Photos for this item */}
+              <PhotoUpload
+                photos={item.photos || []}
+                onPhotosChange={(photos) => updateRBTItem(type, index, 'photos', photos)}
+                maxPhotos={2}
+              />
+              
               <div>
                 <Label className="text-sm font-medium">Tags (comma-separated)</Label>
                 <Input
@@ -191,10 +198,11 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [locationName, setLocationName] = useState(retro?.locationName || '');
   const [city, setCity] = useState(retro?.city || '');
   const [state, setState] = useState(retro?.state || '');
-  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
-  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
-  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [], ownerName: currentUserName }]);
+  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
+  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
+  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
   const [photos, setPhotos] = useState<RetroPhoto[]>([]);
+  const [primaryPhotoUrl, setPrimaryPhotoUrl] = useState<string>(retro?.primaryPhotoUrl || '');
 
   // Load existing attendee users when editing
   React.useEffect(() => {
@@ -219,7 +227,8 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       text: '', 
       tags: [], 
       comments: [],
-      ownerName: currentUserName
+      ownerName: currentUserName,
+      photos: []
     }]);
   }, [currentUserName]);
 
@@ -265,6 +274,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       buds: processItems(buds),
       thorns: processItems(thorns),
       photos: photos, // Include photos in the saved data
+      primaryPhotoUrl: primaryPhotoUrl || undefined,
       locationName: locationName.trim() || undefined,
       city: city.trim() || undefined,
       state: state.trim() || undefined,
@@ -442,7 +452,47 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
             />
           </div>
 
-          {/* Photos Section */}
+          {/* Primary Photo Selection */}
+          <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <h3 className="text-lg font-semibold">Primary Photo for Tile</h3>
+            <p className="text-sm text-muted-foreground">Select a photo from your R/B/T items to display on the retro tile</p>
+            
+            {/* Get all photos from all RBT items */}
+            {(() => {
+              const allPhotos: { photo: RetroPhoto; source: string }[] = [];
+              roses.forEach((item, idx) => item.photos?.forEach(photo => allPhotos.push({ photo, source: `Rose ${idx + 1}` })));
+              buds.forEach((item, idx) => item.photos?.forEach(photo => allPhotos.push({ photo, source: `Bud ${idx + 1}` })));
+              thorns.forEach((item, idx) => item.photos?.forEach(photo => allPhotos.push({ photo, source: `Thorn ${idx + 1}` })));
+              
+              return allPhotos.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {allPhotos.map(({ photo, source }, index) => (
+                    <div 
+                      key={`${photo.id}-${index}`}
+                      className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
+                        primaryPhotoUrl === photo.url ? 'border-primary ring-2 ring-primary/50' : 'border-muted hover:border-primary/50'
+                      }`}
+                      onClick={() => setPrimaryPhotoUrl(photo.url === primaryPhotoUrl ? '' : photo.url)}
+                    >
+                      <img src={photo.url} alt={`From ${source}`} className="w-full h-20 object-cover" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-1 truncate">
+                        {source}
+                      </div>
+                      {primaryPhotoUrl === photo.url && (
+                        <div className="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No photos added to R/B/T items yet. Add photos to individual items above to select a primary photo.</p>
+              );
+            })()}
+          </div>
+
+          {/* General Photos Section */}
           <PhotoUpload
             photos={photos}
             onPhotosChange={setPhotos}

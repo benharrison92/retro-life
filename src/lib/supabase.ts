@@ -21,6 +21,7 @@ export interface Retrospective {
   buds: RBTItem[];
   thorns: RBTItem[];
   photos: RetroPhoto[];
+  primaryPhotoUrl?: string;
   location_name?: string;
   city?: string;
   state?: string;
@@ -64,6 +65,7 @@ export interface RBTItem {
   tags: string[];
   comments: Comment[];
   ownerName?: string;
+  photos?: RetroPhoto[];
 }
 
 export interface Comment {

@@ -28,6 +28,7 @@ export interface Retro {
   roses: RBTItem[];
   buds: RBTItem[];
   thorns: RBTItem[];
+  primaryPhotoUrl?: string;
   locationName?: string;
   city?: string;
   state?: string;
@@ -80,6 +81,7 @@ export const RetroApp = () => {
     roses: retro.roses,
     buds: retro.buds,
     thorns: retro.thorns,
+    primaryPhotoUrl: retro.primaryPhotoUrl,
     locationName: retro.location_name,
     city: retro.city,
     state: retro.state,
@@ -172,6 +174,7 @@ export const RetroApp = () => {
       buds: retro.buds,
       thorns: retro.thorns,
       photos: [],
+      primaryPhotoUrl: retro.primaryPhotoUrl,
       location_name: retro.locationName,
       city: retro.city,
       state: retro.state,
@@ -206,6 +209,7 @@ export const RetroApp = () => {
       buds: legacyRetroData.buds,
       thorns: legacyRetroData.thorns,
       photos: [],
+      primaryPhotoUrl: legacyRetroData.primaryPhotoUrl,
       location_name: typeof legacyRetroData.locationName === 'string' ? legacyRetroData.locationName : undefined,
       city: typeof legacyRetroData.city === 'string' ? legacyRetroData.city : undefined,
       state: typeof legacyRetroData.state === 'string' ? legacyRetroData.state : undefined,

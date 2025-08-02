@@ -41,9 +41,23 @@ export const RetroTileCard = ({ retro, onClick }: RetroTileCardProps) => {
       onClick={() => onClick(retro)}
     >
       {/* Hero Section */}
-      <div className={`${getBackgroundColor(retro.title)} h-32 flex items-center justify-center text-white relative overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/10"></div>
-        <h3 className="text-xl font-bold text-center px-4 relative z-10 drop-shadow-lg">
+      <div className="h-32 relative overflow-hidden">
+        {retro.primaryPhotoUrl ? (
+          <>
+            <img 
+              src={retro.primaryPhotoUrl} 
+              alt={retro.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
+          </>
+        ) : (
+          <>
+            <div className={`${getBackgroundColor(retro.title)} w-full h-full`}></div>
+            <div className="absolute inset-0 bg-black/10"></div>
+          </>
+        )}
+        <h3 className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white text-center px-4 drop-shadow-lg">
           {retro.title}
         </h3>
       </div>
