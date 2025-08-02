@@ -225,6 +225,7 @@ const FeedbackSpace = () => {
                     onEdit={() => {}} // View-only for feedback spaces
                     onDelete={() => {}} // View-only for feedback spaces
                     onUpdateItem={() => {}} // View-only for feedback spaces
+                    onUpdateRetro={() => {}} // View-only for feedback spaces
                   />
                 );
               })}

@@ -401,6 +401,53 @@ export const RetroApp = () => {
     setSelectedRetro(null); // Go back to main view
   };
 
+  const handleUpdateRetro = async (updatedRetro: Retro) => {
+    // Convert legacy format to database format and update
+    const retroId = updatedRetro.id;
+    const dbRetro = retros.find(r => r.id === retroId);
+    if (!dbRetro) return;
+
+    const retroData = {
+      ...dbRetro,
+      title: updatedRetro.title,
+      event_type: updatedRetro.eventType,
+      date: updatedRetro.date,
+      attendees: updatedRetro.attendees,
+      roses: updatedRetro.roses,
+      buds: updatedRetro.buds,
+      thorns: updatedRetro.thorns,
+      photos: updatedRetro.photos,
+      primary_photo_url: updatedRetro.primaryPhotoUrl,
+      location_name: updatedRetro.locationName,
+      city: updatedRetro.city,
+      state: updatedRetro.state,
+      is_private: (updatedRetro as any).is_private,
+    };
+
+    // Update local state immediately for instant UI feedback
+    updateLocalRetro(retroId, retroData);
+
+    // Update selectedRetro if it's the current one being viewed
+    if (selectedRetro?.id === retroId) {
+      setSelectedRetro(retroData);
+    }
+
+    try {
+      await updateRetro(retroId, retroData);
+      toast({
+        title: "Success",
+        description: "Retro updated successfully!",
+      });
+    } catch (error) {
+      console.error('Error updating retro:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update retro. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Handle URL parameters for direct retro access
   useEffect(() => {
     const retroId = searchParams.get('retro');
@@ -441,6 +488,7 @@ export const RetroApp = () => {
               onUpdateItem={handleUpdateRetroItem}
               onAddItem={handleAddRetroItem}
               onUserClick={handleUserClick}
+              onUpdateRetro={handleUpdateRetro}
               currentUserName={currentUserName}
             />
           </div>

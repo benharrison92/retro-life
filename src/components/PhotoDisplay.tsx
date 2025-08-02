@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, X } from 'lucide-react';
 import { RetroPhoto, PhotoReaction, PhotoComment } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { PhotoModal } from './PhotoModal';
 
 interface PhotoDisplayProps {
   photos: RetroPhoto[];
@@ -22,6 +23,8 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
 }) => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [selectedPhoto, setSelectedPhoto] = useState<RetroPhoto | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const { user, profile } = useAuth();
 
   const addReaction = (photoId: string) => {
@@ -96,6 +99,11 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
     }));
   };
 
+  const openPhotoModal = (photo: RetroPhoto) => {
+    setSelectedPhoto(photo);
+    setModalOpen(true);
+  };
+
   if (photos.length === 0) {
     return null;
   }
@@ -114,6 +122,7 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
                 src={photo.url}
                 alt={photo.caption || 'Retro photo'}
                 className="w-full h-24 object-cover rounded cursor-pointer"
+                onClick={() => openPhotoModal(photo)}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded" />
               <div className="absolute top-1 right-1 flex gap-1">
@@ -139,7 +148,8 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
                 <img
                   src={photo.url}
                   alt={photo.caption || 'Retro photo'}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-64 object-cover cursor-pointer"
+                  onClick={() => openPhotoModal(photo)}
                 />
               </div>
               
@@ -223,6 +233,14 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
           )}
         </div>
       ))}
+      
+      <PhotoModal
+        photo={selectedPhoto}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onUpdatePhoto={onUpdatePhoto}
+        readonly={readonly}
+      />
     </div>
   );
 };

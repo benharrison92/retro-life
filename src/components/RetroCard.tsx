@@ -26,10 +26,11 @@ interface RetroCardProps {
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
   onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
   onUserClick?: (userName: string) => void;
+  onUpdateRetro?: (retro: Retro) => void;
   currentUserName: string;
 }
 
-export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, onUserClick, currentUserName }: RetroCardProps) => {
+export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, onUserClick, onUpdateRetro, currentUserName }: RetroCardProps) => {
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
@@ -69,6 +70,26 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
   };
 
+  const handleUpdateItemPhoto = (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {
+    const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
+    const item = items?.find(i => i.id === itemId);
+    if (!item || !item.photos) return;
+
+    const updatedPhotos = item.photos.map(p => p.id === photoId ? updatedPhoto : p);
+    const updatedItem = { ...item, photos: updatedPhotos };
+    
+    onUpdateItem(retro.id, itemType, itemId, updatedItem);
+  };
+
+  const handleUpdateGeneralPhoto = (photoId: string, updatedPhoto: RetroPhoto) => {
+    if (!retro.photos || !onUpdateRetro) return;
+    
+    const updatedPhotos = retro.photos.map(p => p.id === photoId ? updatedPhoto : p);
+    const updatedRetro = { ...retro, photos: updatedPhotos };
+    
+    onUpdateRetro(updatedRetro);
+  };
+
   const RBTItemDisplay = ({ 
     item, 
     type, 
@@ -105,8 +126,9 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
           <div className="mb-3">
             <PhotoDisplay
               photos={item.photos || []}
-              readonly={true}
+              readonly={false}
               showAsGrid={true}
+              onUpdatePhoto={(photoId, updatedPhoto) => handleUpdateItemPhoto(type, item.id, photoId, updatedPhoto)}
             />
           </div>
         )}
@@ -309,8 +331,9 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
         {retro.photos && retro.photos.length > 0 && (
           <PhotoDisplay
             photos={retro.photos}
-            readonly={true}
+            readonly={false}
             showAsGrid={true}
+            onUpdatePhoto={handleUpdateGeneralPhoto}
           />
         )}
         {/* Roses */}
