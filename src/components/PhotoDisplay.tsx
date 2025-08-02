@@ -123,13 +123,15 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
               <img
                 src={photo.url}
                 alt={photo.caption || 'Retro photo'}
-                className="w-full h-24 object-cover rounded cursor-pointer"
+                className="w-full h-24 object-cover rounded"
+              />
+              <div 
+                className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded cursor-pointer" 
                 onClick={() => {
-                  console.log('PhotoDisplay: Grid photo clicked:', photo.id);
+                  console.log('PhotoDisplay: Grid photo overlay clicked:', photo.id);
                   openPhotoModal(photo);
                 }}
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded" />
               <div className="absolute top-1 right-1 flex gap-1">
                 <Badge variant="secondary" className="text-xs px-1 py-0">
                   <Heart className="w-3 h-3 mr-1" />
