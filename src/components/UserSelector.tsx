@@ -66,7 +66,11 @@ export const UserSelector = ({ selectedUsers, onUsersChange, placeholder = "Sear
   }, [searchQuery, selectedUsers]);
 
   const handleAddUser = (user: UserProfile) => {
-    onUsersChange([...selectedUsers, user]);
+    console.log('UserSelector: Adding user:', user);
+    console.log('UserSelector: Current selectedUsers before add:', selectedUsers);
+    const newUsers = [...selectedUsers, user];
+    console.log('UserSelector: New users list:', newUsers);
+    onUsersChange(newUsers);
     setSearchQuery('');
     setShowResults(false);
   };

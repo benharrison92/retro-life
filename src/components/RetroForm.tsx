@@ -248,8 +248,10 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
 
   // Load existing attendee users when editing
   React.useEffect(() => {
+    console.log('RetroForm: Loading existing attendee users:', retro?.attendeeUsers);
     if (retro?.attendeeUsers) {
       setAttendeeUsers(retro.attendeeUsers);
+      console.log('RetroForm: Set attendeeUsers to:', retro.attendeeUsers);
     }
   }, [retro]);
 
