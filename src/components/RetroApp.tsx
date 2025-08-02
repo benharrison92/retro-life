@@ -16,6 +16,7 @@ import { useRetros } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
 import { Retrospective, RBTItem, Comment, UserProfile, RetroPhoto } from "@/lib/supabase";
 import { AddRBTDialog } from "./AddRBTDialog";
+import { useSearchParams } from "react-router-dom";
 
 // Legacy type for compatibility with existing components
 export interface Retro {
@@ -50,6 +51,7 @@ export const RetroApp = () => {
   const [editingRetro, setEditingRetro] = useState<Retrospective | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRetro, setSelectedRetro] = useState<Retrospective | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchKeywords, setSearchKeywords] = useState('');
   const [filterTags, setFilterTags] = useState('');
   const [searchUser, setSearchUser] = useState('');
@@ -398,6 +400,19 @@ export const RetroApp = () => {
     setShowUserRetros(true);
     setSelectedRetro(null); // Go back to main view
   };
+
+  // Handle URL parameters for direct retro access
+  useEffect(() => {
+    const retroId = searchParams.get('retro');
+    if (retroId && retros.length > 0 && !selectedRetro) {
+      const targetRetro = retros.find(r => r.id === retroId);
+      if (targetRetro) {
+        setSelectedRetro(targetRetro);
+        // Remove the query parameter to clean up the URL
+        setSearchParams({});
+      }
+    }
+  }, [retros, searchParams, setSearchParams, selectedRetro]);
 
   if (loading) {
     console.log('RetroApp: Loading retros...');

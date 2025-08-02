@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus, FolderOpen } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus, FolderOpen, ExternalLink } from "lucide-react";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface NotificationHubProps {
   className?: string;
@@ -22,6 +23,31 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
   } = useNotifications();
   
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read when clicked
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+
+    // Navigate based on notification type
+    switch (notification.type) {
+      case 'retro_tagged':
+        if (notification.related_retro_id) {
+          setOpen(false); // Close dialog
+          navigate(`/?retro=${notification.related_retro_id}`);
+        }
+        break;
+      case 'catalogue_invitation':
+        setOpen(false); // Close dialog
+        navigate('/catalogues');
+        break;
+      default:
+        // For other notification types, just mark as read
+        break;
+    }
+  };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -38,65 +64,81 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
     }
   };
 
-  const NotificationItem = ({ notification }: { notification: Notification }) => (
-    <div className={`p-3 border-b transition-colors ${
-      notification.is_read ? 'bg-background' : 'bg-muted/50'
-    }`}>
-      <div className="flex items-start gap-3">
-        <div className="mt-1">
-          {getNotificationIcon(notification.type)}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <h4 className={`text-sm font-medium truncate ${
-              notification.is_read ? 'text-muted-foreground' : 'text-foreground'
-            }`}>
-              {notification.title}
-            </h4>
-            {!notification.is_read && (
-              <div className="w-2 h-2 bg-primary rounded-full ml-2 flex-shrink-0" />
-            )}
+  const isClickableNotification = (type: string) => {
+    return ['retro_tagged', 'catalogue_invitation'].includes(type);
+  };
+
+  const NotificationItem = ({ notification }: { notification: Notification }) => {
+    const isClickable = isClickableNotification(notification.type);
+    
+    return (
+      <div 
+        className={`p-3 border-b transition-colors ${
+          notification.is_read ? 'bg-background' : 'bg-muted/50'
+        } ${isClickable ? 'cursor-pointer hover:bg-accent/50' : ''}`}
+        onClick={isClickable ? () => handleNotificationClick(notification) : undefined}
+      >
+        <div className="flex items-start gap-3">
+          <div className="mt-1">
+            {getNotificationIcon(notification.type)}
           </div>
           
-          <p className={`text-xs mb-2 ${
-            notification.is_read ? 'text-muted-foreground' : 'text-foreground'
-          }`}>
-            {notification.message}
-          </p>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-            </span>
-            
-            <div className="flex items-center gap-1">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <h4 className={`text-sm font-medium truncate ${
+                  notification.is_read ? 'text-muted-foreground' : 'text-foreground'
+                }`}>
+                  {notification.title}
+                </h4>
+                {isClickable && (
+                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                )}
+              </div>
               {!notification.is_read && (
+                <div className="w-2 h-2 bg-primary rounded-full ml-2 flex-shrink-0" />
+              )}
+            </div>
+            
+            <p className={`text-xs mb-2 ${
+              notification.is_read ? 'text-muted-foreground' : 'text-foreground'
+            }`}>
+              {notification.message}
+            </p>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+              </span>
+              
+              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                {!notification.is_read && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => markAsRead(notification.id)}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Check className="w-3 h-3" />
+                    Mark read
+                  </Button>
+                )}
+                
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => markAsRead(notification.id)}
-                  className="h-6 px-2 text-xs"
+                  onClick={() => deleteNotification(notification.id)}
+                  className="h-6 px-2 text-xs text-destructive hover:text-destructive"
                 >
-                  <Check className="w-3 h-3" />
-                  Mark read
+                  <Trash2 className="w-3 h-3" />
                 </Button>
-              )}
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => deleteNotification(notification.id)}
-                className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
