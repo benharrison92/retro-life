@@ -115,16 +115,25 @@ export const useRetros = () => {
             `)
             .eq('retro_id', retro.id);
 
-          console.log('fetchRetros: Attendees query result for retro', retro.id, {
+          console.log('🔍 fetchRetros: RAW ATTENDEES QUERY RESULT for retro', retro.title, {
             attendeesData,
-            attendeesError
+            attendeesError,
+            retroId: retro.id
           });
 
           if (!attendeesError && attendeesData) {
-            convertedRetro.attendeeUsers = attendeesData
+            const mappedAttendees = attendeesData
               .map((attendee: any) => attendee.user_profiles)
               .filter(Boolean);
-            console.log('fetchRetros: Set attendeeUsers for retro', retro.id, convertedRetro.attendeeUsers);
+            
+            console.log('🔍 fetchRetros: MAPPED ATTENDEES for retro', retro.title, {
+              mappedAttendees,
+              attendeesDataLength: attendeesData.length,
+              mappedLength: mappedAttendees.length
+            });
+            
+            convertedRetro.attendeeUsers = mappedAttendees;
+            console.log('🔍 fetchRetros: FINAL attendeeUsers set for retro', retro.title, convertedRetro.attendeeUsers);
           } else {
             convertedRetro.attendeeUsers = [];
             console.log('fetchRetros: No attendees found for retro', retro.id);
