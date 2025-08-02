@@ -100,8 +100,10 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
   };
 
   const openPhotoModal = (photo: RetroPhoto) => {
+    console.log('PhotoDisplay: openPhotoModal called with photo:', photo);
     setSelectedPhoto(photo);
     setModalOpen(true);
+    console.log('PhotoDisplay: Modal state set - selectedPhoto:', photo.id, 'modalOpen: true');
   };
 
   if (photos.length === 0) {
@@ -122,7 +124,10 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
                 src={photo.url}
                 alt={photo.caption || 'Retro photo'}
                 className="w-full h-24 object-cover rounded cursor-pointer"
-                onClick={() => openPhotoModal(photo)}
+                onClick={() => {
+                  console.log('PhotoDisplay: Grid photo clicked:', photo.id);
+                  openPhotoModal(photo);
+                }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded" />
               <div className="absolute top-1 right-1 flex gap-1">
@@ -149,7 +154,10 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
                   src={photo.url}
                   alt={photo.caption || 'Retro photo'}
                   className="w-full h-64 object-cover cursor-pointer"
-                  onClick={() => openPhotoModal(photo)}
+                  onClick={() => {
+                    console.log('PhotoDisplay: Full photo clicked:', photo.id);
+                    openPhotoModal(photo);
+                  }}
                 />
               </div>
               
@@ -237,7 +245,10 @@ export const PhotoDisplay: React.FC<PhotoDisplayProps> = ({
       <PhotoModal
         photo={selectedPhoto}
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => {
+          console.log('PhotoDisplay: PhotoModal onOpenChange called with:', open);
+          setModalOpen(open);
+        }}
         onUpdatePhoto={onUpdatePhoto}
         readonly={readonly}
       />

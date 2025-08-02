@@ -25,7 +25,12 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
   const [commentInput, setCommentInput] = useState('');
   const { user, profile } = useAuth();
 
-  if (!photo) return null;
+  console.log('PhotoModal: Rendering with photo:', photo?.id, 'open:', open);
+
+  if (!photo) {
+    console.log('PhotoModal: No photo provided, returning null');
+    return null;
+  }
 
   const addReaction = () => {
     if (!user || !profile || readonly || !onUpdatePhoto) return;
