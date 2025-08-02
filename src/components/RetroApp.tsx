@@ -172,7 +172,12 @@ export const RetroApp = () => {
   };
 
   const handleEditRetro = async (retro: Retro) => {
+    console.log('=== EDIT RETRO STARTED ===');
+    console.log('handleEditRetro: Starting edit for retro:', retro);
+    console.log('handleEditRetro: Original retro object:', retro);
+    
     // Refresh retros first to get latest attendeeUsers data
+    console.log('handleEditRetro: Refreshing retros to get latest data...');
     await refreshRetros();
     
     // Find the updated retro with attendees
