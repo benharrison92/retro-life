@@ -45,7 +45,7 @@ export interface Retro {
 export type { RBTItem, Comment };
 
 export const RetroApp = () => {
-  const { retros, loading, createRetro, updateRetro, deleteRetro, searchRetrosByLocation, refreshRetros } = useRetros();
+  const { retros, loading, createRetro, updateRetro, deleteRetro, searchRetrosByLocation, refreshRetros, updateLocalRetro } = useRetros();
   const { user, profile } = useAuth();
   const [editingRetro, setEditingRetro] = useState<Retrospective | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -365,14 +365,20 @@ export const RetroApp = () => {
       [type]: [...retro[type], newItem],
     };
 
+    // Update local state immediately for instant UI feedback
+    updateLocalRetro(retroId, updatedRetro);
+
+    // Update selectedRetro if it's the current one being viewed
+    if (selectedRetro?.id === retroId) {
+      setSelectedRetro(updatedRetro);
+    }
+
     try {
       await updateRetro(retroId, updatedRetro);
       toast({
         title: 'Success',
         description: `${type === 'roses' ? 'Rose' : type === 'buds' ? 'Bud' : 'Thorn'} added successfully!`,
       });
-      // Refresh to see the new item
-      await refreshRetros();
     } catch (error) {
       toast({
         title: 'Error',

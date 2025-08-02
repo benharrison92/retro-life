@@ -397,6 +397,13 @@ export const useRetros = () => {
     fetchRetros();
   }, [user]);
 
+  // Function to update local state immediately for optimistic updates
+  const updateLocalRetro = (retroId: string, updatedRetro: Retrospective) => {
+    setRetros(prevRetros => 
+      prevRetros.map(r => r.id === retroId ? updatedRetro : r)
+    );
+  };
+
   return {
     retros,
     loading,
@@ -407,5 +414,6 @@ export const useRetros = () => {
     removeAttendee,
     searchRetrosByLocation,
     refreshRetros: fetchRetros,
+    updateLocalRetro,
   };
 };
