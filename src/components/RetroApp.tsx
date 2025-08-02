@@ -405,6 +405,33 @@ export const RetroApp = () => {
             />
           </div>
         </div>
+
+        {/* Modals need to be rendered even in detail view */}
+        {(showCreateModal || editingRetro) && (
+          <RetroForm
+            retro={editingRetro ? convertToLegacy(editingRetro) : null}
+            onClose={handleCloseCreateModal}
+            onSave={handleSaveRetro}
+            currentUserName={currentUserName}
+          />
+        )}
+
+        {showConfirmModal && retroToDelete && (
+          <ConfirmDialog
+            title="Delete Retrospective"
+            message={`Are you sure you want to delete "${retroToDelete.title}"? This action cannot be undone.`}
+            onConfirm={handleActualDelete}
+            onCancel={() => setShowConfirmModal(false)}
+          />
+        )}
+
+        {/* Add RBT Item Dialog */}
+        <AddRBTDialog
+          isOpen={addItemDialog.isOpen}
+          onClose={() => setAddItemDialog({ isOpen: false, retroId: '', type: 'roses' })}
+          onSubmit={handleSubmitNewItem}
+          type={addItemDialog.type}
+        />
       </>
     );
   }
