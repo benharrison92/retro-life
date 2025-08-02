@@ -71,22 +71,34 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
   };
 
   const handleUpdateItemPhoto = (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {
+    console.log('RetroCard: handleUpdateItemPhoto called', { itemType, itemId, photoId, updatedPhoto });
+    
     const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
     const item = items?.find(i => i.id === itemId);
-    if (!item || !item.photos) return;
+    if (!item || !item.photos) {
+      console.log('RetroCard: Item or photos not found');
+      return;
+    }
 
     const updatedPhotos = item.photos.map(p => p.id === photoId ? updatedPhoto : p);
     const updatedItem = { ...item, photos: updatedPhotos };
     
+    console.log('RetroCard: Calling onUpdateItem with updated item:', updatedItem);
     onUpdateItem(retro.id, itemType, itemId, updatedItem);
   };
 
   const handleUpdateGeneralPhoto = (photoId: string, updatedPhoto: RetroPhoto) => {
-    if (!retro.photos || !onUpdateRetro) return;
+    console.log('RetroCard: handleUpdateGeneralPhoto called', { photoId, updatedPhoto });
+    
+    if (!retro.photos || !onUpdateRetro) {
+      console.log('RetroCard: No photos or onUpdateRetro function');
+      return;
+    }
     
     const updatedPhotos = retro.photos.map(p => p.id === photoId ? updatedPhoto : p);
     const updatedRetro = { ...retro, photos: updatedPhotos };
     
+    console.log('RetroCard: Calling onUpdateRetro with updated retro:', updatedRetro);
     onUpdateRetro(updatedRetro);
   };
 
