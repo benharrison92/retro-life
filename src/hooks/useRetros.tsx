@@ -272,6 +272,10 @@ export const useRetros = () => {
   // Update retro with attendees
   const updateRetro = async (id: string, updates: Partial<Retrospective>, attendeeUsers?: UserProfile[]) => {
     try {
+      console.log('updateRetro: Starting update for retro:', id);
+      console.log('updateRetro: Updates:', updates);
+      console.log('updateRetro: AttendeeUsers:', attendeeUsers);
+      
       const dbUpdates: any = {};
       
       // Convert only the fields that need updating
@@ -291,16 +295,23 @@ export const useRetros = () => {
       if (updates.latitude !== undefined) dbUpdates.latitude = updates.latitude;
       if (updates.longitude !== undefined) dbUpdates.longitude = updates.longitude;
 
-      console.log('updateRetro: Updating retro with attendeeUsers:', attendeeUsers);
+      console.log('updateRetro: DB updates to apply:', dbUpdates);
 
+      // Fetch with user profile to preserve owner name
       const { data, error } = await supabase
         .from('retrospectives')
         .update(dbUpdates)
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          user_profiles!user_id(display_name),
+          feedback_spaces(title)
+        `)
         .single();
 
       if (error) throw error;
+
+      console.log('updateRetro: Database update result:', data);
 
       // Handle attendee users if provided
       if (attendeeUsers !== undefined) {
@@ -323,7 +334,48 @@ export const useRetros = () => {
         }
       }
 
+      // Convert and preserve owner/feedback space info
       const convertedData = convertDbToApp(data);
+      
+      // Add owner name from user profile
+      if (data.user_profiles) {
+        convertedData.ownerName = data.user_profiles.display_name;
+        console.log('updateRetro: Set owner name to:', convertedData.ownerName);
+      }
+      
+      // Add feedback space information
+      if (data.feedback_spaces) {
+        convertedData.feedbackSpaceName = data.feedback_spaces.title;
+      }
+
+      // Fetch and add attendee users
+      if (attendeeUsers !== undefined || !convertedData.attendeeUsers) {
+        console.log('updateRetro: Fetching attendees for updated retro');
+        const { data: attendeesData, error: attendeesError } = await supabase
+          .from('retro_attendees')
+          .select(`
+            user_profiles!inner (
+              id,
+              email,
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('retro_id', id);
+
+        if (!attendeesError && attendeesData) {
+          convertedData.attendeeUsers = attendeesData
+            .map((attendee: any) => attendee.user_profiles)
+            .filter(Boolean);
+          console.log('updateRetro: Set attendeeUsers to:', convertedData.attendeeUsers);
+        } else {
+          convertedData.attendeeUsers = [];
+          console.log('updateRetro: No attendees found or error:', attendeesError);
+        }
+      }
+
+      console.log('updateRetro: Final converted data:', convertedData);
+      
       setRetros(prev => prev.map(retro => 
         retro.id === id ? convertedData : retro
       ));
