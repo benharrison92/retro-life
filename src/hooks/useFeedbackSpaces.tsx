@@ -175,6 +175,27 @@ export const useFeedbackSpaces = () => {
     }
   };
 
+  const getFeedbackSpaceById = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('feedback_spaces')
+        .select('*')
+        .eq('id', id)
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Error fetching feedback space by id:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching feedback space by id:', error);
+      return null;
+    }
+  };
+
   const getFeedbackSpaceRetros = async (spaceId: string) => {
     try {
       const { data, error } = await supabase
@@ -209,6 +230,7 @@ export const useFeedbackSpaces = () => {
     updateFeedbackSpace,
     deleteFeedbackSpace,
     getFeedbackSpaceByCode,
+    getFeedbackSpaceById,
     getFeedbackSpaceRetros,
     refreshFeedbackSpaces: fetchFeedbackSpaces
   };

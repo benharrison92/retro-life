@@ -11,7 +11,7 @@ const CreateRetro = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getFeedbackSpaceByCode } = useFeedbackSpaces();
+  const { getFeedbackSpaceById } = useFeedbackSpaces();
   const { createRetro } = useRetros();
   
   const feedbackSpaceId = searchParams.get('feedbackSpace');
@@ -23,8 +23,8 @@ const CreateRetro = () => {
       if (!feedbackSpaceId) return;
       
       try {
-        // We need to get the feedback space by ID, but our hook only has getByCode
-        // For now, let's pass the ID and modify the hook later
+        const space = await getFeedbackSpaceById(feedbackSpaceId);
+        setFeedbackSpace(space);
         setLoading(false);
       } catch (error) {
         console.error('Error loading feedback space:', error);
@@ -33,7 +33,7 @@ const CreateRetro = () => {
     };
 
     loadFeedbackSpace();
-  }, [feedbackSpaceId]);
+  }, [feedbackSpaceId, getFeedbackSpaceById]);
 
   const handleSave = async (retroData, attendeeUsers?: UserProfile[]) => {
     try {
@@ -125,6 +125,13 @@ const CreateRetro = () => {
           onSave={handleSave}
           currentUserName={user?.email || 'Anonymous'}
           feedbackSpaceMode={!!feedbackSpaceId}
+          initialData={feedbackSpace ? {
+            title: feedbackSpace.title,
+            locationName: feedbackSpace.location_name,
+            city: feedbackSpace.city,
+            state: feedbackSpace.state,
+            country: feedbackSpace.country
+          } : undefined}
         />
       </div>
     </>

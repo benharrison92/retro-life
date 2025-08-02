@@ -25,6 +25,13 @@ interface RetroFormProps {
   }, attendeeUsers?: UserProfile[]) => void;
   currentUserName: string;
   feedbackSpaceMode?: boolean;
+  initialData?: {
+    title?: string;
+    locationName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  };
 }
 
 const eventTypes = [
@@ -190,17 +197,17 @@ const RBTSection = React.memo(({
   );
 });
 
-export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpaceMode = false }: RetroFormProps) => {
-  const [title, setTitle] = useState(retro?.title || '');
+export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpaceMode = false, initialData }: RetroFormProps) => {
+  const [title, setTitle] = useState(retro?.title || initialData?.title || '');
   const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
   const ownerName = currentUserName; // Always use current user as owner
   const [attendees, setAttendees] = useState(retro?.attendees?.join(', ') || '');
   const [attendeeUsers, setAttendeeUsers] = useState<UserProfile[]>([]);
   const [isPrivate, setIsPrivate] = useState((retro as any)?.is_private || false);
-  const [locationName, setLocationName] = useState(retro?.locationName || '');
-  const [city, setCity] = useState(retro?.city || '');
-  const [state, setState] = useState(retro?.state || '');
+  const [locationName, setLocationName] = useState(retro?.locationName || initialData?.locationName || '');
+  const [city, setCity] = useState(retro?.city || initialData?.city || '');
+  const [state, setState] = useState(retro?.state || initialData?.state || '');
   const [roses, setRoses] = useState<RBTItem[]>(() => {
     if (retro?.roses) {
       return retro.roses.map(item => ({
