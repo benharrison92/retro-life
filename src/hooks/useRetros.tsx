@@ -32,6 +32,7 @@ export const useRetros = () => {
     buds: (dbRetro.buds as unknown as RBTItem[]) || [],
     thorns: (dbRetro.thorns as unknown as RBTItem[]) || [],
     photos: (dbRetro.photos as any) || [],
+    primaryPhotoUrl: (dbRetro as any).primary_photo_url || undefined,
     location_name: dbRetro.location_name || undefined,
     city: dbRetro.city || undefined,
     state: dbRetro.state || undefined,
@@ -44,7 +45,7 @@ export const useRetros = () => {
   });
 
   // Convert app type to DB insert
-  const convertAppToDb = (appRetro: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Omit<DbRetrospectiveInsert, 'id' | 'user_id' | 'created_at' | 'updated_at'> => ({
+  const convertAppToDb = (appRetro: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'>): any => ({
     title: appRetro.title,
     event_type: appRetro.event_type,
     date: appRetro.date,
@@ -53,6 +54,7 @@ export const useRetros = () => {
     buds: appRetro.buds as any,
     thorns: appRetro.thorns as any,
     photos: appRetro.photos as any,
+    primary_photo_url: appRetro.primaryPhotoUrl,
     location_name: appRetro.location_name,
     city: appRetro.city,
     state: appRetro.state,
@@ -280,6 +282,7 @@ export const useRetros = () => {
       if (updates.buds !== undefined) dbUpdates.buds = updates.buds;
       if (updates.thorns !== undefined) dbUpdates.thorns = updates.thorns;
       if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
+      if (updates.primaryPhotoUrl !== undefined) dbUpdates.primary_photo_url = updates.primaryPhotoUrl;
       if (updates.location_name !== undefined) dbUpdates.location_name = updates.location_name;
       if (updates.city !== undefined) dbUpdates.city = updates.city;
       if (updates.state !== undefined) dbUpdates.state = updates.state;
