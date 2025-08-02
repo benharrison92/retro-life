@@ -70,7 +70,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
   };
 
-  const handleUpdateItemPhoto = (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {
+  const handleUpdateItemPhoto = async (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {
     console.log('RetroCard: handleUpdateItemPhoto called', { itemType, itemId, photoId, updatedPhoto });
     
     const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
@@ -84,10 +84,16 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     const updatedItem = { ...item, photos: updatedPhotos };
     
     console.log('RetroCard: Calling onUpdateItem with updated item:', updatedItem);
-    onUpdateItem(retro.id, itemType, itemId, updatedItem);
+    
+    try {
+      await onUpdateItem(retro.id, itemType, itemId, updatedItem);
+      console.log('RetroCard: Item photo updated successfully');
+    } catch (error) {
+      console.error('RetroCard: Error updating item photo:', error);
+    }
   };
 
-  const handleUpdateGeneralPhoto = (photoId: string, updatedPhoto: RetroPhoto) => {
+  const handleUpdateGeneralPhoto = async (photoId: string, updatedPhoto: RetroPhoto) => {
     console.log('RetroCard: handleUpdateGeneralPhoto called', { photoId, updatedPhoto });
     
     if (!retro.photos || !onUpdateRetro) {
@@ -99,7 +105,13 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     const updatedRetro = { ...retro, photos: updatedPhotos };
     
     console.log('RetroCard: Calling onUpdateRetro with updated retro:', updatedRetro);
-    onUpdateRetro(updatedRetro);
+    
+    try {
+      await onUpdateRetro(updatedRetro);
+      console.log('RetroCard: General photo updated successfully');
+    } catch (error) {
+      console.error('RetroCard: Error updating general photo:', error);
+    }
   };
 
   const RBTItemDisplay = ({ 
