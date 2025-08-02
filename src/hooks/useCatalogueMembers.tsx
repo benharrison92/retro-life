@@ -159,6 +159,64 @@ export const useCatalogueMembers = (catalogueId?: string) => {
     }
   };
 
+  const inviteUserById = async (userId: string) => {
+    if (!catalogueId || !user) return false;
+    
+    try {
+      // Check if user is already a member or has pending invitation
+      const { data: existingMember, error: memberCheckError } = await supabase
+        .from('catalogue_members')
+        .select('id, status')
+        .eq('catalogue_id', catalogueId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (memberCheckError) {
+        throw memberCheckError;
+      }
+
+      if (existingMember) {
+        toast({
+          title: "Error",
+          description: existingMember.status === 'pending' 
+            ? "User already has a pending invitation" 
+            : "User is already a member of this catalogue",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Create the invitation
+      const { error: inviteError } = await supabase
+        .from('catalogue_members')
+        .insert({
+          catalogue_id: catalogueId,
+          user_id: userId,
+          invited_by_user_id: user.id,
+          role: 'member',
+          status: 'pending'
+        });
+
+      if (inviteError) throw inviteError;
+
+      toast({
+        title: "Success",
+        description: "Invitation sent successfully",
+      });
+
+      await fetchMembers();
+      return true;
+    } catch (error) {
+      console.error('Error inviting user by ID:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send invitation",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   const respondToInvitation = async (memberId: string, status: 'accepted' | 'declined') => {
     try {
       const { error } = await supabase
@@ -252,6 +310,7 @@ export const useCatalogueMembers = (catalogueId?: string) => {
     pendingInvitations,
     loading,
     inviteUser,
+    inviteUserById,
     respondToInvitation,
     removeMember,
     refreshMembers: fetchMembers,
