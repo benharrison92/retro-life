@@ -307,12 +307,18 @@ export const RetroApp = () => {
   };
 
   const handleAddRetroItem = (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
+    console.log('handleAddRetroItem called:', { retroId, itemType });
     const retro = retros.find(r => r.id === retroId);
-    if (!retro || !user) return;
+    if (!retro || !user) {
+      console.log('Retro not found or user not authenticated:', { retro: !!retro, user: !!user });
+      return;
+    }
 
     // Check permissions: user must be owner or tagged attendee
     const isOwner = retro.ownerName === currentUserName;
     const isTaggedAttendee = retro.attendeeUsers?.some(attendee => attendee.id === user.id);
+    
+    console.log('Permission check:', { isOwner, isTaggedAttendee, currentUserName, retroOwner: retro.ownerName });
     
     if (!isOwner && !isTaggedAttendee) {
       toast({
@@ -324,6 +330,7 @@ export const RetroApp = () => {
     }
 
     // Open dialog for adding new item
+    console.log('Opening add dialog for:', { retroId, itemType });
     setAddItemDialog({
       isOpen: true,
       retroId,
@@ -332,6 +339,7 @@ export const RetroApp = () => {
   };
 
   const handleSubmitNewItem = async (text: string, tags: string[]) => {
+    console.log('handleSubmitNewItem called:', { text, tags, addItemDialog });
     const { retroId, type } = addItemDialog;
     const retro = retros.find(r => r.id === retroId);
     if (!retro) return;
@@ -588,7 +596,7 @@ export const RetroApp = () => {
         </div>
       </div>
 
-      {showCreateModal && (
+      {(showCreateModal || editingRetro) && (
         <RetroForm
           retro={editingRetro ? convertToLegacy(editingRetro) : null}
           onClose={handleCloseCreateModal}
