@@ -50,6 +50,7 @@ export interface PhotoComment {
   user_name: string;
   text: string;
   timestamp: string;
+  taggedFriends?: UserProfile[]; // Friends tagged in this comment
 }
 
 export interface RetroPhoto {
@@ -58,6 +59,7 @@ export interface RetroPhoto {
   caption?: string;
   reactions: PhotoReaction[];
   comments: PhotoComment[];
+  taggedFriends?: UserProfile[]; // Friends tagged in this photo
 }
 
 export interface RBTItem {
@@ -74,6 +76,7 @@ export interface Comment {
   text: string;
   authorName: string;
   timestamp: string;
+  taggedFriends?: UserProfile[]; // Friends tagged in this comment
 }
 
 export interface Friendship {

@@ -3,9 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, X } from 'lucide-react';
-import { RetroPhoto, PhotoReaction, PhotoComment } from '@/lib/supabase';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Heart, MessageCircle, X, UserCheck, Tag } from 'lucide-react';
+import { RetroPhoto, PhotoReaction, PhotoComment, UserProfile } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { FriendTagger } from './social/FriendTagger';
+import { PhotoTagger } from './social/PhotoTagger';
 
 interface PhotoModalProps {
   photo: RetroPhoto | null;
@@ -23,6 +26,8 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
   readonly = false,
 }) => {
   const [commentInput, setCommentInput] = useState('');
+  const [taggedFriendsInComment, setTaggedFriendsInComment] = useState<UserProfile[]>([]);
+  const [showPhotoTagger, setShowPhotoTagger] = useState(false);
   const { user, profile } = useAuth();
 
   console.log('PhotoModal: Rendering with photo:', photo?.id, 'open:', open);
@@ -85,6 +90,7 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
       user_name: profile.display_name,
       text: commentText,
       timestamp: new Date().toISOString(),
+      taggedFriends: taggedFriendsInComment.length > 0 ? taggedFriendsInComment : undefined,
     };
 
     console.log('PhotoModal: New comment created:', newComment);
@@ -99,7 +105,34 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
     
     onUpdatePhoto(photo.id, updatedPhoto);
     setCommentInput('');
+    setTaggedFriendsInComment([]);
     console.log('PhotoModal: Comment added and input cleared');
+  };
+
+  const addPhotoTag = (friend: UserProfile) => {
+    if (!onUpdatePhoto) return;
+    
+    const currentTags = photo.taggedFriends || [];
+    if (currentTags.some(tag => tag.id === friend.id)) return; // Already tagged
+    
+    const updatedPhoto = {
+      ...photo,
+      taggedFriends: [...currentTags, friend],
+    };
+    
+    onUpdatePhoto(photo.id, updatedPhoto);
+    setShowPhotoTagger(false);
+  };
+
+  const removePhotoTag = (friendId: string) => {
+    if (!onUpdatePhoto) return;
+    
+    const updatedPhoto = {
+      ...photo,
+      taggedFriends: (photo.taggedFriends || []).filter(tag => tag.id !== friendId),
+    };
+    
+    onUpdatePhoto(photo.id, updatedPhoto);
   };
 
   const userHasReacted = (): boolean => {
@@ -140,22 +173,59 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
               </div>
             )}
 
+            {/* Photo tags */}
+            {photo.taggedFriends && photo.taggedFriends.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-2">Tagged Friends</h3>
+                <div className="flex flex-wrap gap-2">
+                  {photo.taggedFriends.map((friend) => (
+                    <Badge key={friend.id} variant="secondary" className="flex items-center gap-1">
+                      <Avatar className="w-4 h-4">
+                        <AvatarFallback className="text-xs">
+                          {friend.display_name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      {friend.display_name}
+                      {!readonly && (
+                        <X 
+                          className="w-3 h-3 cursor-pointer hover:text-destructive" 
+                          onClick={() => removePhotoTag(friend.id)}
+                        />
+                      )}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Reactions and interactions */}
             <div className="flex items-center gap-3">
               {!readonly && (
-                <Button
-                  variant={userHasReacted() ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => 
-                    userHasReacted() 
-                      ? removeReaction()
-                      : addReaction()
-                  }
-                  className="flex items-center gap-2"
-                >
-                  <Heart className={`w-4 h-4 ${userHasReacted() ? 'fill-current' : ''}`} />
-                  {photo.reactions.length}
-                </Button>
+                <>
+                  <Button
+                    variant={userHasReacted() ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => 
+                      userHasReacted() 
+                        ? removeReaction()
+                        : addReaction()
+                    }
+                    className="flex items-center gap-2"
+                  >
+                    <Heart className={`w-4 h-4 ${userHasReacted() ? 'fill-current' : ''}`} />
+                    {photo.reactions.length}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPhotoTagger(!showPhotoTagger)}
+                    className="flex items-center gap-2"
+                  >
+                    <Tag className="w-4 h-4" />
+                    Tag Friend
+                  </Button>
+                </>
               )}
 
               <Badge variant="outline" className="flex items-center gap-2">
@@ -163,6 +233,15 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
                 {photo.comments.length} comments
               </Badge>
             </div>
+
+            {/* Photo tagger */}
+            {showPhotoTagger && !readonly && (
+              <PhotoTagger
+                onTagFriend={addPhotoTag}
+                existingTags={photo.taggedFriends || []}
+                className="border rounded p-3 bg-muted/20"
+              />
+            )}
 
             {/* Reactions list */}
             {photo.reactions.length > 0 && (
@@ -194,6 +273,20 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
                         </span>
                       </div>
                       <p className="text-sm">{comment.text}</p>
+                      {comment.taggedFriends && comment.taggedFriends.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {comment.taggedFriends.map((friend) => (
+                            <Badge key={friend.id} variant="outline" className="text-xs">
+                              <Avatar className="w-3 h-3 mr-1">
+                                <AvatarFallback className="text-xs">
+                                  {friend.display_name.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              @{friend.display_name}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -201,23 +294,23 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
 
               {/* Add comment */}
               {!readonly && (
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add a comment..."
+                <div className="space-y-3">
+                  <FriendTagger
                     value={commentInput}
-                    onChange={(e) => setCommentInput(e.target.value)}
-                    onKeyPress={(e) => 
-                      e.key === 'Enter' && addComment()
-                    }
-                    className="flex-1"
+                    onChange={setCommentInput}
+                    onTaggedFriendsChange={setTaggedFriendsInComment}
+                    placeholder="Add a comment... Use @ to tag friends"
+                    onSubmit={addComment}
                   />
-                  <Button
-                    size="sm"
-                    onClick={addComment}
-                    disabled={!commentInput.trim()}
-                  >
-                    Comment
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={addComment}
+                      disabled={!commentInput.trim()}
+                    >
+                      Comment
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
