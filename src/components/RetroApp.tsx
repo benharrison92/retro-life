@@ -15,6 +15,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { useRetros } from "@/hooks/useRetros";
 import { useAuth } from "@/hooks/useAuth";
 import { Retrospective, RBTItem, Comment, UserProfile, RetroPhoto } from "@/lib/supabase";
+import { AddRBTDialog } from "./AddRBTDialog";
 
 // Legacy type for compatibility with existing components
 export interface Retro {
@@ -59,6 +60,11 @@ export const RetroApp = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [locationResults, setLocationResults] = useState<Retrospective[]>([]);
+  const [addItemDialog, setAddItemDialog] = useState<{
+    isOpen: boolean;
+    retroId: string;
+    type: 'roses' | 'buds' | 'thorns';
+  }>({ isOpen: false, retroId: '', type: 'roses' });
 
   const { toast } = useToast();
   const currentUserName = profile?.display_name || 'You';
@@ -300,7 +306,7 @@ export const RetroApp = () => {
     await updateRetro(retroId, updatedRetro);
   };
 
-  const handleAddRetroItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
+  const handleAddRetroItem = (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
     const retro = retros.find(r => r.id === retroId);
     if (!retro || !user) return;
 
@@ -317,10 +323,23 @@ export const RetroApp = () => {
       return;
     }
 
+    // Open dialog for adding new item
+    setAddItemDialog({
+      isOpen: true,
+      retroId,
+      type: itemType
+    });
+  };
+
+  const handleSubmitNewItem = async (text: string, tags: string[]) => {
+    const { retroId, type } = addItemDialog;
+    const retro = retros.find(r => r.id === retroId);
+    if (!retro) return;
+
     const newItem: RBTItem = {
-      id: `${itemType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      text: '',
-      tags: [],
+      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      text,
+      tags,
       comments: [],
       ownerName: currentUserName,
       photos: []
@@ -328,12 +347,24 @@ export const RetroApp = () => {
 
     const updatedRetro = {
       ...retro,
-      [itemType]: [...retro[itemType], newItem],
+      [type]: [...retro[type], newItem],
     };
 
-    await updateRetro(retroId, updatedRetro);
-    // Refresh to see the new item
-    await refreshRetros();
+    try {
+      await updateRetro(retroId, updatedRetro);
+      toast({
+        title: 'Success',
+        description: `${type === 'roses' ? 'Rose' : type === 'buds' ? 'Bud' : 'Thorn'} added successfully!`,
+      });
+      // Refresh to see the new item
+      await refreshRetros();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add item. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -459,34 +490,34 @@ export const RetroApp = () => {
                           {user}
                         </button>
                       ))}
-                    {allUsers.filter(user => user.toLowerCase().includes(searchUser.toLowerCase())).length === 0 && (
-                      <p className="px-4 py-2 text-muted-foreground">No users found.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <div className="flex">
-                  <Input
-                    placeholder="City, State..."
-                    className="pl-10 rounded-r-none"
-                    value={locationSearch}
-                    onChange={(e) => setLocationSearch(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
-                  />
-                  <Button
-                    onClick={handleLocationSearch}
-                    className="rounded-l-none px-3"
-                    variant="outline"
-                  >
-                    <Search className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                     {allUsers.filter(user => user.toLowerCase().includes(searchUser.toLowerCase())).length === 0 && (
+                       <p className="px-4 py-2 text-muted-foreground">No users found.</p>
+                     )}
+                   </div>
+                 )}
+               </div>
+               <div className="relative">
+                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                 <div className="flex">
+                   <Input
+                     placeholder="City, State..."
+                     className="pl-10 rounded-r-none"
+                     value={locationSearch}
+                     onChange={(e) => setLocationSearch(e.target.value)}
+                     onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
+                   />
+                   <Button
+                     onClick={handleLocationSearch}
+                     className="rounded-l-none px-3"
+                     variant="outline"
+                   >
+                     <Search className="w-4 h-4" />
+                   </Button>
+                 </div>
+               </div>
+             </div>
+           </CardContent>
+         </Card>
 
         {showUserRetros && selectedUser && (
           <Card className="shadow-elegant">
@@ -574,6 +605,14 @@ export const RetroApp = () => {
           onCancel={() => setShowConfirmModal(false)}
         />
         )}
+
+        {/* Add RBT Item Dialog */}
+        <AddRBTDialog
+          isOpen={addItemDialog.isOpen}
+          onClose={() => setAddItemDialog({ isOpen: false, retroId: '', type: 'roses' })}
+          onSubmit={handleSubmitNewItem}
+          type={addItemDialog.type}
+        />
     </>
   );
 };
