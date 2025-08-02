@@ -63,11 +63,22 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
   };
 
   const addComment = () => {
-    if (!user || !profile || readonly || !onUpdatePhoto) return;
+    console.log('PhotoModal: addComment called');
+    console.log('PhotoModal: user:', user, 'profile:', profile, 'readonly:', readonly, 'onUpdatePhoto:', !!onUpdatePhoto);
+    
+    if (!user || !profile || readonly || !onUpdatePhoto) {
+      console.log('PhotoModal: addComment early return - missing requirements');
+      return;
+    }
 
     const commentText = commentInput.trim();
-    if (!commentText) return;
+    console.log('PhotoModal: commentText:', commentText);
+    if (!commentText) {
+      console.log('PhotoModal: addComment early return - no comment text');
+      return;
+    }
 
+    console.log('PhotoModal: Creating new comment for photo:', photo.id);
     const newComment: PhotoComment = {
       id: crypto.randomUUID(),
       user_id: user.id,
@@ -76,12 +87,19 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({
       timestamp: new Date().toISOString(),
     };
 
-    onUpdatePhoto(photo.id, {
+    console.log('PhotoModal: New comment created:', newComment);
+    console.log('PhotoModal: Current photo comments:', photo.comments);
+
+    const updatedPhoto = {
       ...photo,
       comments: [...photo.comments, newComment],
-    });
+    };
 
+    console.log('PhotoModal: Updated photo with new comment:', updatedPhoto);
+    
+    onUpdatePhoto(photo.id, updatedPhoto);
     setCommentInput('');
+    console.log('PhotoModal: Comment added and input cleared');
   };
 
   const userHasReacted = (): boolean => {
