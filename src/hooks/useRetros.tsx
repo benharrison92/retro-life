@@ -78,7 +78,7 @@ export const useRetros = () => {
         .select(`
           *,
           feedback_spaces(title),
-          user_profiles!retrospectives_user_id_fkey(display_name)
+          user_profiles!user_id(display_name)
         `)
         .order('date', { ascending: false });
 
