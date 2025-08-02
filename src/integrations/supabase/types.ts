@@ -417,6 +417,7 @@ export type Database = {
           event_type: string
           feedback_space_id: string | null
           id: string
+          is_private: boolean
           latitude: number | null
           location_name: string | null
           longitude: number | null
@@ -439,6 +440,7 @@ export type Database = {
           event_type: string
           feedback_space_id?: string | null
           id?: string
+          is_private?: boolean
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
@@ -461,6 +463,7 @@ export type Database = {
           event_type?: string
           feedback_space_id?: string | null
           id?: string
+          is_private?: boolean
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
