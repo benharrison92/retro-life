@@ -198,11 +198,43 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [locationName, setLocationName] = useState(retro?.locationName || '');
   const [city, setCity] = useState(retro?.city || '');
   const [state, setState] = useState(retro?.state || '');
-  const [roses, setRoses] = useState<RBTItem[]>(retro?.roses || [{ id: 'roses-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
-  const [buds, setBuds] = useState<RBTItem[]>(retro?.buds || [{ id: 'buds-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
-  const [thorns, setThorns] = useState<RBTItem[]>(retro?.thorns || [{ id: 'thorns-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }]);
+  const [roses, setRoses] = useState<RBTItem[]>(() => {
+    if (retro?.roses) {
+      return retro.roses.map(item => ({
+        ...item,
+        ownerName: item.ownerName || currentUserName,
+        photos: item.photos || []
+      }));
+    }
+    return [{ id: 'roses-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }];
+  });
+  const [buds, setBuds] = useState<RBTItem[]>(() => {
+    if (retro?.buds) {
+      return retro.buds.map(item => ({
+        ...item,
+        ownerName: item.ownerName || currentUserName,
+        photos: item.photos || []
+      }));
+    }
+    return [{ id: 'buds-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }];
+  });
+  const [thorns, setThorns] = useState<RBTItem[]>(() => {
+    if (retro?.thorns) {
+      return retro.thorns.map(item => ({
+        ...item,
+        ownerName: item.ownerName || currentUserName,
+        photos: item.photos || []
+      }));
+    }
+    return [{ id: 'thorns-initial', text: '', tags: [], comments: [], ownerName: currentUserName, photos: [] }];
+  });
   const [photos, setPhotos] = useState<RetroPhoto[]>([]);
-  const [primaryPhotoUrl, setPrimaryPhotoUrl] = useState<string>(retro?.primaryPhotoUrl || '');
+  const [primaryPhotoUrl, setPrimaryPhotoUrl] = useState<string>(() => {
+    if (retro?.primaryPhotoUrl && typeof retro.primaryPhotoUrl === 'string') {
+      return retro.primaryPhotoUrl;
+    }
+    return '';
+  });
 
   // Load existing attendee users when editing
   React.useEffect(() => {
