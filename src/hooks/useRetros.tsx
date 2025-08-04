@@ -160,12 +160,12 @@ export const useRetros = () => {
   // Manage retro attendees
   const addAttendees = async (retroId: string, attendeeUsers: UserProfile[]) => {
     if (!user) {
-      console.error('addAttendees: No authenticated user');
+      console.error('🚨 addAttendees: No authenticated user');
       return;
     }
 
     try {
-      console.log('addAttendees: Starting to add attendees to retro', retroId, attendeeUsers);
+      console.log('🚀 addAttendees: Starting to add attendees to retro', retroId, attendeeUsers);
       
       // Check if user has permission to add attendees to this retro
       const { data: retroData, error: retroError } = await supabase
@@ -175,13 +175,13 @@ export const useRetros = () => {
         .single();
 
       if (retroError) {
-        console.error('addAttendees: Error fetching retro:', retroError);
+        console.error('🚨 addAttendees: Error fetching retro:', retroError);
         throw retroError;
       }
 
-      console.log('addAttendees: Retro data:', retroData);
-      console.log('addAttendees: Current user ID:', user.id);
-      console.log('addAttendees: Retro owner ID:', retroData.user_id);
+      console.log('🚀 addAttendees: Retro data:', retroData);
+      console.log('🚀 addAttendees: Current user ID:', user.id);
+      console.log('🚀 addAttendees: Retro owner ID:', retroData.user_id);
       
       // Insert attendees into retro_attendees table
       const attendeeInserts = attendeeUsers.map(attendee => ({
@@ -189,10 +189,10 @@ export const useRetros = () => {
         user_id: attendee.id,
       }));
 
-      console.log('addAttendees: Inserting attendee data:', attendeeInserts);
+      console.log('🚀 addAttendees: Inserting attendee data:', attendeeInserts);
 
       for (const attendeeInsert of attendeeInserts) {
-        console.log('addAttendees: Inserting individual attendee:', attendeeInsert);
+        console.log('🚀 addAttendees: Inserting individual attendee:', attendeeInsert);
         
         const { data: insertResult, error: insertError } = await supabase
           .from('retro_attendees')
@@ -200,8 +200,13 @@ export const useRetros = () => {
           .select();
 
         if (insertError) {
-          console.error('addAttendees: Error inserting attendee:', insertError);
-          console.error('addAttendees: Failed attendee data:', attendeeInsert);
+          console.error('🚨 addAttendees: Error inserting attendee:', insertError);
+          console.error('🚨 addAttendees: Failed attendee data:', attendeeInsert);
+          
+          // Log the specific error for debugging
+          if (insertError.code === '23505') {
+            console.log('ℹ️ addAttendees: Duplicate attendee detected (user already added)');
+          }
           
           // Continue with other attendees but log the error
           toast({
@@ -210,17 +215,36 @@ export const useRetros = () => {
             variant: "destructive",
           });
         } else {
-          console.log('addAttendees: Successfully inserted attendee:', insertResult);
+          console.log('✅ addAttendees: Successfully inserted attendee:', insertResult);
         }
       }
 
-      console.log('addAttendees: Finished processing all attendees');
+      console.log('✅ addAttendees: Finished processing all attendees');
+      
+      // Verify what was actually saved to the database
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('retro_attendees')
+        .select(`
+          user_id,
+          user_profiles!inner (
+            id,
+            display_name,
+            email
+          )
+        `)
+        .eq('retro_id', retroId);
+        
+      console.log('🔍 addAttendees: VERIFICATION - Final attendees in DB:', verifyData);
+      if (verifyError) {
+        console.error('🚨 addAttendees: Verification error:', verifyError);
+      }
+      
       toast({
         title: "Success",
         description: "Attendees processed",
       });
     } catch (error) {
-      console.error('Error adding attendees:', error);
+      console.error('🚨 Error adding attendees:', error);
       toast({
         title: "Error",
         description: "Failed to add attendees",
