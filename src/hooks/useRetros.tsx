@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, Retrospective, RBTItem } from '@/lib/supabase';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
@@ -66,7 +66,7 @@ export const useRetros = () => {
   });
 
   // Fetch retros (own + friends') with attendee users
-  const fetchRetros = async () => {
+  const fetchRetros = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -155,7 +155,7 @@ export const useRetros = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // Manage retro attendees
   const addAttendees = async (retroId: string, attendeeUsers: UserProfile[]) => {
@@ -515,6 +515,35 @@ export const useRetros = () => {
   useEffect(() => {
     fetchRetros();
   }, [user]);
+
+  // Set up real-time listener for retro_attendees changes
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('🔄 Setting up real-time listener for retro_attendees');
+    
+    const channel = supabase
+      .channel('retro_attendees_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'retro_attendees'
+        },
+        (payload) => {
+          console.log('🔄 Real-time retro_attendees change:', payload);
+          // Refresh retros to get updated attendee data
+          fetchRetros();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔄 Cleaning up real-time listener');
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchRetros]);
 
   // Function to update local state immediately for optimistic updates
   const updateLocalRetro = (retroId: string, updatedRetro: Retrospective) => {
