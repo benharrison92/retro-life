@@ -43,6 +43,11 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
         setOpen(false); // Close dialog
         navigate('/catalogues');
         break;
+      case 'friend_request':
+        setOpen(false); // Close dialog
+        // Navigate to friends section where they can accept/decline
+        navigate('/?friends=true');
+        break;
       default:
         // For other notification types, just mark as read
         break;
@@ -65,7 +70,7 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
   };
 
   const isClickableNotification = (type: string) => {
-    return ['retro_tagged', 'catalogue_invitation'].includes(type);
+    return ['retro_tagged', 'catalogue_invitation', 'friend_request'].includes(type);
   };
 
   const NotificationItem = ({ notification }: { notification: Notification }) => {

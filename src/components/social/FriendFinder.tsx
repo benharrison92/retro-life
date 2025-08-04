@@ -21,6 +21,7 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
   const [loading, setLoading] = useState(false);
   const [friends, setFriends] = useState<string[]>([]);
   const [pendingRequests, setPendingRequests] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   
   const { user } = useAuth();
   const { toast } = useToast();
@@ -50,19 +51,24 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
     }
   };
 
-  const searchUsers = async () => {
-    if (!searchQuery.trim() || !user) return;
+  const searchUsers = async (query: string) => {
+    if (!query.trim() || !user) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
 
     setLoading(true);
     try {
       const { data } = await supabase
         .from('user_profiles')
         .select('*')
-        .or(`display_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+        .or(`display_name.ilike.%${query}%,email.ilike.%${query}%`)
         .neq('id', user.id)
         .limit(10);
 
       setSearchResults(data || []);
+      setShowDropdown(true);
     } catch (error) {
       console.error('Error searching users:', error);
       toast({
@@ -74,6 +80,20 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
       setLoading(false);
     }
   };
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery) {
+        searchUsers(searchQuery);
+      } else {
+        setSearchResults([]);
+        setShowDropdown(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, user]);
 
   const sendFriendRequest = async (friendId: string) => {
     if (!user) return;
@@ -154,56 +174,72 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
               <CardTitle className="text-lg">Search Users</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
+              <div className="relative">
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder="Start typing name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && searchUsers()}
+                  onFocus={() => searchQuery && setShowDropdown(true)}
+                  className="pr-10"
                 />
-                <Button onClick={searchUsers} disabled={loading}>
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="space-y-3">
-                  {searchResults.map((user) => {
-                    const status = getUserStatus(user.id);
-                    return (
-                      <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={user.avatar_url} />
-                            <AvatarFallback>
-                              {user.display_name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{user.display_name}</p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                
+                {showDropdown && searchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {searchResults.map((user) => {
+                      const status = getUserStatus(user.id);
+                      return (
+                        <div key={user.id} className="flex items-center justify-between p-3 hover:bg-accent border-b last:border-b-0">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {user.display_name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{user.display_name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            </div>
                           </div>
+                          <Button
+                            size="sm"
+                            variant={status === 'friend' ? 'secondary' : status === 'pending' ? 'outline' : 'default'}
+                            disabled={status !== 'none'}
+                            onClick={() => {
+                              sendFriendRequest(user.id);
+                              setShowDropdown(false);
+                              setSearchQuery('');
+                            }}
+                            className="ml-2 h-8 px-2 text-xs"
+                          >
+                            {status === 'friend' && 'Friends'}
+                            {status === 'pending' && 'Sent'}
+                            {status === 'none' && (
+                              <>
+                                <UserPlus className="h-3 w-3 mr-1" />
+                                Add
+                              </>
+                            )}
+                          </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant={status === 'friend' ? 'secondary' : status === 'pending' ? 'outline' : 'default'}
-                          disabled={status !== 'none'}
-                          onClick={() => sendFriendRequest(user.id)}
-                        >
-                          {status === 'friend' && 'Friends'}
-                          {status === 'pending' && 'Request Sent'}
-                          {status === 'none' && (
-                            <>
-                              <UserPlus className="h-4 w-4 mr-2" />
-                              Add Friend
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+                
+                {loading && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg p-3">
+                    <p className="text-sm text-muted-foreground text-center">Searching...</p>
+                  </div>
+                )}
+                
+                {searchQuery && !loading && searchResults.length === 0 && showDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg p-3">
+                    <p className="text-sm text-muted-foreground text-center">No users found</p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
