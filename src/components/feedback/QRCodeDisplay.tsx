@@ -29,7 +29,13 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (open && canvasRef.current && url) {
+    // Add a small delay to ensure the canvas is rendered in the DOM
+    const generateQR = () => {
+      if (!open || !url || !canvasRef.current) {
+        console.log('QR code generation skipped:', { open, hasCanvas: !!canvasRef.current, url });
+        return;
+      }
+
       console.log('Generating QR code for URL:', url);
       QRCode.toCanvas(canvasRef.current, url, {
         width: 256,
@@ -46,8 +52,13 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
           console.log('QR code generated successfully');
         }
       });
-    } else {
-      console.log('QR code generation skipped:', { open, hasCanvas: !!canvasRef.current, url });
+    };
+
+    if (open && url) {
+      // Use requestAnimationFrame to ensure the canvas is rendered
+      requestAnimationFrame(() => {
+        setTimeout(generateQR, 10);
+      });
     }
   }, [open, url]);
 
