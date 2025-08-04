@@ -172,9 +172,9 @@ export const RetroApp = () => {
   };
 
   const handleEditRetro = async (retro: Retro) => {
-    console.log('=== EDIT RETRO STARTED ===');
-    console.log('handleEditRetro: Starting edit for retro:', retro);
-    console.log('handleEditRetro: Original retro object:', retro);
+    console.log('🎯 EDIT BUTTON CLICKED! Retro:', retro.title);
+    console.log('🎯 handleEditRetro: Starting edit for retro:', retro);
+    console.log('🎯 handleEditRetro: Original retro object:', retro);
     
     // Refresh retros first to get latest attendeeUsers data
     console.log('handleEditRetro: Refreshing retros to get latest data...');
@@ -223,6 +223,10 @@ export const RetroApp = () => {
     state?: string;
     isPrivate?: boolean;
   }, attendeeUsers?: UserProfile[]) => {
+    console.log('💾 SAVE BUTTON CLICKED! Title:', legacyRetroData.title);
+    console.log('💾 handleSaveRetro: Legacy retro data:', legacyRetroData);
+    console.log('💾 handleSaveRetro: Attendee users:', attendeeUsers);
+    
     // Convert legacy data to database format
     const retroData: Omit<Retrospective, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
       title: legacyRetroData.title,
