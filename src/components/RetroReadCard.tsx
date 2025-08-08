@@ -1,10 +1,12 @@
 import React from 'react';
 
-// Placeholder component — implement UI/logic later
-export type RetroReadCardProps = {
-  // TODO: define props (e.g., title, date, location, items, onOpen, etc.)
-};
-
-export default function RetroReadCard(_props: RetroReadCardProps) {
-  return null;
+export default function RetroReadCard() {
+  return (
+    <section className="min-h-[50vh] w-full bg-background text-foreground flex items-center justify-center border border-dashed border-border rounded-lg">
+      <div className="text-center space-y-2 p-8">
+        <h1 className="text-2xl font-semibold tracking-tight">RetroReadCard</h1>
+        <p className="text-muted-foreground">Blank component. Add your content here.</p>
+      </div>
+    </section>
+  );
 }
