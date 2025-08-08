@@ -66,6 +66,7 @@ export const RetroApp = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [locationResults, setLocationResults] = useState<Retrospective[]>([]);
+  const [showQuick, setShowQuick] = useState(false);
   const [addItemDialog, setAddItemDialog] = useState<{
     isOpen: boolean;
     retroId: string;
@@ -491,6 +492,7 @@ export const RetroApp = () => {
     return (
       <>
         <AppHeader />
+
         <div className="min-h-screen bg-background p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             <RetroDetailView
@@ -568,6 +570,14 @@ export const RetroApp = () => {
                 <Plus className="w-5 h-5 mr-2" />
                 Create New Retro
               </Button>
+                <Button
+  variant="outline"
+  onClick={() => setShowQuick(true)}
+  className="w-full sm:w-auto px-6 py-3 mb-4"
+  size="lg"
+>
+  Quick RBT
+</Button>
 
               <div className="flex items-center gap-4">
                 <NotificationHub className="w-full sm:w-auto" />
@@ -768,6 +778,39 @@ export const RetroApp = () => {
           onSubmit={handleSubmitNewItem}
           type={addItemDialog.type}
         />
+      {/* Quick RBT Composer */}
+<QuickRBTComposer
+  open={showQuick}
+  onClose={() => setShowQuick(false)}
+  onSave={async (p) => {
+    // Build a retro shaped like the rest of your app:
+    const now = new Date().toISOString().slice(0,10);
+    const mkItem = (text: string) => ({ id: cryptoRandomId(), text, tags: p.tags, comments: [] as any[] });
+    const newRetro: any = {
+      title: p.title,
+      event_type: 'trip',
+      date: now,
+      attendees: [],
+      roses: p.roses.map(mkItem),
+      buds: p.buds.map(mkItem),
+      thorns: p.thorns.map(mkItem),
+      photos: [],
+      primaryPhotoUrl: undefined,
+      location_name: p.locationName,
+      is_private: false,
+    };
+    try {
+      // These should already exist in your file:
+      await createRetro(newRetro, []);   // creates the retro
+      await refreshRetros();             // reloads the list
+      setShowQuick(false);
+    } catch (e) {
+      console.error(e);
+      alert('Could not save. Please try again.');
+    }
+  }}
+/>
+
     </>
   );
 };
