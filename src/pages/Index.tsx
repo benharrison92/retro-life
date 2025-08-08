@@ -25,6 +25,9 @@ const Index = () => {
 
   const handleOpen = (postId: string) => {
     navigate(`/?retro=${postId}`);
+    setTimeout(() => {
+      document.getElementById('retro-root')?.scrollIntoView({ behavior: 'smooth' });
+    }, 0);
   };
 
   const handleShare = (postId: string) => {
@@ -68,7 +71,7 @@ const Index = () => {
   console.log('Index: Rendering RetroApp for user', user.id);
   return (
     <>
-      <RetroApp />
+      <div id="retro-root"><RetroApp /></div>
       <section className="container py-8">
         <h2 className="mb-4 text-2xl font-semibold text-foreground">Featured trips</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
