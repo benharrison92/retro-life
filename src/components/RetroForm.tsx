@@ -62,6 +62,26 @@ const RBTSection = React.memo(({
   currentUserName: string;
 }) => {
   console.log(`RBTSection ${type} rendering with ${items.length} items`);
+  const theme = ({
+    roses: {
+      itemBg: 'bg-positive-muted',
+      border: 'border-positive/30',
+      glow: 'hover:shadow-glow-positive',
+      chipText: 'text-positive',
+    },
+    buds: {
+      itemBg: 'bg-opportunity-muted',
+      border: 'border-opportunity/30',
+      glow: 'hover:shadow-glow-opportunity',
+      chipText: 'text-opportunity',
+    },
+    thorns: {
+      itemBg: 'bg-negative-muted',
+      border: 'border-negative/30',
+      glow: 'hover:shadow-glow-negative',
+      chipText: 'text-negative',
+    }
+  } as const)[type];
   return (
     <Card className="shadow-md">
       <CardHeader className={`${colorClass} text-white rounded-t-lg`}>
@@ -74,113 +94,120 @@ const RBTSection = React.memo(({
       </CardHeader>
       <CardContent className="p-4 space-y-4">
         {items.map((item, index) => (
-          <Card key={item.id} className="border-2">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-muted-foreground">
+          <div
+            key={item.id}
+            className={`rounded-lg border ${theme.border} ${theme.itemBg} ${theme.glow} hover-scale animate-fade-in transition-[transform,box-shadow] p-4 space-y-3`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className={`text-lg ${theme.chipText}`}>
+                  {type === 'roses' ? '🌹' : type === 'buds' ? '🌱' : '🌿'}
+                </span>
+                <span className="text-xs font-medium text-muted-foreground">
                   Created by: {item.ownerName || currentUserName}
                 </span>
               </div>
-              <Textarea
-                placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
-                value={item.text}
-                onChange={(e) => updateRBTItem(type, index, 'text', e.target.value)}
-                className="min-h-[80px] resize-none"
+            </div>
+
+            <Textarea
+              placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
+              value={item.text}
+              onChange={(e) => updateRBTItem(type, index, 'text', e.target.value)}
+              className="min-h-[80px] resize-none bg-card"
+            />
+            
+            {/* Photos for this item */}
+            <PhotoUpload
+              photos={item.photos || []}
+              onPhotosChange={(photos) => updateRBTItem(type, index, 'photos', photos)}
+              maxPhotos={2}
+            />
+            
+            <div>
+              <Label className="text-sm font-medium">Tags (comma-separated)</Label>
+              <Input
+                placeholder="e.g., beach, kids, fun"
+                value={item.tags?.join(', ') || ''}
+                onChange={(e) => updateRBTItem(type, index, 'tags', e.target.value.split(',').map(tag => tag.trim()))}
+                className="mt-1"
               />
-              
-              {/* Photos for this item */}
-              <PhotoUpload
-                photos={item.photos || []}
-                onPhotosChange={(photos) => updateRBTItem(type, index, 'photos', photos)}
-                maxPhotos={2}
-              />
-              
-              <div>
-                <Label className="text-sm font-medium">Tags (comma-separated)</Label>
-                <Input
-                  placeholder="e.g., beach, kids, fun"
-                  value={item.tags?.join(', ') || ''}
-                  onChange={(e) => updateRBTItem(type, index, 'tags', e.target.value.split(',').map(tag => tag.trim()))}
-                  className="mt-1"
-                />
-                {item.tags && item.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {item.tags.map((tag, tagIndex) => (
-                      <Badge key={tagIndex} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Comments Section */}
-              <div className="border-t pt-3">
-                <Label className="text-sm font-medium flex items-center gap-1">
-                  <MessageCircle className="w-4 h-4" />
-                  Comments ({item.comments?.length || 0})
-                </Label>
-                
-                {item.comments && item.comments.length > 0 && (
-                  <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
-                    {item.comments.map((comment) => (
-                      <div key={comment.id} className="bg-muted p-2 rounded text-sm">
-                        <div className="font-semibold text-foreground">
-                          {comment.authorName}
-                          <span className="text-muted-foreground text-xs ml-2">
-                            ({new Date(comment.timestamp).toLocaleDateString()})
-                          </span>
-                        </div>
-                        <p className="text-muted-foreground mt-1">{comment.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    placeholder="Add a comment..."
-                    className="flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        const target = e.target as HTMLInputElement;
-                        addComment(type, index, target.value);
-                        target.value = '';
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={(e) => {
-                      const input = (e.target as HTMLElement).parentElement?.querySelector('input') as HTMLInputElement;
-                      if (input?.value) {
-                        addComment(type, index, input.value);
-                        input.value = '';
-                      }
-                    }}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {items.length > 1 && (
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={() => removeRBTItem(type, index)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Remove
-                  </Button>
+              {item.tags && item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {item.tags.map((tag, tagIndex) => (
+                    <Badge key={tagIndex} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Comments Section */}
+            <div className="border-t pt-3">
+              <Label className="text-sm font-medium flex items-center gap-1">
+                <MessageCircle className="w-4 h-4" />
+                Comments ({item.comments?.length || 0})
+              </Label>
+              
+              {item.comments && item.comments.length > 0 && (
+                <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
+                  {item.comments.map((comment) => (
+                    <div key={comment.id} className="bg-muted p-2 rounded text-sm">
+                      <div className="font-semibold text-foreground">
+                        {comment.authorName}
+                        <span className="text-muted-foreground text-xs ml-2">
+                          ({new Date(comment.timestamp).toLocaleDateString()})
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground mt-1">{comment.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 mt-2">
+                <Input
+                  placeholder="Add a comment..."
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      const target = e.target as HTMLInputElement;
+                      addComment(type, index, target.value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={(e) => {
+                    const input = (e.target as HTMLElement).parentElement?.querySelector('input') as HTMLInputElement;
+                    if (input?.value) {
+                      addComment(type, index, input.value);
+                      input.value = '';
+                    }
+                  }}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {items.length > 1 && (
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => removeRBTItem(type, index)}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+            )}
+          </div>
         ))}
         
         <Button

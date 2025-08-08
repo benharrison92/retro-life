@@ -131,3 +131,20 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Animation and interaction utilities for R/B/T UI */
+@layer utilities {
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-fade-in { 
+    animation: fade-in 0.25s ease-out both;
+  }
+  .hover-scale {
+    @apply transition-transform duration-200;
+  }
+  .hover-scale:hover { 
+    transform: translateY(-2px) scale(1.02);
+  }
+}

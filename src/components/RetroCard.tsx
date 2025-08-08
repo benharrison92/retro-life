@@ -126,9 +126,14 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     const isExpanded = expandedItems[item.id];
     const hasComments = item.comments && item.comments.length > 0;
     const hasPhotos = item.photos && item.photos.length > 0;
+    const shadowClass = type === 'roses' 
+      ? 'hover:shadow-glow-positive' 
+      : type === 'buds' 
+        ? 'hover:shadow-glow-opportunity' 
+        : 'hover:shadow-glow-negative';
 
     return (
-      <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200`}>
+      <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale`}>
         {/* Creator info */}
         <div className="flex justify-between items-start mb-2">
           <p className="text-sm flex-1">{item.text}</p>
