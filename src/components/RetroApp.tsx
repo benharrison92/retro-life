@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Retrospective, RBTItem, Comment, UserProfile, RetroPhoto } from "@/lib/supabase";
 import { AddRBTDialog } from "./AddRBTDialog";
 import { useSearchParams } from "react-router-dom";
+import ReminderPrompt from './ReminderPrompt';
 import QuickRBTComposer from './QuickRBTComposer';
 
 function cryptoRandomId(){ try{ return crypto.randomUUID(); } catch{ return Math.random().toString(36).slice(2); } }
@@ -66,6 +67,8 @@ export const RetroApp = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [locationResults, setLocationResults] = useState<Retrospective[]>([]);
+  const [showReminder, setShowReminder] = useState(false);
+  const [lastRetroTitle, setLastRetroTitle] = useState('');
   const [showQuick, setShowQuick] = useState(false);
   const [addItemDialog, setAddItemDialog] = useState<{
     isOpen: boolean;
@@ -807,9 +810,19 @@ export const RetroApp = () => {
     } catch (e) {
       console.error(e);
       alert('Could not save. Please try again.');
+      setLastRetroTitle(p.title);
+setShowReminder(true);
+
     }
   }}
+<ReminderPrompt
+  open={showReminder}
+  onClose={() => setShowReminder(false)}
+  defaultMessage={`Plan for next ${lastRetroTitle}`}
+  tags={[]}
 />
+
+  />
 
     </>
   );
