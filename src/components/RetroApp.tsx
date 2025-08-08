@@ -17,6 +17,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Retrospective, RBTItem, Comment, UserProfile, RetroPhoto } from "@/lib/supabase";
 import { AddRBTDialog } from "./AddRBTDialog";
 import { useSearchParams } from "react-router-dom";
+import QuickRBTComposer from './QuickRBTComposer';
+
+function cryptoRandomId(){ try{ return crypto.randomUUID(); } catch{ return Math.random().toString(36).slice(2); } }
+
 
 // Legacy type for compatibility with existing components
 export interface Retro {
