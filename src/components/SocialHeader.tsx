@@ -122,6 +122,14 @@ export function SocialHeader() {
         Feedback Spaces
       </Button>
 
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate('/retro-read')}
+      >
+        Retro Read
+      </Button>
+
       {/* User dropdown menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
