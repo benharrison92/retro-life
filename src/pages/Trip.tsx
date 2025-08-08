@@ -4,7 +4,7 @@ import { useRetros } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
 import TripDetail from '@/components/TripDetail';
 import { RetroCard } from '@/components/RetroCard';
-
+import { AppHeader } from '@/components/AppHeader';
 const Trip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -51,6 +51,16 @@ const Trip = () => {
       await navigator.clipboard.writeText(shareUrl);
     } catch {
       try { await navigator.clipboard.writeText(shareUrl); } catch {}
+    }
+  };
+
+  const handleBack = () => {
+    try {
+      const idx = (window.history.state && (window.history.state as any).idx) ?? 0;
+      if (idx > 0 || window.history.length > 1) navigate(-1);
+      else navigate('/');
+    } catch {
+      navigate('/');
     }
   };
 
@@ -109,8 +119,10 @@ const Trip = () => {
   } as any;
 
   return (
-    <div className="container py-6 space-y-6">
-      <TripDetail
+    <>
+      <AppHeader />
+      <div className="container py-6 space-y-6">
+        <TripDetail
         id={retro.id}
         title={retro.title}
         cover={{ url: coverUrl, alt: retro.title }}
@@ -121,7 +133,7 @@ const Trip = () => {
         location={location.name ? location : undefined}
         itinerary={[]}
         stats={{ likes: 0, comments: 0, hasLiked: false }}
-        onBack={() => navigate(-1)}
+        onBack={handleBack}
         onLikeToggle={() => {}}
         onShare={(rid) => handleShare(rid)}
       />
@@ -140,6 +152,7 @@ const Trip = () => {
         />
       </section>
     </div>
+    </>
   );
 };
 
