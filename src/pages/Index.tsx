@@ -3,54 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { RetroApp } from "@/components/RetroApp";
 import PostCard from "@/components/PostCard";
+import { useRetros } from '@/hooks/useRetros';
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const samplePosts = [
-    {
-      id: 'p1',
-      title: 'Sunrise over Big Sur',
-      excerpt: 'Cliffside drive, fog lifting, coffee in hand.',
-      images: [{ url: '/placeholder.svg', alt: 'Big Sur sunrise' }],
-      author: { id: 'u1', name: 'Ava Carter', avatarUrl: null },
-      createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-      location: { name: 'Big Sur, CA' },
-      likeCount: 128,
-      commentCount: 14,
-      bookmarked: false,
-      hasLiked: false,
-    },
-    {
-      id: 'p2',
-      title: 'Kyoto in blossom',
-      excerpt: 'Early morning at Fushimi Inari.',
-      images: [{ url: '/placeholder.svg', alt: 'Kyoto torii gates' }],
-      author: { id: 'u2', name: 'Kenji Sato', avatarUrl: null },
-      createdAt: new Date(Date.now() - 26 * 3600 * 1000).toISOString(),
-      location: { name: 'Kyoto, JP' },
-      likeCount: 342,
-      commentCount: 56,
-      bookmarked: true,
-      hasLiked: true,
-    },
-    {
-      id: 'p3',
-      title: 'Icelandic waterfalls',
-      excerpt: 'Skógafoss spray and rainbows.',
-      images: [{ url: '/placeholder.svg', alt: 'Skógafoss waterfall' }],
-      author: { id: 'u3', name: 'Lara Jensen', avatarUrl: null },
-      createdAt: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
-      location: { name: 'South Coast, IS' },
-      likeCount: 901,
-      commentCount: 120,
-      bookmarked: false,
-      hasLiked: false,
-    },
-  ];
+  const { retros } = useRetros();
+  const featuredPosts = retros.slice(0, 6).map((r) => ({
+    id: r.id,
+    title: r.title,
+    excerpt: r.event_type ? `${r.event_type} — ${r.date}` : r.date,
+    images: [{ url: r.primaryPhotoUrl || '/placeholder.svg', alt: r.title }],
+    author: { id: r.user_id, name: (r as any).ownerName || 'Owner', avatarUrl: null },
+    createdAt: r.created_at,
+    location: { name: r.location_name || r.city || r.state || '' },
+    likeCount: 0,
+    commentCount: 0,
+    bookmarked: false,
+    hasLiked: false,
+  }));
 
   const handleOpen = (postId: string) => {
-    console.log('Open post', postId);
+    navigate(`/?retro=${postId}`);
   };
 
   const handleShare = (postId: string) => {
@@ -98,7 +72,7 @@ const Index = () => {
       <section className="container py-8">
         <h2 className="mb-4 text-2xl font-semibold text-foreground">Featured trips</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {samplePosts.map((p) => (
+          {featuredPosts.map((p) => (
             <PostCard
               key={p.id}
               {...p}
