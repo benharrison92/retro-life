@@ -812,12 +812,14 @@ export const RetroApp = () => {
     }
   }}
 />
-<ReminderPrompt
-  open={showReminder}
-  onClose={() => setShowReminder(false)}
-  defaultMessage={`Plan for next ${lastRetroTitle}`}
-  tags={[]}
-/>
+{showReminder && (
+  <ReminderPrompt
+    open={showReminder}
+    onClose={() => setShowReminder(false)}
+    defaultMessage={'Plan for next ' + lastRetroTitle}
+    tags={[]}
+  />
+)}
 
     </>
   );
