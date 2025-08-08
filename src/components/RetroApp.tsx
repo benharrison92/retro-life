@@ -782,11 +782,11 @@ export const RetroApp = () => {
           type={addItemDialog.type}
         />
       {/* Quick RBT Composer */}
+{/* Quick RBT Composer */}
 <QuickRBTComposer
   open={showQuick}
   onClose={() => setShowQuick(false)}
   onSave={async (p) => {
-    // Build a retro shaped like the rest of your app:
     const now = new Date().toISOString().slice(0,10);
     const mkItem = (text: string) => ({ id: cryptoRandomId(), text, tags: p.tags, comments: [] as any[] });
     const newRetro: any = {
@@ -803,26 +803,21 @@ export const RetroApp = () => {
       is_private: false,
     };
     try {
-      // These should already exist in your file:
-      await createRetro(newRetro, []);   // creates the retro
-      await refreshRetros();             // reloads the list
+      await createRetro(newRetro, []);
+      await refreshRetros();
       setShowQuick(false);
     } catch (e) {
       console.error(e);
       alert('Could not save. Please try again.');
-      setLastRetroTitle(p.title);
-setShowReminder(true);
-
     }
   }}
+/>
 <ReminderPrompt
   open={showReminder}
   onClose={() => setShowReminder(false)}
   defaultMessage={`Plan for next ${lastRetroTitle}`}
   tags={[]}
 />
-
-  />
 
     </>
   );
