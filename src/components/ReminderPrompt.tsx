@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+import { supabase } from '@/integrations/supabase/client';
 
 export default function ReminderPrompt({ open, onClose, defaultMessage, tags }: { open: boolean; onClose:()=>void; defaultMessage: string; tags?: string[] }) {
   const [message, setMessage] = useState(defaultMessage);
@@ -18,7 +13,7 @@ export default function ReminderPrompt({ open, onClose, defaultMessage, tags }: 
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from('reminders').insert({
+    await (supabase as any).from('reminders').insert({
       user_id: user.id,
       message,
       due_date: date || null,
