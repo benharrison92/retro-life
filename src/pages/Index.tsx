@@ -25,14 +25,11 @@ const Index = () => {
   }));
 
   const handleOpen = (postId: string) => {
-    navigate(`/?retro=${postId}`);
-    setTimeout(() => {
-      document.getElementById('retro-root')?.scrollIntoView({ behavior: 'smooth' });
-    }, 0);
+    navigate(`/trip/${postId}`);
   };
 
   const handleShare = async (postId: string) => {
-    const shareUrl = `${window.location.origin}/?retro=${postId}`;
+    const shareUrl = `${window.location.origin}/trip/${postId}`;
     try {
       if ((navigator as any).share) {
         await (navigator as any).share({
@@ -43,14 +40,10 @@ const Index = () => {
         return;
       }
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied to clipboard');
     } catch (e) {
       try {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard');
-      } catch {
-        toast.error('Unable to share');
-      }
+      } catch {}
     }
   };
 
