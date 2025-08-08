@@ -180,19 +180,60 @@ export default function RetroComposer({ open, onClose, onSave, preset }: RetroCo
 }
 
 function RBTSection({ label, color, items, setItems, placeholder }: { label: 'Rose'|'Bud'|'Thorn', color: 'rose'|'emerald'|'amber', items: string[], setItems: (v: string[])=>void, placeholder: string }) {
+  const [adding, setAdding] = useState(false)
+  const [draft, setDraft] = useState('')
   const colorClass = color === 'rose' ? 'text-rose-700' : color === 'emerald' ? 'text-emerald-700' : 'text-amber-700'
+
+  const handleConfirmAdd = () => {
+    const text = draft.trim()
+    if (!text) return
+    if (items.length >= MAX_ITEMS) return
+    setItems([...items, text])
+    setDraft('')
+    setAdding(false)
+  }
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h3 className={`text-sm font-semibold ${colorClass}`}>{label}</h3>
         <button
-          onClick={() => items.length < MAX_ITEMS && setItems([...items, ''])}
+          onClick={() => items.length < MAX_ITEMS && setAdding(true)}
           className="inline-flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-50"
           disabled={items.length >= MAX_ITEMS}
         >
           <Plus className="h-3.5 w-3.5"/> Add
         </button>
       </div>
+
+      {adding && (
+        <div className="mb-2 rounded-xl border border-neutral-200 bg-white p-3">
+          <label className="mb-1 block text-xs font-medium text-neutral-600">New {label}</label>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={placeholder}
+            rows={3}
+            className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900"
+          />
+          <div className="mt-2 flex items-center justify-end gap-2">
+            <button
+              onClick={() => { setAdding(false); setDraft('') }}
+              className="rounded-full px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmAdd}
+              disabled={!draft.trim()}
+              className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
+            >
+              <Plus className="h-3.5 w-3.5"/> Add {label}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2">
         {items.map((val, i) => (
           <div key={i} className="flex items-center gap-2">
