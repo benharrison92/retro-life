@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { RetroApp } from "@/components/RetroApp";
 import PostCard from "@/components/PostCard";
 import { useRetros } from '@/hooks/useRetros';
+import { toast } from 'sonner';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -30,15 +31,26 @@ const Index = () => {
     }, 0);
   };
 
-  const handleShare = (postId: string) => {
+  const handleShare = async (postId: string) => {
+    const shareUrl = `${window.location.origin}/?retro=${postId}`;
     try {
-      if (navigator.share) {
-        navigator.share({ title: 'Trip', url: window.location.href });
-      } else {
-        console.log('Share post', postId);
+      if ((navigator as any).share) {
+        await (navigator as any).share({
+          title: 'Trip retro',
+          text: 'Check out this trip retro',
+          url: shareUrl,
+        });
+        return;
       }
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied to clipboard');
     } catch (e) {
-      console.log('Share error', e);
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard');
+      } catch {
+        toast.error('Unable to share');
+      }
     }
   };
 
