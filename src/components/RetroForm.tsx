@@ -13,6 +13,7 @@ import { PhotoUpload } from "./PhotoUpload";
 import { RetroPhoto } from "@/lib/supabase";
 import { UserSelector } from "./UserSelector";
 import { UserProfile } from "@/hooks/useRetros";
+import { AddRBTDialog } from "./AddRBTDialog";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -272,7 +273,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
     }
     return '';
   });
-
+  const [addDialogForm, setAddDialogForm] = useState<{ isOpen: boolean; type: 'roses' | 'buds' | 'thorns' }>({ isOpen: false, type: 'roses' });
   // Load existing attendee users when editing
   React.useEffect(() => {
     console.log('RetroForm: Loading existing attendee users:', retro?.attendeeUsers);
@@ -292,16 +293,28 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   }, []);
 
   const addRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns') => {
-    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
-    setters[type](prevItems => [...prevItems, { 
-      id: `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, 
-      text: '', 
-      tags: [], 
+    setAddDialogForm({ isOpen: true, type });
+  }, []);
+
+  const closeAddDialog = useCallback(() => {
+    setAddDialogForm(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleFormAddSubmit = useCallback((text: string, tags: string[]) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const newItem: RBTItem = {
+      id: `${addDialogForm.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      text: trimmed,
+      tags,
       comments: [],
       ownerName: currentUserName,
       photos: []
-    }]);
-  }, [currentUserName]);
+    };
+    const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
+    setters[addDialogForm.type](prev => [...prev, newItem]);
+    setAddDialogForm(prev => ({ ...prev, isOpen: false }));
+  }, [addDialogForm.type, currentUserName]);
 
   const removeRBTItem = useCallback((type: 'roses' | 'buds' | 'thorns', index: number) => {
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
@@ -610,6 +623,14 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
                 : retro ? 'Update Retro' : 'Create Retro'}
             </Button>
           </div>
+
+          {/* Add RBT Item Dialog for form */}
+          <AddRBTDialog
+            isOpen={addDialogForm.isOpen}
+            onClose={closeAddDialog}
+            onSubmit={handleFormAddSubmit}
+            type={addDialogForm.type}
+          />
         </form>
       </div>
     </div>
