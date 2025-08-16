@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/AppHeader';
 import Map from '@/components/Map';
-import { RetroMapCard } from '@/components/RetroMapCard';
+import { RetroSidebar } from '@/components/RetroSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Globe } from 'lucide-react';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 interface RetroLocation {
   id: string;
@@ -268,6 +269,10 @@ export default function MapExplore() {
     setMapCenter([retro.latitude, retro.longitude]);
   };
 
+  const handleCloseSidebar = () => {
+    setSelectedRetro(null);
+  };
+
   const handleSaveToCollection = () => {
     if (!selectedRetro) return;
     
@@ -305,53 +310,53 @@ export default function MapExplore() {
   console.log('Map markers:', mapMarkers.length);
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      
-      <main className="container mx-auto p-4 space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
-            <Globe className="h-8 w-8" />
-            Explore Retros Around the World
-          </h1>
-          <p className="text-muted-foreground">
-            Discover retrospectives shared by our community from amazing places around the globe
-          </p>
-          {user && (
-            <p className="text-sm text-blue-600">
-              🔄 Automatically adding coordinates to your retros for better discovery...
+    <SidebarProvider>
+      <div className="min-h-screen bg-background w-full">
+        <AppHeader />
+        
+        <main className="container mx-auto p-4 space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
+              <Globe className="h-8 w-8" />
+              Explore Retros Around the World
+            </h1>
+            <p className="text-muted-foreground">
+              Discover retrospectives shared by our community from amazing places around the globe
             </p>
-          )}
-        </div>
+            {user && (
+              <p className="text-sm text-blue-600">
+                🔄 Automatically adding coordinates to your retros for better discovery...
+              </p>
+            )}
+          </div>
 
-        {/* Search and Geocoding Controls */}
-        <div className="flex gap-2 max-w-md mx-auto">
-          <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-1">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for a location to explore..."
-              className="flex-1"
-            />
-            <Button type="submit">
-              <Search className="h-4 w-4" />
-            </Button>
-          </form>
-          
-          {user && (
-            <Button 
-              variant="outline" 
-              onClick={geocodeExistingRetros}
-              disabled={isGeocoding}
-            >
-              {isGeocoding ? 'Adding...' : 'Add My Retros'}
-            </Button>
-          )}
-        </div>
+          {/* Search and Geocoding Controls */}
+          <div className="flex gap-2 max-w-md mx-auto">
+            <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-1">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for a location to explore..."
+                className="flex-1"
+              />
+              <Button type="submit">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+            
+            {user && (
+              <Button 
+                variant="outline" 
+                onClick={geocodeExistingRetros}
+                disabled={isGeocoding}
+              >
+                {isGeocoding ? 'Adding...' : 'Add My Retros'}
+              </Button>
+            )}
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map */}
-          <div className="lg:col-span-2">
+          {/* Map - Now Full Width */}
+          <div className="w-full">
             <div className="h-[600px] border rounded-lg overflow-hidden">
               {!isLoading ? (
                 <Map
@@ -381,49 +386,34 @@ export default function MapExplore() {
             </div>
           </div>
 
-          {/* Retro Details */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">
-              {selectedRetro ? 'Selected Retro' : 'Select a retro on the map'}
-            </h2>
-            
-            {selectedRetro ? (
-              <RetroMapCard
-                retro={selectedRetro}
-                onSave={handleSaveToCollection}
-                onLike={() => handleLikeRetro(selectedRetro.id)}
-                currentUser={user}
-              />
-            ) : (
-              <div className="text-center p-6 border rounded-lg bg-muted/50">
-                <Globe className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">
-                  Click on any marker on the map to view the retro details
-                </p>
-              </div>
-            )}
-
-            {/* Recent Retros List */}
-            <div className="space-y-2">
-              <h3 className="font-medium">Recent Retros</h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {retros.slice(0, 10).map(retro => (
-                  <button
-                    key={retro.id}
-                    onClick={() => handleMarkerClick(retro)}
-                    className="w-full text-left p-2 hover:bg-muted rounded-lg transition-colors"
-                  >
-                    <p className="font-medium text-sm truncate">{retro.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {retro.location_name} • {new Date(retro.date).toLocaleDateString()}
-                    </p>
-                  </button>
-                ))}
-              </div>
+          {/* Recent Retros List */}
+          <div className="max-w-2xl mx-auto space-y-2">
+            <h3 className="font-medium text-center">Recent Retros</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {retros.slice(0, 6).map(retro => (
+                <button
+                  key={retro.id}
+                  onClick={() => handleMarkerClick(retro)}
+                  className="text-left p-3 hover:bg-muted rounded-lg transition-colors border"
+                >
+                  <p className="font-medium text-sm truncate">{retro.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {retro.location_name} • {new Date(retro.date).toLocaleDateString()}
+                  </p>
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+
+        <RetroSidebar
+          selectedRetro={selectedRetro}
+          onClose={handleCloseSidebar}
+          onSave={handleSaveToCollection}
+          onLike={handleLikeRetro}
+          currentUser={user}
+        />
+      </div>
+    </SidebarProvider>
   );
 }
