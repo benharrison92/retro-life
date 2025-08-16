@@ -233,6 +233,7 @@ export default function MapExplore() {
   };
 
   const handleMarkerClick = (retro: RetroLocation) => {
+    console.log('handleMarkerClick called with:', retro);
     setSelectedRetro(retro);
     setMapCenter([retro.latitude, retro.longitude]);
   };
@@ -269,6 +270,9 @@ export default function MapExplore() {
     label: `<strong>${retro.title}</strong><br/>${retro.location_name}<br/><em>Click to view details</em>`,
     data: retro
   }));
+
+  console.log('Current retros for map:', retros.length);
+  console.log('Map markers:', mapMarkers.length);
 
   return (
     <div className="min-h-screen bg-background">

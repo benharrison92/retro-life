@@ -85,7 +85,9 @@ const Map: React.FC<MapProps> = ({
       // Add click handler for marker
       el.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (marker.data && onMarkerClick) {
+        console.log('Marker clicked:', marker);
+        if (onMarkerClick && marker.data) {
+          console.log('Calling onMarkerClick with data:', marker.data);
           onMarkerClick(marker.data);
         } else if (onLocationSelect) {
           onLocationSelect(marker.lat, marker.lng);
