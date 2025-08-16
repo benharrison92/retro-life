@@ -25,10 +25,11 @@ interface RetroMapCardProps {
   };
   onSave: () => void;
   onLike: () => void;
+  onOpenFull?: () => void;
   currentUser?: any;
 }
 
-export function RetroMapCard({ retro, onSave, onLike, currentUser }: RetroMapCardProps) {
+export function RetroMapCard({ retro, onSave, onLike, onOpenFull, currentUser }: RetroMapCardProps) {
   const roses = Array.isArray(retro.roses) ? retro.roses : [];
   const buds = Array.isArray(retro.buds) ? retro.buds : [];
   const thorns = Array.isArray(retro.thorns) ? retro.thorns : [];
@@ -107,27 +108,36 @@ export function RetroMapCard({ retro, onSave, onLike, currentUser }: RetroMapCar
         )}
       </CardContent>
 
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex flex-col gap-2">
         <Button
-          variant="outline"
+          onClick={onOpenFull}
+          className="w-full"
           size="sm"
-          onClick={onLike}
-          className="flex-1"
-          disabled={!currentUser}
         >
-          <Heart className="h-4 w-4 mr-2" />
-          Like
+          Open Full View
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onSave}
-          className="flex-1"
-          disabled={!currentUser}
-        >
-          <Bookmark className="h-4 w-4 mr-2" />
-          Save
-        </Button>
+        <div className="flex gap-2 w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onLike}
+            className="flex-1"
+            disabled={!currentUser}
+          >
+            <Heart className="h-4 w-4 mr-2" />
+            Like
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSave}
+            className="flex-1"
+            disabled={!currentUser}
+          >
+            <Bookmark className="h-4 w-4 mr-2" />
+            Save
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

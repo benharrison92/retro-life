@@ -411,6 +411,7 @@ export default function MapExplore() {
           onClose={handleCloseSidebar}
           onSave={handleSaveToCollection}
           onLike={handleLikeRetro}
+          onOpenFull={(retroId) => window.open(`/retro/${retroId}`, '_blank')}
           currentUser={user}
         />
       </div>

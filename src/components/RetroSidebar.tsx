@@ -35,6 +35,7 @@ interface RetroSidebarProps {
   onClose: () => void;
   onSave: () => void;
   onLike: (retroId: string) => void;
+  onOpenFull: (retroId: string) => void;
   currentUser: any;
 }
 
@@ -43,6 +44,7 @@ export function RetroSidebar({
   onClose, 
   onSave, 
   onLike, 
+  onOpenFull,
   currentUser 
 }: RetroSidebarProps) {
   const { open, setOpen } = useSidebar();
@@ -72,6 +74,7 @@ export function RetroSidebar({
           retro={selectedRetro}
           onSave={onSave}
           onLike={() => onLike(selectedRetro.id)}
+          onOpenFull={() => onOpenFull(selectedRetro.id)}
           currentUser={currentUser}
         />
       </SidebarContent>
