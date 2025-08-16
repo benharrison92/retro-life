@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -43,6 +43,22 @@ const Map: React.FC<MapProps> = ({
   onLocationSelect,
   className = "w-full h-96 rounded-lg"
 }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className={className}>
+        <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+          Loading map...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <MapContainer
@@ -50,6 +66,7 @@ const Map: React.FC<MapProps> = ({
         zoom={zoom}
         className="w-full h-full rounded-lg"
         style={{ height: '100%', width: '100%' }}
+        key={`${center[0]}-${center[1]}`} // Force re-render when center changes
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
