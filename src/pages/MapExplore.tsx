@@ -156,9 +156,39 @@ export default function MapExplore() {
 
   const geocodeAndUpdateRetro = async (retro: any) => {
     try {
-      const query = [retro.location_name, retro.city, retro.state, retro.country]
-        .filter(Boolean)
-        .join(', ');
+      // Build a better query by cleaning the location data
+      let query = '';
+      
+      // If location_name already contains comma-separated parts, use it as is
+      if (retro.location_name && retro.location_name.includes(',')) {
+        query = retro.location_name;
+      } else {
+        // Build query from parts, prioritizing real countries over "US"
+        const parts = [];
+        if (retro.location_name) parts.push(retro.location_name);
+        if (retro.city && retro.city !== retro.location_name) parts.push(retro.city);
+        
+        // Only add state if country is actually US
+        if (retro.state && retro.country === 'US') {
+          parts.push(retro.state);
+        }
+        
+        // Fix country field - if it contains real country names, use them
+        if (retro.country && retro.country !== 'US') {
+          parts.push(retro.country);
+        } else if (retro.country === 'US') {
+          parts.push('United States');
+        }
+        
+        query = parts.join(', ');
+      }
+
+      // Clean up common issues in the query
+      query = query
+        .replace(/,\s*US$/, ', United States') // Replace trailing "US" with "United States"
+        .replace(/,\s*United States,\s*United States/, ', United States') // Remove duplicates
+        .replace(/\s+/g, ' ') // Clean multiple spaces
+        .trim();
 
       if (!query) {
         console.log(`No query string for retro ${retro.id}`);
