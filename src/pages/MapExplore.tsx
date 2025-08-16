@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import Map from '@/components/Map';
 import { RetroSidebar } from '@/components/RetroSidebar';
@@ -34,6 +35,7 @@ interface RetroLocation {
 export default function MapExplore() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [retros, setRetros] = useState<RetroLocation[]>([]);
   const [selectedRetro, setSelectedRetro] = useState<RetroLocation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -411,7 +413,7 @@ export default function MapExplore() {
           onClose={handleCloseSidebar}
           onSave={handleSaveToCollection}
           onLike={handleLikeRetro}
-          onOpenFull={(retroId) => window.open(`/retro/${retroId}`, '_blank')}
+          onOpenFull={(retroId) => navigate(`/retro/${retroId}`)}
           currentUser={user}
         />
       </div>
