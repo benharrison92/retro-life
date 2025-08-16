@@ -15,6 +15,7 @@ import { UserSelector } from "./UserSelector";
 import { UserProfile } from "@/hooks/useRetros";
 import { AddRBTDialog } from "./AddRBTDialog";
 import LocationPicker from "./LocationPicker";
+import { JournalPromptsDialog } from "./JournalPromptsDialog";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -51,7 +52,8 @@ const RBTSection = React.memo(({
   addRBTItem,
   removeRBTItem,
   addComment,
-  currentUserName
+  currentUserName,
+  setJournalPromptsDialog
 }: { 
   type: 'roses' | 'buds' | 'thorns'; 
   items: RBTItem[]; 
@@ -62,6 +64,7 @@ const RBTSection = React.memo(({
   removeRBTItem: (type: 'roses' | 'buds' | 'thorns', index: number) => void;
   addComment: (type: 'roses' | 'buds' | 'thorns', itemIndex: number, commentText: string) => void;
   currentUserName: string;
+  setJournalPromptsDialog: React.Dispatch<React.SetStateAction<{ isOpen: boolean; type: 'roses' | 'buds' | 'thorns' }>>;
 }) => {
   console.log(`RBTSection ${type} rendering with ${items.length} items`);
   const theme = ({
@@ -111,12 +114,23 @@ const RBTSection = React.memo(({
               </div>
             </div>
 
-            <Textarea
-              placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
-              value={item.text}
-              onChange={(e) => updateRBTItem(type, index, 'text', e.target.value)}
-              className="min-h-[80px] resize-none bg-card"
-            />
+            <div className="relative">
+              <Textarea
+                placeholder={`Enter ${sectionTitle.toLowerCase()}...`}
+                value={item.text}
+                onChange={(e) => updateRBTItem(type, index, 'text', e.target.value)}
+                className="min-h-[80px] resize-none bg-card"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setJournalPromptsDialog({ isOpen: true, type })}
+                className="absolute top-2 right-2 text-xs opacity-60 hover:opacity-100"
+              >
+                💡 Prompts
+              </Button>
+            </div>
             
             {/* Photos for this item */}
             <PhotoUpload
@@ -292,6 +306,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
     return '';
   });
   const [addDialogForm, setAddDialogForm] = useState<{ isOpen: boolean; type: 'roses' | 'buds' | 'thorns' }>({ isOpen: false, type: 'roses' });
+  const [journalPromptsDialog, setJournalPromptsDialog] = useState<{ isOpen: boolean; type: 'roses' | 'buds' | 'thorns' }>({ isOpen: false, type: 'roses' });
   // Load existing attendee users when editing
   React.useEffect(() => {
     console.log('RetroForm: Loading existing attendee users:', retro?.attendeeUsers);
@@ -574,6 +589,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
               removeRBTItem={removeRBTItem}
               addComment={addComment}
               currentUserName={currentUserName}
+              setJournalPromptsDialog={setJournalPromptsDialog}
             />
             <RBTSection 
               type="buds" 
@@ -585,6 +601,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
               removeRBTItem={removeRBTItem}
               addComment={addComment}
               currentUserName={currentUserName}
+              setJournalPromptsDialog={setJournalPromptsDialog}
             />
             <RBTSection 
               type="thorns" 
@@ -596,6 +613,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
               removeRBTItem={removeRBTItem}
               addComment={addComment}
               currentUserName={currentUserName}
+              setJournalPromptsDialog={setJournalPromptsDialog}
             />
           </div>
 
@@ -664,6 +682,33 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
             onClose={closeAddDialog}
             onSubmit={handleFormAddSubmit}
             type={addDialogForm.type}
+          />
+
+          <JournalPromptsDialog
+            open={journalPromptsDialog.isOpen}
+            onClose={() => setJournalPromptsDialog(prev => ({ ...prev, isOpen: false }))}
+            type={journalPromptsDialog.type}
+            onUsePrompt={(prompt) => {
+              // Find the first empty item of the selected type and populate it
+              const items = journalPromptsDialog.type === 'roses' ? roses : 
+                           journalPromptsDialog.type === 'buds' ? buds : thorns;
+              const emptyIndex = items.findIndex(item => !item.text.trim());
+              if (emptyIndex !== -1) {
+                updateRBTItem(journalPromptsDialog.type, emptyIndex, 'text', prompt);
+              } else {
+                // Add a new item if no empty ones exist
+                const newItem: RBTItem = {
+                  id: `${journalPromptsDialog.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  text: prompt,
+                  tags: [],
+                  comments: [],
+                  ownerName: currentUserName,
+                  photos: []
+                };
+                const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
+                setters[journalPromptsDialog.type](prev => [...prev, newItem]);
+              }
+            }}
           />
         </form>
       </div>
