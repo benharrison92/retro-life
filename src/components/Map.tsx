@@ -73,25 +73,42 @@ const Map: React.FC<MapProps> = ({
     // Add markers
     markers.forEach((marker, index) => {
       const el = document.createElement('div');
-      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform';
+      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform z-10';
+      el.style.pointerEvents = 'auto';
+      
+      console.log('Creating marker for:', marker);
       
       const popup = marker.label ? new mapboxgl.Popup().setHTML(marker.label) : undefined;
       
       const markerInstance = new mapboxgl.Marker(el)
         .setLngLat([marker.lng, marker.lat])
-        .setPopup(popup)
         .addTo(map.current!);
       
-      // Add click handler for marker
+      if (popup) {
+        markerInstance.setPopup(popup);
+      }
+      
+      // Add click handler for marker with better event handling
       el.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        console.log('Marker clicked:', marker);
+        console.log('🎯 Marker clicked!', { marker, data: marker.data });
+        
         if (onMarkerClick && marker.data) {
-          console.log('Calling onMarkerClick with data:', marker.data);
+          console.log('🚀 Calling onMarkerClick with data:', marker.data);
           onMarkerClick(marker.data);
         } else if (onLocationSelect) {
+          console.log('📍 Calling onLocationSelect');
           onLocationSelect(marker.lat, marker.lng);
+        } else {
+          console.log('❌ No click handlers available');
         }
+      });
+      
+      // Also try mousedown as backup
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
       });
     });
 
