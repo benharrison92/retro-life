@@ -68,16 +68,23 @@ const Map: React.FC<MapProps> = ({
     }
 
     // Add markers
-    markers.forEach(marker => {
+    markers.forEach((marker, index) => {
       const el = document.createElement('div');
-      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg';
+      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg cursor-pointer';
       
       const popup = marker.label ? new mapboxgl.Popup().setHTML(marker.label) : undefined;
       
-      new mapboxgl.Marker(el)
+      const markerInstance = new mapboxgl.Marker(el)
         .setLngLat([marker.lng, marker.lat])
         .setPopup(popup)
         .addTo(map.current!);
+      
+      // Add click handler for marker
+      el.addEventListener('click', () => {
+        if (onLocationSelect) {
+          onLocationSelect(marker.lat, marker.lng);
+        }
+      });
     });
 
     // Cleanup

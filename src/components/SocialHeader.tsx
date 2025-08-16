@@ -24,7 +24,8 @@ import {
   MessageCircle,
   Bell,
   BookOpen,
-  QrCode
+  QrCode,
+  Globe
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -125,6 +126,15 @@ export function SocialHeader() {
       <Button
         variant="outline"
         size="sm"
+        onClick={() => navigate('/explore')}
+      >
+        <Globe className="h-4 w-4 mr-2" />
+        Explore Map
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => navigate('/retro-read')}
       >
         Retro Read
@@ -171,6 +181,10 @@ export function SocialHeader() {
           <DropdownMenuItem onClick={() => navigate('/catalogues')}>
             <BookOpen className="mr-2 h-4 w-4" />
             My Catalogues
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/explore')}>
+            <Globe className="mr-2 h-4 w-4" />
+            Explore Map
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
