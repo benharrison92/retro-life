@@ -41,6 +41,7 @@ export default function MapExplore() {
 
   useEffect(() => {
     fetchPublicRetros();
+    geocodeExistingRetros();
   }, []);
 
   const fetchPublicRetros = async () => {
@@ -67,10 +68,8 @@ export default function MapExplore() {
           user_profiles!user_id(display_name)
         `)
         .eq('is_private', false)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
         .order('date', { ascending: false })
-        .limit(100);
+        .limit(200);
 
       if (error) throw error;
       
@@ -83,7 +82,12 @@ export default function MapExplore() {
         photos: Array.isArray(retro.photos) ? retro.photos : []
       }));
       
-      setRetros(transformedData);
+      // Filter retros that have coordinates
+      const retrosWithCoords = transformedData.filter(retro => 
+        retro.latitude !== null && retro.longitude !== null
+      );
+      
+      setRetros(retrosWithCoords);
     } catch (error) {
       console.error('Error fetching retros:', error);
       toast({
@@ -93,6 +97,71 @@ export default function MapExplore() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const geocodeExistingRetros = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch user's retros without coordinates
+      const { data: userRetros, error } = await supabase
+        .from('retrospectives')
+        .select('id, location_name, city, state, country')
+        .eq('user_id', user.id)
+        .or('latitude.is.null,longitude.is.null')
+        .not('location_name', 'is', null);
+
+      if (error) throw error;
+
+      // Geocode each retro
+      for (const retro of userRetros || []) {
+        await geocodeAndUpdateRetro(retro);
+        // Add small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Refresh the map after geocoding
+      fetchPublicRetros();
+    } catch (error) {
+      console.error('Error geocoding retros:', error);
+    }
+  };
+
+  const geocodeAndUpdateRetro = async (retro: any) => {
+    try {
+      const query = [retro.location_name, retro.city, retro.state, retro.country]
+        .filter(Boolean)
+        .join(', ');
+
+      if (!query) return;
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`
+      );
+      const results = await response.json();
+
+      if (results.length > 0) {
+        const result = results[0];
+        const { error } = await supabase
+          .from('retrospectives')
+          .update({
+            latitude: parseFloat(result.lat),
+            longitude: parseFloat(result.lon),
+            city: result.address?.city || result.address?.town || result.address?.village || retro.city,
+            state: result.address?.state || retro.state,
+            country: result.address?.country || retro.country
+          })
+          .eq('id', retro.id);
+
+        if (error) {
+          console.error('Error updating retro coordinates:', error);
+        } else {
+          console.log(`Updated coordinates for ${retro.location_name}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error geocoding retro:', error);
     }
   };
 
@@ -170,6 +239,11 @@ export default function MapExplore() {
           <p className="text-muted-foreground">
             Discover retrospectives shared by our community from amazing places around the globe
           </p>
+          {user && (
+            <p className="text-sm text-blue-600">
+              🔄 Automatically adding coordinates to your retros for better discovery...
+            </p>
+          )}
         </div>
 
         {/* Search */}
