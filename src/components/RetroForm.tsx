@@ -14,6 +14,7 @@ import { RetroPhoto } from "@/lib/supabase";
 import { UserSelector } from "./UserSelector";
 import { UserProfile } from "@/hooks/useRetros";
 import { AddRBTDialog } from "./AddRBTDialog";
+import LocationPicker from "./LocationPicker";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -236,6 +237,23 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
   const [locationName, setLocationName] = useState(retro?.locationName || initialData?.locationName || '');
   const [city, setCity] = useState(retro?.city || initialData?.city || '');
   const [state, setState] = useState(retro?.state || initialData?.state || '');
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    locationName: string;
+    city?: string;
+    state?: string;
+    country?: string;
+  } | null>(
+    retro?.latitude && retro?.longitude ? {
+      latitude: retro.latitude,
+      longitude: retro.longitude,
+      locationName: retro.locationName || '',
+      city: retro.city,
+      state: retro.state,
+      country: retro.country
+    } : null
+  );
   const [roses, setRoses] = useState<RBTItem[]>(() => {
     if (retro?.roses) {
       return retro.roses.map(item => ({
@@ -468,38 +486,54 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
               <MapPin className="w-4 h-4" />
               <Label className="text-base font-semibold">Location (Optional)</Label>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="locationName">Location Name</Label>
-                <Input
-                  id="locationName"
-                  value={locationName}
-                  onChange={(e) => setLocationName(e.target.value)}
-                  placeholder="e.g., Disneyland"
-                  className="mt-1"
-                />
+            
+            <LocationPicker
+              value={selectedLocation || undefined}
+              onChange={(location) => {
+                setSelectedLocation(location);
+                setLocationName(location.locationName);
+                setCity(location.city || '');
+                setState(location.state || '');
+              }}
+              placeholder="Search for a location (e.g., Yosemite National Park)"
+            />
+            
+            {/* Manual input fields as fallback */}
+            <details className="cursor-pointer">
+              <summary className="text-sm text-muted-foreground mb-2">Enter location manually</summary>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                <div>
+                  <Label htmlFor="locationName">Location Name</Label>
+                  <Input
+                    id="locationName"
+                    value={locationName}
+                    onChange={(e) => setLocationName(e.target.value)}
+                    placeholder="e.g., Disneyland"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="e.g., Anaheim"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="e.g., CA"
+                    className="mt-1"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="e.g., Anaheim"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g., CA"
-                  className="mt-1"
-                />
-              </div>
-            </div>
+            </details>
           </div>
 
           {/* Privacy Settings */}
