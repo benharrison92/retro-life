@@ -222,7 +222,7 @@ export default function MapExplore() {
   const mapMarkers = retros.map(retro => ({
     lat: retro.latitude,
     lng: retro.longitude,
-    label: retro.title,
+    label: `<strong>${retro.title}</strong><br/>${retro.location_name}<br/><em>Click to view details</em>`,
     data: retro
   }));
 
@@ -268,8 +268,11 @@ export default function MapExplore() {
                   center={mapCenter}
                   zoom={6}
                   markers={mapMarkers}
+                  onMarkerClick={(retroData) => {
+                    handleMarkerClick(retroData);
+                  }}
                   onLocationSelect={(lat, lng) => {
-                    // Find retro at this location
+                    // Fallback for map clicks without markers
                     const nearbyRetro = retros.find(retro => 
                       Math.abs(retro.latitude - lat) < 0.01 && 
                       Math.abs(retro.longitude - lng) < 0.01

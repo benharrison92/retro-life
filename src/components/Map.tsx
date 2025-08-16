@@ -7,6 +7,7 @@ interface LocationPoint {
   lat: number;
   lng: number;
   label?: string;
+  data?: any; // Additional data that can be passed with the marker
 }
 
 interface MapProps {
@@ -14,6 +15,7 @@ interface MapProps {
   zoom?: number;
   markers?: LocationPoint[];
   onLocationSelect?: (lat: number, lng: number) => void;
+  onMarkerClick?: (data: any) => void;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ const Map: React.FC<MapProps> = ({
   zoom = 10,
   markers = [],
   onLocationSelect,
+  onMarkerClick,
   className = "w-full h-96 rounded-lg"
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -70,7 +73,7 @@ const Map: React.FC<MapProps> = ({
     // Add markers
     markers.forEach((marker, index) => {
       const el = document.createElement('div');
-      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg cursor-pointer';
+      el.className = 'w-6 h-6 bg-primary rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform';
       
       const popup = marker.label ? new mapboxgl.Popup().setHTML(marker.label) : undefined;
       
@@ -80,8 +83,11 @@ const Map: React.FC<MapProps> = ({
         .addTo(map.current!);
       
       // Add click handler for marker
-      el.addEventListener('click', () => {
-        if (onLocationSelect) {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (marker.data && onMarkerClick) {
+          onMarkerClick(marker.data);
+        } else if (onLocationSelect) {
           onLocationSelect(marker.lat, marker.lng);
         }
       });
