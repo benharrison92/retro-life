@@ -52,18 +52,35 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   }, [value]);
 
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim() && searchQuery.length > 2) {
+        searchLocation(searchQuery);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
   const searchLocation = async (query: string) => {
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
     
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&addressdetails=1&extratags=1`
       );
       const results = await response.json();
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching location:', error);
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
@@ -71,7 +88,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    searchLocation(searchQuery);
+    if (searchResults.length > 0) {
+      handleLocationSelect(searchResults[0]);
+    }
   };
 
   const handleLocationSelect = (result: NominatimResult) => {
