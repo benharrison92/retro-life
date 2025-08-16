@@ -38,6 +38,7 @@ export default function MapExplore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   useEffect(() => {
     fetchPublicRetros();
@@ -101,30 +102,55 @@ export default function MapExplore() {
   };
 
   const geocodeExistingRetros = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user logged in, skipping geocoding');
+      return;
+    }
+
+    setIsGeocoding(true);
+    console.log('Starting geocoding process...');
 
     try {
       // Fetch user's retros without coordinates
       const { data: userRetros, error } = await supabase
         .from('retrospectives')
-        .select('id, location_name, city, state, country')
+        .select('id, location_name, city, state, country, latitude, longitude')
         .eq('user_id', user.id)
         .or('latitude.is.null,longitude.is.null')
         .not('location_name', 'is', null);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching retros for geocoding:', error);
+        throw error;
+      }
+
+      console.log(`Found ${userRetros?.length || 0} retros to geocode:`, userRetros);
 
       // Geocode each retro
       for (const retro of userRetros || []) {
+        console.log(`Geocoding: ${retro.location_name}`);
         await geocodeAndUpdateRetro(retro);
         // Add small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
+      console.log('Geocoding complete, refreshing map...');
       // Refresh the map after geocoding
-      fetchPublicRetros();
+      await fetchPublicRetros();
+      
+      toast({
+        title: "Geocoding Complete",
+        description: `Updated coordinates for ${userRetros?.length || 0} retros.`,
+      });
     } catch (error) {
       console.error('Error geocoding retros:', error);
+      toast({
+        title: "Geocoding Error",
+        description: "Failed to update some retro coordinates.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeocoding(false);
     }
   };
 
@@ -134,20 +160,36 @@ export default function MapExplore() {
         .filter(Boolean)
         .join(', ');
 
-      if (!query) return;
+      if (!query) {
+        console.log(`No query string for retro ${retro.id}`);
+        return;
+      }
+
+      console.log(`Geocoding query: "${query}"`);
 
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`
       );
+      
+      if (!response.ok) {
+        throw new Error(`Geocoding API error: ${response.status}`);
+      }
+      
       const results = await response.json();
+      console.log(`Geocoding results for "${query}":`, results);
 
       if (results.length > 0) {
         const result = results[0];
+        const latitude = parseFloat(result.lat);
+        const longitude = parseFloat(result.lon);
+        
+        console.log(`Updating retro ${retro.id} with coordinates: ${latitude}, ${longitude}`);
+        
         const { error } = await supabase
           .from('retrospectives')
           .update({
-            latitude: parseFloat(result.lat),
-            longitude: parseFloat(result.lon),
+            latitude: latitude,
+            longitude: longitude,
             city: result.address?.city || result.address?.town || result.address?.village || retro.city,
             state: result.address?.state || retro.state,
             country: result.address?.country || retro.country
@@ -155,13 +197,15 @@ export default function MapExplore() {
           .eq('id', retro.id);
 
         if (error) {
-          console.error('Error updating retro coordinates:', error);
+          console.error(`Error updating retro ${retro.id}:`, error);
         } else {
-          console.log(`Updated coordinates for ${retro.location_name}`);
+          console.log(`✅ Successfully updated coordinates for ${retro.location_name}`);
         }
+      } else {
+        console.log(`No geocoding results found for "${query}"`);
       }
     } catch (error) {
-      console.error('Error geocoding retro:', error);
+      console.error(`Error geocoding retro ${retro.location_name}:`, error);
     }
   };
 
@@ -246,18 +290,30 @@ export default function MapExplore() {
           )}
         </div>
 
-        {/* Search */}
-        <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-md mx-auto">
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for a location to explore..."
-            className="flex-1"
-          />
-          <Button type="submit">
-            <Search className="h-4 w-4" />
-          </Button>
-        </form>
+        {/* Search and Geocoding Controls */}
+        <div className="flex gap-2 max-w-md mx-auto">
+          <form onSubmit={handleSearchSubmit} className="flex gap-2 flex-1">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for a location to explore..."
+              className="flex-1"
+            />
+            <Button type="submit">
+              <Search className="h-4 w-4" />
+            </Button>
+          </form>
+          
+          {user && (
+            <Button 
+              variant="outline" 
+              onClick={geocodeExistingRetros}
+              disabled={isGeocoding}
+            >
+              {isGeocoding ? 'Adding...' : 'Add My Retros'}
+            </Button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map */}
