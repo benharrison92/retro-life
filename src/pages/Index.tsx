@@ -18,10 +18,9 @@ const Index = () => {
   const [parentRetros, setParentRetros] = useState<Retrospective[]>([]);
   const [loadingParents, setLoadingParents] = useState(false);
   
-  const featuredRetros = retros.filter(r => !r.is_private).sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-  const featuredPosts = featuredRetros.slice(0, 6).map((r) => ({
+  // Only show parent retros in featured section too
+  const featuredParentRetros = parentRetros.slice(0, 6);
+  const featuredPosts = featuredParentRetros.map((r) => ({
     id: r.id,
     title: r.title,
     excerpt: r.event_type ? `${r.event_type} — ${r.date}` : r.date,
@@ -179,13 +178,13 @@ const Index = () => {
       <section className="container py-8 border-t">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold text-foreground">All Recent Trips</h2>
-          {featuredRetros.length > 6 && (
+          {parentRetros.length > 6 && (
             <Button 
               variant="outline" 
               onClick={() => navigate('/featured-trips')}
               className="flex items-center gap-2"
             >
-              View All ({featuredRetros.length})
+              View All ({parentRetros.length})
               <ArrowRight className="h-4 w-4" />
             </Button>
           )}
