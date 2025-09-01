@@ -170,6 +170,7 @@ export const useRetros = () => {
           user_profiles!user_id(display_name)
         `)
         .is('parent_id', null)
+        .eq('is_private', false)
         .order('date', { ascending: false });
 
       if (retrosError) throw retrosError;
@@ -214,7 +215,7 @@ export const useRetros = () => {
         })
       );
 
-      return parentRetrosWithAttendees.filter(r => !r.is_private);
+      return parentRetrosWithAttendees;
     } catch (error) {
       console.error('Error fetching parent retros:', error);
       return [];
