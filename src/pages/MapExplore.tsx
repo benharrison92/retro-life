@@ -413,7 +413,7 @@ export default function MapExplore() {
           onClose={handleCloseSidebar}
           onSave={handleSaveToCollection}
           onLike={handleLikeRetro}
-          onOpenFull={(retroId) => navigate(`/retro/${retroId}`)}
+          onOpenFull={(retroId) => navigate(`/trip/${retroId}`)}
           currentUser={user}
         />
       </div>
