@@ -9,7 +9,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { RetroForm } from "./RetroForm";
 import { NotificationHub } from "./NotificationHub";
 import { RetroCard } from "./RetroCard";
-import { RetroTileCard } from "./RetroTileCard";
+import PostCard from "./PostCard";
 import { RetroDetailView } from "./RetroDetailView";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { SaveAsDialog } from "./SaveAsDialog";
@@ -747,15 +747,36 @@ export const RetroApp = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {/* Retro Tiles Grid Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {retrosToDisplay.map((retro, index) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {retrosToDisplay.map((retro, index) => {
+              // Convert retro to PostCard format
+              const postData = {
+                id: retro.id,
+                title: retro.title,
+                excerpt: retro.roses[0]?.text || retro.buds[0]?.text || retro.thorns[0]?.text || 'No content yet',
+                images: retro.primaryPhotoUrl ? [{ url: retro.primaryPhotoUrl, alt: retro.title }] : [],
+                author: {
+                  id: retro.user_id,
+                  name: retro.ownerName || 'Anonymous'
+                },
+                createdAt: retro.created_at,
+                location: retro.location_name ? {
+                  name: retro.location_name || `${retro.city || ''} ${retro.state || ''}`.trim() || 'Unknown location'
+                } : undefined,
+                likeCount: 0,
+                commentCount: 0,
+                hasLiked: false,
+                bookmarked: false,
+              };
+              
+              return (
                 <div key={retro.id} className="relative">
-                  <RetroTileCard
-                    retro={retro}
-                    onClick={handleRetroTileClick}
-                    onSaveAsFeatured={handleSaveAsFeatured}
+                  <PostCard
+                    {...postData}
+                    onOpen={(id) => handleRetroTileClick(retro)}
+                    onShare={(id) => console.log('share', id)}
+                    onLikeToggle={async (id, next) => console.log('like', id, next)}
+                    onBookmarkToggle={async (id, next) => console.log('bookmark', id, next)}
                   />
                   {/* Special location indicator for search results */}
                   {showLocationSearch && index === 0 && (
@@ -764,8 +785,8 @@ export const RetroApp = () => {
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         )}
         </div>
