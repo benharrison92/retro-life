@@ -107,21 +107,7 @@ export type Database = {
             foreignKeyName: "catalogue_members_invited_by_user_id_fkey"
             columns: ["invited_by_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "catalogue_members_invited_by_user_id_fkey"
-            columns: ["invited_by_user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "catalogue_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -159,13 +145,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "catalogues_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "catalogues_user_id_fkey"
             columns: ["user_id"]
@@ -259,13 +238,6 @@ export type Database = {
             foreignKeyName: "friend_invitations_from_user_id_fkey"
             columns: ["from_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friend_invitations_from_user_id_fkey"
-            columns: ["from_user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -301,21 +273,7 @@ export type Database = {
             foreignKeyName: "friendships_friend_id_fkey"
             columns: ["friend_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friendships_friend_id_fkey"
-            columns: ["friend_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friendships_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -440,21 +398,7 @@ export type Database = {
             foreignKeyName: "fk_notifications_related_user_id"
             columns: ["related_user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_notifications_related_user_id"
-            columns: ["related_user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_notifications_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -567,13 +511,6 @@ export type Database = {
             foreignKeyName: "reminders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reminders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -604,13 +541,6 @@ export type Database = {
             columns: ["retro_id"]
             isOneToOne: false
             referencedRelation: "retrospectives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_retro_attendees_user_id"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -735,13 +665,6 @@ export type Database = {
             foreignKeyName: "retros_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "retros_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -829,13 +752,6 @@ export type Database = {
             foreignKeyName: "retrospectives_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "retrospectives_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -873,27 +789,7 @@ export type Database = {
       }
     }
     Views: {
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       accept_invite_txn: {

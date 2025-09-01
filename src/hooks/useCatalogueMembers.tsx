@@ -89,17 +89,39 @@ export const useCatalogueMembers = (catalogueId?: string) => {
     if (!catalogueId || !user) return false;
     
     try {
-      // First, find the user by email
-      const { data: userProfile, error: userError } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('email', userEmail)
-        .single();
+      // Due to new security restrictions, we can only find users among friends
+      // First get user's friends
+      const { data: friendships } = await supabase
+        .from('friendships')
+        .select(`
+          friend_id,
+          user_profiles!friendships_friend_id_fkey(id, email)
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'accepted');
 
-      if (userError) {
+      // Also get reverse friendships
+      const { data: reverseFriendships } = await supabase
+        .from('friendships')
+        .select(`
+          user_id,
+          user_profiles!friendships_user_id_fkey(id, email)
+        `)
+        .eq('friend_id', user.id)
+        .eq('status', 'accepted');
+
+      // Find the user among friends by email
+      const allFriends = [
+        ...(friendships?.map(f => (f as any).user_profiles) || []),
+        ...(reverseFriendships?.map(f => (f as any).user_profiles) || [])
+      ].filter(Boolean);
+
+      const userProfile = allFriends.find(friend => friend.email === userEmail);
+
+      if (!userProfile) {
         toast({
-          title: "Error",
-          description: "User not found with that email address",
+          title: "Error", 
+          description: "User not found among your friends. You can only invite friends to catalogues.",
           variant: "destructive",
         });
         return false;

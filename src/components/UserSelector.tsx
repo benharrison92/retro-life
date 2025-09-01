@@ -36,21 +36,53 @@ export const UserSelector = ({ selectedUsers, onUsersChange, placeholder = "Sear
 
       setIsSearching(true);
       try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('id, email, display_name, avatar_url')
-          .or(`display_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
-          .limit(10);
+        // With the new security policy, we can only search among friends
+        // First get user's friends, then search among them
+        const { data: friendships, error: friendError } = await supabase
+          .from('friendships')
+          .select(`
+            friend_id,
+            user_profiles!friendships_friend_id_fkey(id, display_name, email, avatar_url)
+          `)
+          .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+          .eq('status', 'accepted');
 
-        if (error) {
-          console.error('Error searching users:', error);
+        if (friendError) {
+          console.error('Error fetching friends:', friendError);
           return;
         }
 
+        // Also get reverse friendships (where current user is the friend)
+        const { data: reverseFriendships, error: reverseError } = await supabase
+          .from('friendships')
+          .select(`
+            user_id,
+            user_profiles!friendships_user_id_fkey(id, display_name, email, avatar_url)
+          `)
+          .eq('friend_id', (await supabase.auth.getUser()).data.user?.id)
+          .eq('status', 'accepted');
+
+        if (reverseError) {
+          console.error('Error fetching reverse friendships:', reverseError);
+          return;
+        }
+
+        // Combine and flatten friend profiles
+        const allFriends = [
+          ...(friendships?.map(f => (f as any).user_profiles) || []),
+          ...(reverseFriendships?.map(f => (f as any).user_profiles) || [])
+        ].filter(Boolean);
+
+        // Filter friends based on search query
+        const filteredFriends = allFriends.filter(friend =>
+          friend.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          friend.email.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
         // Filter out already selected users
-        const filteredResults = data?.filter(
+        const filteredResults = filteredFriends.filter(
           user => !selectedUsers.some(selected => selected.id === user.id)
-        ) || [];
+        );
 
         setSearchResults(filteredResults);
         setShowResults(true);
@@ -164,7 +196,9 @@ export const UserSelector = ({ selectedUsers, onUsersChange, placeholder = "Sear
         {showResults && searchResults.length === 0 && searchQuery.length >= 2 && !isSearching && (
           <Card className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border shadow-lg">
             <CardContent className="p-4 text-center text-sm text-muted-foreground">
-              No users found matching "{searchQuery}"
+              No friends found matching "{searchQuery}". 
+              <br />
+              <span className="text-xs">Note: You can only tag friends in retrospectives.</span>
             </CardContent>
           </Card>
         )}
