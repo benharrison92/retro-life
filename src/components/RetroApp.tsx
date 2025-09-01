@@ -759,7 +759,7 @@ export const RetroApp = () => {
                   id: retro.user_id,
                   name: retro.ownerName || 'Anonymous'
                 },
-                createdAt: retro.created_at,
+                createdAt: retro.created_at || new Date().toISOString(),
                 location: retro.location_name ? {
                   name: retro.location_name || `${retro.city || ''} ${retro.state || ''}`.trim() || 'Unknown location'
                 } : undefined,

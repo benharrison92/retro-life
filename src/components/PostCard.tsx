@@ -52,7 +52,13 @@ export type PostCardProps = {
 }
 
 function timeAgo(input: string | Date) {
+  if (!input) return 'Unknown'
+  
   const d = typeof input === 'string' ? new Date(input) : input
+  
+  // Check if date is valid
+  if (isNaN(d.getTime())) return 'Unknown'
+  
   const s = Math.floor((Date.now() - d.getTime()) / 1000)
   const u = [
     ['y', 31536000],
