@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Network, ArrowRight } from 'lucide-react';
 import { RetroApp } from "@/components/RetroApp";
 import PostCard from "@/components/PostCard";
 import { useRetros } from '@/hooks/useRetros';
@@ -77,6 +80,32 @@ const Index = () => {
   return (
     <>
       <div id="retro-root"><RetroApp /></div>
+      
+      {/* New Hierarchical Trips Feature */}
+      <section className="container py-6">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary text-primary-foreground rounded-full">
+                  <Network className="h-6 w-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Try Hierarchical Retros</CardTitle>
+                  <p className="text-muted-foreground">
+                    Organize your retrospectives in a structured hierarchy - from trips to categories to specific venues and events
+                  </p>
+                </div>
+              </div>
+              <Button onClick={() => navigate('/hierarchy')} className="flex items-center gap-2">
+                Explore
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+      </section>
+
       <section className="container py-8">
         <h2 className="mb-4 text-2xl font-semibold text-foreground">Featured trips</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
