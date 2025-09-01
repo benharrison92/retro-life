@@ -5,6 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import TripDetail from '@/components/TripDetail';
 import { RetroCard } from '@/components/RetroCard';
 import { AppHeader } from '@/components/AppHeader';
+import { RetroBreadcrumb } from '@/components/RetroBreadcrumb';
+import { ChildRetrosList } from '@/components/ChildRetrosList';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 const Trip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -55,12 +59,17 @@ const Trip = () => {
   };
 
   const handleBack = () => {
-    try {
-      const idx = (window.history.state && (window.history.state as any).idx) ?? 0;
-      if (idx > 0 || window.history.length > 1) navigate(-1);
-      else navigate('/');
-    } catch {
-      navigate('/');
+    // If this retro has a parent, navigate to parent instead of home
+    if ((retro as any)?.parent_id) {
+      navigate(`/trip/${(retro as any).parent_id}`);
+    } else {
+      try {
+        const idx = (window.history.state && (window.history.state as any).idx) ?? 0;
+        if (idx > 0 || window.history.length > 1) navigate(-1);
+        else navigate('/');
+      } catch {
+        navigate('/');
+      }
     }
   };
 
@@ -94,6 +103,10 @@ const Trip = () => {
     await updateRetro(updatedRetro.id, updatedRetro);
   };
 
+  const handleAddChildRetro = () => {
+    navigate(`/create-retro?parent_id=${retro?.id}`);
+  };
+
   // Convert to legacy Retro type expected by RetroCard
   const legacyRetro = {
     id: retro.id,
@@ -119,40 +132,65 @@ const Trip = () => {
   } as any;
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <AppHeader />
+      
+      {/* Breadcrumb Navigation */}
+      {retro && (
+        <div className="container mx-auto px-4 py-2">
+          <RetroBreadcrumb retroId={retro.id} />
+        </div>
+      )}
+      
       <div className="container py-6 space-y-6">
         <TripDetail
-        id={retro.id}
-        title={retro.title}
-        cover={{ url: coverUrl, alt: retro.title }}
-        images={images}
-        author={author}
-        createdAt={retro.created_at}
-        startDate={retro.date}
-        location={location.name ? location : undefined}
-        itinerary={[]}
-        stats={{ likes: 0, comments: 0, hasLiked: false }}
-        onBack={handleBack}
-        onLikeToggle={() => {}}
-        onShare={(rid) => handleShare(rid)}
-      />
-
-      <section>
-        <h2 className="mb-3 text-xl font-semibold text-foreground">Reflection (R/B/T)</h2>
-        <RetroCard
-          retro={legacyRetro}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onUpdateItem={handleUpdateItem}
-          onAddItem={handleAddItem}
-          onUserClick={() => {}}
-          onUpdateRetro={handleUpdateRetro}
-          currentUserName={currentUserName}
+          id={retro.id}
+          title={retro.title}
+          cover={{ url: coverUrl, alt: retro.title }}
+          images={images}
+          author={author}
+          createdAt={retro.created_at}
+          startDate={retro.date}
+          location={location.name ? location : undefined}
+          itinerary={[]}
+          stats={{ likes: 0, comments: 0, hasLiked: false }}
+          onBack={handleBack}
+          onLikeToggle={() => {}}
+          onShare={(rid) => handleShare(rid)}
         />
-      </section>
+
+        {/* Child Retrospectives */}
+        <ChildRetrosList
+          parentRetroId={retro.id}
+          onAddChild={handleAddChildRetro}
+        />
+
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold text-foreground">Reflection (R/B/T)</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddChildRetro}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Sub-Retro
+            </Button>
+          </div>
+          <RetroCard
+            retro={legacyRetro}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onUpdateItem={handleUpdateItem}
+            onAddItem={handleAddItem}
+            onUserClick={() => {}}
+            onUpdateRetro={handleUpdateRetro}
+            currentUserName={currentUserName}
+          />
+        </section>
+      </div>
     </div>
-    </>
   );
 };
 

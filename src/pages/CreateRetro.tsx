@@ -5,6 +5,7 @@ import { RetroForm } from '@/components/RetroForm';
 import { useFeedbackSpaces } from '@/hooks/useFeedbackSpaces';
 import { useRetros, UserProfile } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const CreateRetro = () => {
@@ -15,25 +16,44 @@ const CreateRetro = () => {
   const { createRetro } = useRetros();
   
   const feedbackSpaceId = searchParams.get('feedbackSpace');
+  const parentId = searchParams.get('parent_id');
   const [feedbackSpace, setFeedbackSpace] = useState(null);
-  const [loading, setLoading] = useState(!!feedbackSpaceId);
+  const [parentRetro, setParentRetro] = useState(null);
+  const [loading, setLoading] = useState(!!feedbackSpaceId || !!parentId);
 
   useEffect(() => {
-    const loadFeedbackSpace = async () => {
-      if (!feedbackSpaceId) return;
-      
+    const loadData = async () => {
       try {
-        const space = await getFeedbackSpaceById(feedbackSpaceId);
-        setFeedbackSpace(space);
-        setLoading(false);
+        // Load feedback space if creating for feedback space
+        if (feedbackSpaceId) {
+          const space = await getFeedbackSpaceById(feedbackSpaceId);
+          setFeedbackSpace(space);
+        }
+        
+        // Load parent retro if creating a child retro
+        if (parentId) {
+          const { data, error } = await supabase
+            .from('retrospectives')
+            .select('*')
+            .eq('id', parentId)
+            .single();
+            
+          if (error) {
+            console.error('Error loading parent retro:', error);
+            toast.error('Failed to load parent retrospective');
+          } else {
+            setParentRetro(data);
+          }
+        }
       } catch (error) {
-        console.error('Error loading feedback space:', error);
+        console.error('Error loading data:', error);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadFeedbackSpace();
-  }, [feedbackSpaceId, getFeedbackSpaceById]);
+    loadData();
+  }, [feedbackSpaceId, parentId, getFeedbackSpaceById]);
 
   const handleSave = async (retroData, attendeeUsers?: UserProfile[]) => {
     try {
@@ -54,7 +74,9 @@ const CreateRetro = () => {
         country: retroData.country || 'US',
         latitude: retroData.latitude,
         longitude: retroData.longitude,
-        is_private: retroData.isPrivate || false, // Include privacy setting
+        is_private: retroData.isPrivate || false,
+        // Include parent_id if creating a child retro
+        ...(parentId && { parent_id: parentId }),
         // Include feedback_space_id if creating for a feedback space
         ...(feedbackSpaceId && { feedback_space_id: feedbackSpaceId })
       };
@@ -64,9 +86,11 @@ const CreateRetro = () => {
       if (result) {
         toast.success('Feedback submitted successfully!');
         
-        // Navigate back to feedback space if that's where we came from
+        // Navigate based on context
         if (feedbackSpaceId) {
-          navigate(-1); // Go back to the feedback space
+          navigate(-1); // Go back to feedback space
+        } else if (parentId) {
+          navigate(`/trip/${parentId}`); // Go back to parent retro
         } else {
           navigate('/'); // Go to main app
         }
@@ -80,6 +104,8 @@ const CreateRetro = () => {
   const handleClose = () => {
     if (feedbackSpaceId) {
       navigate(-1); // Go back to feedback space
+    } else if (parentId) {
+      navigate(`/trip/${parentId}`); // Go back to parent retro
     } else {
       navigate('/'); // Go to main app
     }
@@ -125,13 +151,18 @@ const CreateRetro = () => {
           onSave={handleSave}
           currentUserName={user?.email || 'Anonymous'}
           feedbackSpaceMode={!!feedbackSpaceId}
-          initialData={feedbackSpace ? {
-            title: feedbackSpace.title,
-            locationName: feedbackSpace.location_name,
-            city: feedbackSpace.city,
-            state: feedbackSpace.state,
-            country: feedbackSpace.country
-          } : undefined}
+          initialData={
+            feedbackSpace ? {
+              title: feedbackSpace.title,
+              locationName: feedbackSpace.location_name,
+              city: feedbackSpace.city,
+              state: feedbackSpace.state,
+              country: feedbackSpace.country
+            } : parentRetro ? {
+              title: `${parentRetro.title} - `,
+              // Don't inherit location data for child retros
+            } : undefined
+          }
         />
       </div>
     </>

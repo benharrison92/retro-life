@@ -685,6 +685,7 @@ export type Database = {
           latitude: number | null
           location_name: string | null
           longitude: number | null
+          parent_id: string | null
           photos: Json | null
           primary_photo_url: string | null
           roses: Json | null
@@ -708,6 +709,7 @@ export type Database = {
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
+          parent_id?: string | null
           photos?: Json | null
           primary_photo_url?: string | null
           roses?: Json | null
@@ -731,6 +733,7 @@ export type Database = {
           latitude?: number | null
           location_name?: string | null
           longitude?: number | null
+          parent_id?: string | null
           photos?: Json | null
           primary_photo_url?: string | null
           roses?: Json | null
@@ -746,6 +749,13 @@ export type Database = {
             columns: ["feedback_space_id"]
             isOneToOne: false
             referencedRelation: "feedback_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retrospectives_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "retrospectives"
             referencedColumns: ["id"]
           },
           {
@@ -803,6 +813,14 @@ export type Database = {
       generate_unique_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_retro_breadcrumb: {
+        Args: { retro_uuid: string }
+        Returns: {
+          id: string
+          level: number
+          title: string
+        }[]
       }
       is_catalogue_member: {
         Args: { catalogue_uuid: string; user_uuid: string }
