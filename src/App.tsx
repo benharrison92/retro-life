@@ -13,6 +13,7 @@ import FeedbackSpace from "./pages/FeedbackSpace";
 import CreateRetro from "./pages/CreateRetro";
 import Trip from "./pages/Trip";
 import MapExplore from "./pages/MapExplore";
+import FeaturedTrips from "./pages/FeaturedTrips";
 
 import RetroReadCardPage from "./pages/RetroReadCard";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/create-retro" element={<CreateRetro />} />
             <Route path="/trip/:id" element={<Trip />} />
             <Route path="/explore" element={<MapExplore />} />
+            <Route path="/featured-trips" element={<FeaturedTrips />} />
             <Route path="/retro-read-card" element={<RetroReadCardPage />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

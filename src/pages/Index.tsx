@@ -13,7 +13,10 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { retros } = useRetros();
-  const featuredPosts = retros.filter(r => !r.is_private).slice(0, 6).map((r) => ({
+  const featuredRetros = retros.filter(r => !r.is_private).sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  const featuredPosts = featuredRetros.slice(0, 6).map((r) => ({
     id: r.id,
     title: r.title,
     excerpt: r.event_type ? `${r.event_type} — ${r.date}` : r.date,
@@ -112,7 +115,19 @@ const Index = () => {
       </section>
 
       <section className="container py-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">Featured trips</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-foreground">Featured trips</h2>
+          {featuredRetros.length > 6 && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/featured-trips')}
+              className="flex items-center gap-2"
+            >
+              View All ({featuredRetros.length})
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featuredPosts.map((p) => (
             <PostCard
