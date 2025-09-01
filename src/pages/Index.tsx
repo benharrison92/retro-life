@@ -13,7 +13,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { retros } = useRetros();
-  const featuredPosts = retros.slice(0, 6).map((r) => ({
+  const featuredPosts = retros.filter(r => !r.is_private).slice(0, 6).map((r) => ({
     id: r.id,
     title: r.title,
     excerpt: r.event_type ? `${r.event_type} — ${r.date}` : r.date,
