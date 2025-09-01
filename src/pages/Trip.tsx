@@ -11,6 +11,7 @@ import { SaveAsDialog } from '@/components/SaveAsDialog';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, MoreVertical, Globe, Network } from 'lucide-react';
+import { AddItemDialog } from '@/components/AddItemDialog';
 const Trip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const Trip = () => {
   const { profile } = useAuth();
   const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
   const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child' | 'make_child'>('featured');
+  const [addItemDialogOpen, setAddItemDialogOpen] = useState(false);
+  const [addItemType, setAddItemType] = useState<'roses' | 'buds' | 'thorns'>('roses');
 
   const retro = useMemo(() => retros.find(r => r.id === id), [retros, id]);
   const currentUserName = profile?.display_name || 'You';
@@ -87,19 +90,24 @@ const Trip = () => {
   };
 
   const handleAddItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
-    const r = retros.find(rr => rr.id === retroId);
+    setAddItemType(itemType);
+    setAddItemDialogOpen(true);
+  };
+
+  const handleConfirmAddItem = async (text: string) => {
+    const r = retros.find(rr => rr.id === id);
     if (!r) return;
     const newItem = {
-      id: `${itemType}-${Date.now()}`,
-      text: '',
+      id: `${addItemType}-${Date.now()}`,
+      text,
       tags: [],
       comments: [],
       ownerName: currentUserName,
       photos: []
     };
-    const updated = { ...r, [itemType]: [...(r as any)[itemType], newItem] };
-    updateLocalRetro(retroId, updated);
-    await updateRetro(retroId, updated);
+    const updated = { ...r, [addItemType]: [...(r as any)[addItemType], newItem] };
+    updateLocalRetro(r.id, updated);
+    await updateRetro(r.id, updated);
   };
 
   const handleUpdateRetro = async (updatedRetro: any) => {
@@ -219,7 +227,7 @@ const Trip = () => {
           </div>
           <RetroCard
             retro={legacyRetro}
-            onEdit={() => {}}
+            onEdit={() => navigate(`/create-retro?edit=${retro.id}`)}
             onDelete={() => {}}
             onUpdateItem={handleUpdateItem}
             onAddItem={handleAddItem}
@@ -239,6 +247,14 @@ const Trip = () => {
             mode={saveAsMode}
           />
         )}
+
+        {/* Add Item Dialog */}
+        <AddItemDialog
+          isOpen={addItemDialogOpen}
+          onClose={() => setAddItemDialogOpen(false)}
+          onConfirm={handleConfirmAddItem}
+          itemType={addItemType}
+        />
       </div>
     </div>
   );

@@ -13,13 +13,15 @@ const CreateRetro = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getFeedbackSpaceById } = useFeedbackSpaces();
-  const { createRetro } = useRetros();
+  const { createRetro, updateRetro } = useRetros();
   
   const feedbackSpaceId = searchParams.get('feedbackSpace');
   const parentId = searchParams.get('parent_id');
+  const editId = searchParams.get('edit');
   const [feedbackSpace, setFeedbackSpace] = useState(null);
   const [parentRetro, setParentRetro] = useState(null);
-  const [loading, setLoading] = useState(!!feedbackSpaceId || !!parentId);
+  const [editRetro, setEditRetro] = useState(null);
+  const [loading, setLoading] = useState(!!feedbackSpaceId || !!parentId || !!editId);
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,6 +47,22 @@ const CreateRetro = () => {
             setParentRetro(data);
           }
         }
+
+        // Load existing retro if editing
+        if (editId) {
+          const { data, error } = await supabase
+            .from('retrospectives')
+            .select('*')
+            .eq('id', editId)
+            .single();
+            
+          if (error) {
+            console.error('Error loading retro for editing:', error);
+            toast.error('Failed to load retrospective for editing');
+          } else {
+            setEditRetro(data);
+          }
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -53,7 +71,7 @@ const CreateRetro = () => {
     };
 
     loadData();
-  }, [feedbackSpaceId, parentId, getFeedbackSpaceById]);
+  }, [feedbackSpaceId, parentId, editId, getFeedbackSpaceById]);
 
   const handleSave = async (retroData, attendeeUsers?: UserProfile[]) => {
     try {
@@ -82,12 +100,23 @@ const CreateRetro = () => {
       };
 
       console.log('CreateRetro: Saving retro with data:', retroToSave);
-      const result = await createRetro(retroToSave, attendeeUsers);
-      if (result) {
+      
+      let result;
+      if (editId) {
+        // Update existing retro
+        result = await updateRetro(editId, retroToSave, attendeeUsers);
+        toast.success('Retrospective updated successfully!');
+      } else {
+        // Create new retro
+        result = await createRetro(retroToSave, attendeeUsers);
         toast.success('Feedback submitted successfully!');
-        
+      }
+      
+      if (result) {
         // Navigate based on context
-        if (feedbackSpaceId) {
+        if (editId) {
+          navigate(`/trip/${editId}`); // Go back to the edited retro
+        } else if (feedbackSpaceId) {
           navigate(-1); // Go back to feedback space
         } else if (parentId) {
           navigate(`/trip/${parentId}`); // Go back to parent retro
@@ -97,12 +126,14 @@ const CreateRetro = () => {
       }
     } catch (error) {
       console.error('Error saving retro:', error);
-      toast.error('Failed to save feedback');
+      toast.error(`Failed to ${editId ? 'update' : 'save'} feedback`);
     }
   };
 
   const handleClose = () => {
-    if (feedbackSpaceId) {
+    if (editId) {
+      navigate(`/trip/${editId}`); // Go back to the retro being edited
+    } else if (feedbackSpaceId) {
       navigate(-1); // Go back to feedback space
     } else if (parentId) {
       navigate(`/trip/${parentId}`); // Go back to parent retro
@@ -146,7 +177,27 @@ const CreateRetro = () => {
       <AppHeader />
       <div className="container max-w-4xl mx-auto p-6">
         <RetroForm
-          retro={null}
+          retro={editRetro ? {
+            id: editRetro.id,
+            title: editRetro.title,
+            eventType: editRetro.event_type,
+            date: editRetro.date,
+            attendees: editRetro.attendees || [],
+            roses: editRetro.roses || [],
+            buds: editRetro.buds || [],
+            thorns: editRetro.thorns || [],
+            photos: editRetro.photos || [],
+            locationName: editRetro.location_name,
+            city: editRetro.city,
+            state: editRetro.state,
+            country: editRetro.country,
+            latitude: editRetro.latitude,
+            longitude: editRetro.longitude,
+            ownerName: user?.email || 'Anonymous',
+            createdAt: new Date(editRetro.created_at),
+            updatedAt: editRetro.updated_at ? new Date(editRetro.updated_at) : undefined,
+            attendeeUsers: editRetro.attendee_users || []
+          } : null}
           onClose={handleClose}
           onSave={handleSave}
           currentUserName={user?.email || 'Anonymous'}
