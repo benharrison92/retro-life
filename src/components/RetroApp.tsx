@@ -749,6 +749,26 @@ export const RetroApp = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {retrosToDisplay.map((retro, index) => {
+              // Generate a vibrant color based on the retro title for default background
+              const getBackgroundColor = (title: string) => {
+                const colors = [
+                  'bg-gradient-to-br from-blue-500 to-purple-600',
+                  'bg-gradient-to-br from-green-500 to-teal-600',
+                  'bg-gradient-to-br from-orange-500 to-red-600',
+                  'bg-gradient-to-br from-pink-500 to-rose-600',
+                  'bg-gradient-to-br from-indigo-500 to-blue-600',
+                  'bg-gradient-to-br from-purple-500 to-pink-600',
+                  'bg-gradient-to-br from-yellow-500 to-orange-600',
+                  'bg-gradient-to-br from-emerald-500 to-green-600',
+                ];
+                
+                let hash = 0;
+                for (let i = 0; i < title.length; i++) {
+                  hash = title.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return colors[Math.abs(hash) % colors.length];
+              };
+
               // Convert retro to PostCard format
               const postData = {
                 id: retro.id,
@@ -767,6 +787,7 @@ export const RetroApp = () => {
                 commentCount: 0,
                 hasLiked: false,
                 bookmarked: false,
+                defaultBackground: retro.primaryPhotoUrl ? undefined : getBackgroundColor(retro.title),
               };
               
               return (

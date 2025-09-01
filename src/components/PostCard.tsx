@@ -41,6 +41,7 @@ export type PostCardProps = {
   commentCount: number
   bookmarked?: boolean
   hasLiked?: boolean
+  defaultBackground?: string // For retros without photos
   /**
    * Handlers are optional. If provided, card will call them optimistically.
    */
@@ -87,6 +88,7 @@ export default function PostCard({
   commentCount,
   bookmarked: initialBookmarked = false,
   hasLiked: initialLiked = false,
+  defaultBackground,
   onOpen,
   onLikeToggle,
   onBookmarkToggle,
@@ -129,49 +131,52 @@ export default function PostCard({
       animate={{ opacity: 1, y: 0 }}
       className={`group relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white shadow-sm transition hover:shadow-lg ${className}`}
     >
-      {/* Cover image */}
-      {cover && (
-        <button
-          onClick={() => onOpen?.(id)}
-          className="relative block aspect-[16/10] w-full overflow-hidden"
-          aria-label={`Open ${title}`}
-        >
+      {/* Cover image or default background */}
+      <button
+        onClick={() => onOpen?.(id)}
+        className="relative block aspect-[16/10] w-full overflow-hidden"
+        aria-label={`Open ${title}`}
+      >
+        {cover ? (
           <img
             src={cover.url}
             alt={cover.alt ?? title}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
             loading="lazy"
           />
-          {/* Top overlays */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+        ) : (
+          <div className={`h-full w-full ${defaultBackground || 'bg-gradient-to-br from-blue-500 to-purple-600'}`} />
+        )}
+        
+        {/* Top overlays */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
-          <div className="absolute left-3 top-3 flex items-center gap-2 text-white">
-            {location?.name && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-xs font-medium backdrop-blur">
-                <MapPin className="h-3.5 w-3.5" />
-                {location.name}
-              </span>
-            )}
-          </div>
+        <div className="absolute left-3 top-3 flex items-center gap-2 text-white">
+          {location?.name && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-xs font-medium backdrop-blur">
+              <MapPin className="h-3.5 w-3.5" />
+              {location.name}
+            </span>
+          )}
+        </div>
 
-          <div className="absolute right-3 top-3">
-            <button
-              type="button"
-              className="inline-flex items-center rounded-full bg-black/40 p-2 text-white backdrop-blur transition hover:bg-black/60"
-              aria-label="More options"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </div>
+        <div className="absolute right-3 top-3">
+          <button
+            type="button"
+            className="inline-flex items-center rounded-full bg-black/40 p-2 text-white backdrop-blur transition hover:bg-black/60"
+            aria-label="More options"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+        </div>
 
-          <div className="absolute bottom-3 left-3 right-3 flex flex-col gap-1 text-white">
-            <h3 className="line-clamp-2 text-balance text-lg font-semibold drop-shadow">{title}</h3>
-            {excerpt && (
-              <p className="line-clamp-2 text-sm opacity-90">{excerpt}</p>
-            )}
-          </div>
-        </button>
-      )}
+        <div className="absolute bottom-3 left-3 right-3 flex flex-col gap-1 text-white">
+          <h3 className="line-clamp-2 text-balance text-lg font-semibold drop-shadow">{title}</h3>
+          {excerpt && (
+            <p className="line-clamp-2 text-sm opacity-90">{excerpt}</p>
+          )}
+        </div>
+      </button>
 
       {/* Footer / actions */}
       <div className="flex items-center justify-between gap-3 px-3 py-3">
