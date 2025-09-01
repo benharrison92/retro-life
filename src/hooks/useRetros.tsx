@@ -157,6 +157,134 @@ export const useRetros = () => {
     }
   }, [user, toast]);
 
+  // Fetch only parent retros (for main homepage display)
+  const fetchParentRetros = useCallback(async () => {
+    if (!user) return [];
+
+    try {
+      const { data: retrosData, error: retrosError } = await supabase
+        .from('retrospectives')
+        .select(`
+          *,
+          feedback_spaces(title),
+          user_profiles!user_id(display_name)
+        `)
+        .is('parent_id', null)
+        .order('date', { ascending: false });
+
+      if (retrosError) throw retrosError;
+
+      // Process parent retros with attendees
+      const parentRetrosWithAttendees = await Promise.all(
+        (retrosData || []).map(async (retro: any) => {
+          const convertedRetro = convertDbToApp(retro);
+          
+          // Add owner name from user profile
+          if (retro.user_profiles) {
+            convertedRetro.ownerName = retro.user_profiles.display_name;
+          }
+          
+          // Add feedback space information
+          if (retro.feedback_spaces) {
+            convertedRetro.feedbackSpaceName = retro.feedback_spaces.title;
+          }
+          
+          // Fetch attendee users for this retro
+          const { data: attendeesData, error: attendeesError } = await supabase
+            .from('retro_attendees')
+            .select(`
+              user_profiles!inner (
+                id,
+                email,
+                display_name,
+                avatar_url
+              )
+            `)
+            .eq('retro_id', retro.id);
+
+          if (!attendeesError && attendeesData) {
+            convertedRetro.attendeeUsers = attendeesData
+              .map((attendee: any) => attendee.user_profiles)
+              .filter(Boolean);
+          } else {
+            convertedRetro.attendeeUsers = [];
+          }
+
+          return convertedRetro;
+        })
+      );
+
+      return parentRetrosWithAttendees.filter(r => !r.is_private);
+    } catch (error) {
+      console.error('Error fetching parent retros:', error);
+      return [];
+    }
+  }, [user]);
+
+  // Fetch child retros for a specific parent
+  const fetchChildRetros = useCallback(async (parentId: string) => {
+    if (!user) return [];
+
+    try {
+      const { data: retrosData, error: retrosError } = await supabase
+        .from('retrospectives')
+        .select(`
+          *,
+          feedback_spaces(title),
+          user_profiles!user_id(display_name)
+        `)
+        .eq('parent_id', parentId)
+        .order('date', { ascending: false });
+
+      if (retrosError) throw retrosError;
+
+      // Process child retros with attendees
+      const childRetrosWithAttendees = await Promise.all(
+        (retrosData || []).map(async (retro: any) => {
+          const convertedRetro = convertDbToApp(retro);
+          
+          // Add owner name from user profile
+          if (retro.user_profiles) {
+            convertedRetro.ownerName = retro.user_profiles.display_name;
+          }
+          
+          // Add feedback space information
+          if (retro.feedback_spaces) {
+            convertedRetro.feedbackSpaceName = retro.feedback_spaces.title;
+          }
+          
+          // Fetch attendee users for this retro
+          const { data: attendeesData, error: attendeesError } = await supabase
+            .from('retro_attendees')
+            .select(`
+              user_profiles!inner (
+                id,
+                email,
+                display_name,
+                avatar_url
+              )
+            `)
+            .eq('retro_id', retro.id);
+
+          if (!attendeesError && attendeesData) {
+            convertedRetro.attendeeUsers = attendeesData
+              .map((attendee: any) => attendee.user_profiles)
+              .filter(Boolean);
+          } else {
+            convertedRetro.attendeeUsers = [];
+          }
+
+          return convertedRetro;
+        })
+      );
+
+      return childRetrosWithAttendees.filter(r => !r.is_private);
+    } catch (error) {
+      console.error('Error fetching child retros:', error);
+      return [];
+    }
+  }, [user]);
+
   // Manage retro attendees
   const addAttendees = async (retroId: string, attendeeUsers: UserProfile[]) => {
     if (!user) {
@@ -625,6 +753,9 @@ export const useRetros = () => {
   return {
     retros,
     loading,
+    fetchRetros,
+    fetchParentRetros,
+    fetchChildRetros,
     createRetro,
     updateRetro,
     deleteRetro,
