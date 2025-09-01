@@ -28,6 +28,7 @@ export interface Retrospective {
   country?: string;
   latitude?: number;
   longitude?: number;
+  parent_id?: string; // For hierarchical retros - null for parent retros
   feedback_space_id?: string;
   feedbackSpaceName?: string; // Name of the feedback space if retro is part of one
   ownerName?: string; // Display name of the user who created the retro

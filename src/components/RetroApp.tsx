@@ -140,8 +140,11 @@ export const RetroApp = () => {
     setShowLocationSearch(true);
   };
 
-  // Filter logic
+  // Filter logic - only show parent retros (no parent_id)
   const filteredRetros = retros.filter(retro => {
+    // Only include parent retros (those without a parent_id)
+    const isParentRetro = !retro.parent_id;
+    
     const matchesTags = filterTags ? 
       filterTags.split(',').map(tag => tag.trim().toLowerCase()).filter(Boolean).every(filterTag =>
         retro.roses.some(r => r.tags?.some(t => t.toLowerCase().includes(filterTag))) ||
@@ -166,7 +169,7 @@ export const RetroApp = () => {
       retro.attendees.some(attendee => attendee.toLowerCase().includes(searchUser.toLowerCase()))
       : true;
 
-    return matchesTags && matchesKeywords && matchesUser;
+    return isParentRetro && matchesTags && matchesKeywords && matchesUser;
   });
 
   const retrosToDisplay = showLocationSearch && locationResults.length > 0 
