@@ -552,6 +552,76 @@ export const useRetros = () => {
     );
   };
 
+  // Make retro public/featured
+  const makeRetroPublic = async (retroId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('retrospectives')
+        .update({ is_private: false })
+        .eq('id', retroId)
+        .eq('user_id', user.id); // Only allow owner to make public
+
+      if (error) throw error;
+
+      // Update local state
+      setRetros(prevRetros => 
+        prevRetros.map(r => 
+          r.id === retroId ? { ...r, is_private: false } as any : r
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Retrospective is now public and featured",
+      });
+    } catch (error) {
+      console.error('Error making retro public:', error);
+      toast({
+        title: "Error",
+        description: "Failed to make retrospective public",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Assign parent to existing retro
+  const assignParentRetro = async (retroId: string, parentId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('retrospectives')
+        .update({ parent_id: parentId })
+        .eq('id', retroId)
+        .eq('user_id', user.id); // Only allow owner to reassign
+
+      if (error) throw error;
+
+      // Update local state
+      setRetros(prevRetros => 
+        prevRetros.map(r => 
+          r.id === retroId ? { ...r, parent_id: parentId } as any : r
+        )
+      );
+
+      toast({
+        title: "Success", 
+        description: "Retrospective hierarchy updated",
+      });
+    } catch (error) {
+      console.error('Error assigning parent retro:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update retrospective hierarchy",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return {
     retros,
     loading,
@@ -563,5 +633,7 @@ export const useRetros = () => {
     searchRetrosByLocation,
     refreshRetros: fetchRetros,
     updateLocalRetro,
+    makeRetroPublic,
+    assignParentRetro,
   };
 };

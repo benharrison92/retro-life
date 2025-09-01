@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRetros } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,13 +7,17 @@ import { RetroCard } from '@/components/RetroCard';
 import { AppHeader } from '@/components/AppHeader';
 import { RetroBreadcrumb } from '@/components/RetroBreadcrumb';
 import { ChildRetrosList } from '@/components/ChildRetrosList';
+import { SaveAsDialog } from '@/components/SaveAsDialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, MoreVertical, Globe, Network } from 'lucide-react';
 const Trip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { retros, loading, updateRetro, updateLocalRetro } = useRetros();
   const { profile } = useAuth();
+  const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
+  const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child'>('featured');
 
   const retro = useMemo(() => retros.find(r => r.id === id), [retros, id]);
   const currentUserName = profile?.display_name || 'You';
@@ -107,6 +111,16 @@ const Trip = () => {
     navigate(`/create-retro?parent_id=${retro?.id}`);
   };
 
+  const handleSaveAsFeatured = () => {
+    setSaveAsMode('featured');
+    setSaveAsDialogOpen(true);
+  };
+
+  const handleSaveAsChild = () => {
+    setSaveAsMode('child');
+    setSaveAsDialogOpen(true);
+  };
+
   // Convert to legacy Retro type expected by RetroCard
   const legacyRetro = {
     id: retro.id,
@@ -168,15 +182,35 @@ const Trip = () => {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-semibold text-foreground">Reflection (R/B/T)</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddChildRetro}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Sub-Retro
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddChildRetro}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Sub-Retro
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleSaveAsFeatured}>
+                    <Globe className="h-4 w-4 mr-2" />
+                    Save as Featured Retro
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSaveAsChild}>
+                    <Network className="h-4 w-4 mr-2" />
+                    Save as Sub-Retro
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           <RetroCard
             retro={legacyRetro}
@@ -189,6 +223,17 @@ const Trip = () => {
             currentUserName={currentUserName}
           />
         </section>
+
+        {/* Save As Dialog */}
+        {retro && (
+          <SaveAsDialog
+            isOpen={saveAsDialogOpen}
+            onClose={() => setSaveAsDialogOpen(false)}
+            retroId={retro.id}
+            retroTitle={retro.title}
+            mode={saveAsMode}
+          />
+        )}
       </div>
     </div>
   );
