@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Users, Calendar, UserCheck, Heart, Lightbulb, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { User, Users, Calendar, UserCheck, Heart, Lightbulb, AlertTriangle, MoreVertical, Globe } from "lucide-react";
 import { Retrospective } from "@/lib/supabase";
 
 interface RetroTileCardProps {
   retro: Retrospective;
   onClick: (retro: Retrospective) => void;
+  onSaveAsFeatured?: (retro: Retrospective) => void;
 }
 
-export const RetroTileCard = ({ retro, onClick }: RetroTileCardProps) => {
+export const RetroTileCard = ({ retro, onClick, onSaveAsFeatured }: RetroTileCardProps) => {
   const rosesCount = retro.roses?.length || 0;
   const budsCount = retro.buds?.length || 0;
   const thornsCount = retro.thorns?.length || 0;
@@ -60,6 +63,35 @@ export const RetroTileCard = ({ retro, onClick }: RetroTileCardProps) => {
         <h3 className="absolute inset-0 flex items-center justify-center text-xl font-bold text-white text-center px-4 drop-shadow-lg">
           {retro.title}
         </h3>
+        
+        {/* Save As Featured Button */}
+        {onSaveAsFeatured && !retro.is_private && (
+          <div className="absolute top-2 right-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 bg-black/40 text-white hover:bg-black/60"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSaveAsFeatured(retro);
+                  }}
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Save as Featured
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       
       <CardContent className="p-4 space-y-3">

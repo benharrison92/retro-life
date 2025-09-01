@@ -77,6 +77,15 @@ export const RetroApp = () => {
     retroId: string;
     type: 'roses' | 'buds' | 'thorns';
   }>({ isOpen: false, retroId: '', type: 'roses' });
+  const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
+  const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child' | 'make_child'>('featured');
+  const [selectedRetroForSaveAs, setSelectedRetroForSaveAs] = useState<Retrospective | null>(null);
+
+  const handleSaveAsFeatured = (retro: Retrospective) => {
+    setSelectedRetroForSaveAs(retro);
+    setSaveAsMode('featured');
+    setSaveAsDialogOpen(true);
+  };
 
   const { toast } = useToast();
   const currentUserName = profile?.display_name || 'You';
@@ -743,6 +752,7 @@ export const RetroApp = () => {
                   <RetroTileCard
                     retro={retro}
                     onClick={handleRetroTileClick}
+                    onSaveAsFeatured={handleSaveAsFeatured}
                   />
                   {/* Special location indicator for search results */}
                   {showLocationSearch && index === 0 && (
@@ -822,6 +832,20 @@ export const RetroApp = () => {
     tags={[]}
   />
 )}
+
+        {/* Save As Dialog */}
+        {selectedRetroForSaveAs && (
+          <SaveAsDialog
+            isOpen={saveAsDialogOpen}
+            onClose={() => {
+              setSaveAsDialogOpen(false);
+              setSelectedRetroForSaveAs(null);
+            }}
+            retroId={selectedRetroForSaveAs.id}
+            retroTitle={selectedRetroForSaveAs.title}
+            mode={saveAsMode}
+          />
+        )}
 
     </>
   );
