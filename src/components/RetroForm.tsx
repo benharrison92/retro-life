@@ -16,6 +16,7 @@ import { UserProfile } from "@/hooks/useRetros";
 import { AddRBTDialog } from "./AddRBTDialog";
 import LocationPicker from "./LocationPicker";
 import { JournalPromptsDialog } from "./JournalPromptsDialog";
+import { PlaceSearch } from "./PlaceSearch";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -268,6 +269,7 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       country: retro.country
     } : null
   );
+  const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [roses, setRoses] = useState<RBTItem[]>(() => {
     if (retro?.roses) {
       return retro.roses.map(item => ({
@@ -399,6 +401,14 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       city: city.trim() || undefined,
       state: state.trim() || undefined,
       isPrivate, // Include privacy setting
+      // Include Google Places data if available
+      placeId: selectedPlace?.place_id,
+      placeName: selectedPlace?.name,
+      placeAddress: selectedPlace?.formatted_address,
+      placeRating: selectedPlace?.rating,
+      placeUserRatingsTotal: selectedPlace?.user_ratings_total,
+      placeTypes: selectedPlace?.types,
+      placePhotos: selectedPlace?.photos,
     };
 
     console.log('RetroForm: Submitting retro data:', retroData);
@@ -502,16 +512,53 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
               <Label className="text-base font-semibold">Location (Optional)</Label>
             </div>
             
-            <LocationPicker
-              value={selectedLocation || undefined}
-              onChange={(location) => {
-                setSelectedLocation(location);
-                setLocationName(location.locationName);
-                setCity(location.city || '');
-                setState(location.state || '');
-              }}
-              placeholder="Search for a location (e.g., Yosemite National Park)"
-            />
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-medium">Search Places (Google Places)</Label>
+                <PlaceSearch
+                  value={selectedPlace}
+                  onChange={(place) => {
+                    setSelectedPlace(place);
+                    if (place) {
+                      setLocationName(place.name);
+                      setCity('');
+                      setState('');
+                      setSelectedLocation({
+                        latitude: place.geometry.location.lat,
+                        longitude: place.geometry.location.lng,
+                        locationName: place.name,
+                        city: '',
+                        state: '',
+                        country: 'US'
+                      });
+                    }
+                  }}
+                  placeholder="Search for a restaurant or place..."
+                  currentLocation={selectedLocation ? { lat: selectedLocation.latitude, lng: selectedLocation.longitude } : undefined}
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or use map search</span>
+                </div>
+              </div>
+
+              <LocationPicker
+                value={selectedLocation || undefined}
+                onChange={(location) => {
+                  setSelectedLocation(location);
+                  setLocationName(location.locationName);
+                  setCity(location.city || '');
+                  setState(location.state || '');
+                  setSelectedPlace(null); // Clear place selection when using map
+                }}
+                placeholder="Search for a location (e.g., Yosemite National Park)"
+              />
+            </div>
             
             {/* Manual input fields as fallback */}
             <details className="cursor-pointer">

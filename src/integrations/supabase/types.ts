@@ -687,6 +687,13 @@ export type Database = {
           longitude: number | null
           parent_id: string | null
           photos: Json | null
+          place_address: string | null
+          place_id: string | null
+          place_name: string | null
+          place_photos: Json | null
+          place_rating: number | null
+          place_types: string[] | null
+          place_user_ratings_total: number | null
           primary_photo_url: string | null
           roses: Json | null
           state: string | null
@@ -711,6 +718,13 @@ export type Database = {
           longitude?: number | null
           parent_id?: string | null
           photos?: Json | null
+          place_address?: string | null
+          place_id?: string | null
+          place_name?: string | null
+          place_photos?: Json | null
+          place_rating?: number | null
+          place_types?: string[] | null
+          place_user_ratings_total?: number | null
           primary_photo_url?: string | null
           roses?: Json | null
           state?: string | null
@@ -735,6 +749,13 @@ export type Database = {
           longitude?: number | null
           parent_id?: string | null
           photos?: Json | null
+          place_address?: string | null
+          place_id?: string | null
+          place_name?: string | null
+          place_photos?: Json | null
+          place_rating?: number | null
+          place_types?: string[] | null
+          place_user_ratings_total?: number | null
           primary_photo_url?: string | null
           roses?: Json | null
           state?: string | null
