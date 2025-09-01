@@ -17,7 +17,7 @@ const Trip = () => {
   const { retros, loading, updateRetro, updateLocalRetro } = useRetros();
   const { profile } = useAuth();
   const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
-  const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child'>('featured');
+  const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child' | 'make_child'>('featured');
 
   const retro = useMemo(() => retros.find(r => r.id === id), [retros, id]);
   const currentUserName = profile?.display_name || 'You';
@@ -121,6 +121,11 @@ const Trip = () => {
     setSaveAsDialogOpen(true);
   };
 
+  const handleAddSubRetro = () => {
+    setSaveAsMode('make_child');
+    setSaveAsDialogOpen(true);
+  };
+
   // Convert to legacy Retro type expected by RetroCard
   const legacyRetro = {
     id: retro.id,
@@ -186,7 +191,7 @@ const Trip = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleAddChildRetro}
+                onClick={handleAddSubRetro}
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
