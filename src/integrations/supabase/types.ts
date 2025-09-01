@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -210,6 +210,7 @@ export type Database = {
           created_at: string | null
           from_user_id: string | null
           id: string
+          normalized_to_email: string | null
           status: string | null
           to_email: string
           updated_at: string | null
@@ -218,6 +219,7 @@ export type Database = {
           created_at?: string | null
           from_user_id?: string | null
           id?: string
+          normalized_to_email?: string | null
           status?: string | null
           to_email: string
           updated_at?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           created_at?: string | null
           from_user_id?: string | null
           id?: string
+          normalized_to_email?: string | null
           status?: string | null
           to_email?: string
           updated_at?: string | null
@@ -278,6 +281,67 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      node_attachments: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          node_id: string
+          storage_path: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          node_id: string
+          storage_path: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          node_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "node_attachments_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "retro_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      node_tags: {
+        Row: {
+          created_at: string
+          id: string
+          node_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          node_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          node_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "node_tags_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "retro_nodes"
             referencedColumns: ["id"]
           },
         ]
@@ -370,6 +434,88 @@ export type Database = {
         }
         Relationships: []
       }
+      rbt_entries: {
+        Row: {
+          author_id: string
+          bud: string | null
+          created_at: string
+          id: string
+          is_current: boolean | null
+          node_id: string
+          rose: string | null
+          thorn: string | null
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          author_id: string
+          bud?: string | null
+          created_at?: string
+          id?: string
+          is_current?: boolean | null
+          node_id: string
+          rose?: string | null
+          thorn?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          author_id?: string
+          bud?: string | null
+          created_at?: string
+          id?: string
+          is_current?: boolean | null
+          node_id?: string
+          rose?: string | null
+          thorn?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbt_entries_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "retro_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          id: string
+          message: string
+          source: string | null
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          message: string
+          source?: string | null
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          message?: string
+          source?: string | null
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retro_attendees: {
         Row: {
           created_at: string
@@ -399,6 +545,124 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_retro_attendees_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retro_nodes: {
+        Row: {
+          created_at: string
+          created_by: string
+          end_date: string | null
+          id: string
+          metadata: Json | null
+          order_index: number | null
+          parent_id: string | null
+          path: string | null
+          start_date: string | null
+          subtitle: string | null
+          title: string
+          type: Database["public"]["Enums"]["node_type"]
+          updated_at: string
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          order_index?: number | null
+          parent_id?: string | null
+          path?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title: string
+          type: Database["public"]["Enums"]["node_type"]
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          order_index?: number | null
+          parent_id?: string | null
+          path?: string | null
+          start_date?: string | null
+          subtitle?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["node_type"]
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retro_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "retro_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retros: {
+        Row: {
+          bud: string[] | null
+          context_type: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_public: boolean | null
+          location_name: string | null
+          rose: string[] | null
+          start_date: string | null
+          tags: string[] | null
+          thorn: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bud?: string[] | null
+          context_type?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_public?: boolean | null
+          location_name?: string | null
+          rose?: string[] | null
+          start_date?: string | null
+          tags?: string[] | null
+          thorn?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bud?: string[] | null
+          context_type?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_public?: boolean | null
+          location_name?: string | null
+          rose?: string[] | null
+          start_date?: string | null
+          tags?: string[] | null
+          thorn?: string[] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retros_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
@@ -528,6 +792,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite_txn: {
+        Args: { p_from_user: string; p_invite_id: string; p_to_user: string }
+        Returns: undefined
+      }
       generate_unique_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -542,7 +810,8 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      node_type: "TRIP" | "CATEGORY" | "CITY" | "VENUE" | "EVENT" | "NOTEBOOK"
+      visibility_type: "PUBLIC" | "FRIENDS" | "PRIVATE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -669,6 +938,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      node_type: ["TRIP", "CATEGORY", "CITY", "VENUE", "EVENT", "NOTEBOOK"],
+      visibility_type: ["PUBLIC", "FRIENDS", "PRIVATE"],
+    },
   },
 } as const
