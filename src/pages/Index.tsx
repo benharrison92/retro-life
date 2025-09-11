@@ -167,7 +167,7 @@ const Index = () => {
               <p className="text-muted-foreground mb-4">
                 Create your first journey to start documenting your experiences
               </p>
-              <Button onClick={() => navigate('/create')}>
+              <Button onClick={() => navigate('/create-retro?type=parent')}>
                 Create Journey
               </Button>
             </CardContent>

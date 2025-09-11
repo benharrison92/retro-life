@@ -29,6 +29,11 @@ interface RetroFormProps {
   }, attendeeUsers?: UserProfile[]) => void;
   currentUserName: string;
   feedbackSpaceMode?: boolean;
+  isCreatingParent?: boolean;
+  parentContext?: {
+    title: string;
+    eventType: string;
+  };
   initialData?: {
     title?: string;
     locationName?: string;
@@ -241,7 +246,7 @@ const RBTSection = React.memo(({
   );
 });
 
-export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpaceMode = false, initialData }: RetroFormProps) => {
+export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpaceMode = false, isCreatingParent = false, parentContext, initialData }: RetroFormProps) => {
   const [title, setTitle] = useState(retro?.title || initialData?.title || '');
   const [eventType, setEventType] = useState(retro?.eventType || 'Personal');
   const [date, setDate] = useState(retro?.date || new Date().toISOString().split('T')[0]);
@@ -425,7 +430,13 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
             <h2 className="text-2xl font-bold">
               {feedbackSpaceMode 
                 ? 'Add Feedback to Event' 
-                : retro ? 'Edit Retrospective' : 'Create New Retrospective'}
+                : retro 
+                  ? 'Edit Retrospective'
+                  : isCreatingParent
+                    ? 'Create New Parent Event'
+                    : parentContext
+                      ? `Add Sub-Event to "${parentContext.title}"`
+                      : 'Create New Retrospective'}
             </h2>
             <Button onClick={onClose} variant="ghost" size="sm">
               <X className="w-5 h-5" />

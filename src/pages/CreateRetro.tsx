@@ -18,10 +18,12 @@ const CreateRetro = () => {
   const feedbackSpaceId = searchParams.get('feedbackSpace');
   const parentId = searchParams.get('parent_id');
   const editId = searchParams.get('edit');
+  const type = searchParams.get('type'); // 'parent' for new parent retros
   const [feedbackSpace, setFeedbackSpace] = useState(null);
   const [parentRetro, setParentRetro] = useState(null);
   const [editRetro, setEditRetro] = useState(null);
   const [loading, setLoading] = useState(!!feedbackSpaceId || !!parentId || !!editId);
+  const [isCreatingParent, setIsCreatingParent] = useState(type === 'parent');
 
   useEffect(() => {
     const loadData = async () => {
@@ -202,6 +204,11 @@ const CreateRetro = () => {
           onSave={handleSave}
           currentUserName={user?.email || 'Anonymous'}
           feedbackSpaceMode={!!feedbackSpaceId}
+          isCreatingParent={isCreatingParent}
+          parentContext={parentRetro ? {
+            title: parentRetro.title,
+            eventType: parentRetro.event_type
+          } : undefined}
           initialData={
             feedbackSpace ? {
               title: feedbackSpace.title,

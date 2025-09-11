@@ -21,6 +21,7 @@ import { AddRBTDialog } from "./AddRBTDialog";
 import { useSearchParams } from "react-router-dom";
 import ReminderPrompt from './ReminderPrompt';
 import QuickRBTComposer from './QuickRBTComposer';
+import { RetroCreationFlow } from './RetroCreationFlow';
 
 function cryptoRandomId(){ try{ return crypto.randomUUID(); } catch{ return Math.random().toString(36).slice(2); } }
 
@@ -80,6 +81,7 @@ export const RetroApp = () => {
   const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
   const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child' | 'make_child'>('featured');
   const [selectedRetroForSaveAs, setSelectedRetroForSaveAs] = useState<Retrospective | null>(null);
+  const [showCreationFlow, setShowCreationFlow] = useState(false);
 
   const handleSaveAsFeatured = (retro: Retrospective) => {
     setSelectedRetroForSaveAs(retro);
@@ -190,7 +192,7 @@ export const RetroApp = () => {
 
   const handleOpenCreateModal = () => {
     setEditingRetro(null);
-    setShowCreateModal(true);
+    setShowCreationFlow(true);
   };
 
   const handleEditRetro = async (retro: Retro) => {
@@ -237,6 +239,10 @@ export const RetroApp = () => {
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
     setEditingRetro(null);
+  };
+
+  const handleCloseCreationFlow = () => {
+    setShowCreationFlow(false);
   };
 
   const handleSaveRetro = async (legacyRetroData: Omit<Retro, 'id' | 'createdAt' | 'updatedAt'> & {
@@ -536,6 +542,12 @@ export const RetroApp = () => {
           />
         )}
 
+        {showCreationFlow && (
+          <RetroCreationFlow
+            onClose={handleCloseCreationFlow}
+          />
+        )}
+
         {showConfirmModal && retroToDelete && (
           <ConfirmDialog
             title="Delete Retrospective"
@@ -585,7 +597,7 @@ export const RetroApp = () => {
                 size="lg"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Create New Retro
+                Create New Experience
               </Button>
                 <Button
   variant="outline"
@@ -819,6 +831,12 @@ export const RetroApp = () => {
           onClose={handleCloseCreateModal}
           onSave={handleSaveRetro}
           currentUserName={currentUserName}
+        />
+      )}
+
+      {showCreationFlow && (
+        <RetroCreationFlow
+          onClose={handleCloseCreationFlow}
         />
       )}
 
