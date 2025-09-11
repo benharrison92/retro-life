@@ -24,6 +24,12 @@ export type Database = {
           item_type: string
           original_item_id: string
           original_retro_id: string
+          place_address: string | null
+          place_id: string | null
+          place_name: string | null
+          place_rating: number | null
+          place_types: string[] | null
+          place_user_ratings_total: number | null
           saved_from_user_id: string
           saved_from_user_name: string
           user_id: string
@@ -37,6 +43,12 @@ export type Database = {
           item_type: string
           original_item_id: string
           original_retro_id: string
+          place_address?: string | null
+          place_id?: string | null
+          place_name?: string | null
+          place_rating?: number | null
+          place_types?: string[] | null
+          place_user_ratings_total?: number | null
           saved_from_user_id: string
           saved_from_user_name: string
           user_id: string
@@ -50,6 +62,12 @@ export type Database = {
           item_type?: string
           original_item_id?: string
           original_retro_id?: string
+          place_address?: string | null
+          place_id?: string | null
+          place_name?: string | null
+          place_rating?: number | null
+          place_types?: string[] | null
+          place_user_ratings_total?: number | null
           saved_from_user_id?: string
           saved_from_user_name?: string
           user_id?: string

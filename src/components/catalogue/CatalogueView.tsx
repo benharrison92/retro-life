@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, MapPin, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useCatalogueItems } from '@/hooks/useCatalogues';
 import { CatalogueMembersDialog } from './CatalogueMembersDialog';
-import { Catalogue } from '@/lib/supabase';
+import { CatalogueItemDiscussion } from './CatalogueItemDiscussion';
+import { Catalogue, CatalogueItem } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 interface CatalogueViewProps {
@@ -17,6 +18,7 @@ interface CatalogueViewProps {
 export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
   const { items, loading, removeItemFromCatalogue } = useCatalogueItems(catalogue.id);
   const { user } = useAuth();
+  const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
   
   const isOwner = user?.id === catalogue.user_id;
 
@@ -74,7 +76,7 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
       ) : (
         <div className="space-y-4">
           {items.map((item) => (
-            <Card key={item.id}>
+            <Card key={item.id} className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -88,31 +90,69 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
                       </p>
                     </div>
                   </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Remove Item</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to remove this item from your catalogue?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => removeItemFromCatalogue(item.id)}>
-                          Remove
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedItem(item);
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Remove Item</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to remove this item from your catalogue?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => removeItemFromCatalogue(item.id)}>
+                            Remove
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent onClick={() => setSelectedItem(item)}>
                 <p className="mb-3">{item.item_text}</p>
+                
+                {/* Location display */}
+                {item.place_name && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-auto p-2 text-xs mb-3 w-full justify-start hover:bg-muted/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
+                      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                    }}
+                  >
+                    <MapPin className="w-3 h-3 mr-2 text-blue-600" />
+                    <div className="text-left flex-1">
+                      <div className="font-medium text-foreground">{item.place_name}</div>
+                      {item.place_address && (
+                        <div className="text-muted-foreground text-xs truncate">{item.place_address}</div>
+                      )}
+                      {item.place_rating && (
+                        <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
+                      )}
+                    </div>
+                  </Button>
+                )}
+
                 {item.item_tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {item.item_tags.map((tag, index) => (
@@ -126,6 +166,15 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Discussion Dialog */}
+      {selectedItem && (
+        <CatalogueItemDiscussion
+          item={selectedItem}
+          isOpen={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+        />
       )}
     </div>
   );

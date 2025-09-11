@@ -204,7 +204,15 @@ export const useCatalogueItems = (catalogueId?: string) => {
     itemText: string,
     itemTags: string[],
     savedFromUserId: string,
-    savedFromUserName: string
+    savedFromUserName: string,
+    placeData?: {
+      place_id?: string;
+      place_name?: string;
+      place_address?: string;
+      place_rating?: number;
+      place_user_ratings_total?: number;
+      place_types?: string[];
+    }
   ) => {
     if (!user) return;
 
@@ -220,7 +228,15 @@ export const useCatalogueItems = (catalogueId?: string) => {
           item_text: itemText,
           item_tags: itemTags,
           saved_from_user_id: savedFromUserId,
-          saved_from_user_name: savedFromUserName
+          saved_from_user_name: savedFromUserName,
+          ...(placeData && {
+            place_id: placeData.place_id,
+            place_name: placeData.place_name,
+            place_address: placeData.place_address,
+            place_rating: placeData.place_rating,
+            place_user_ratings_total: placeData.place_user_ratings_total,
+            place_types: placeData.place_types,
+          }),
         })
         .select()
         .single();

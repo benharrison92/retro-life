@@ -83,6 +83,7 @@ export interface RBTItem {
   place_name?: string;
   place_address?: string;
   place_rating?: number;
+  place_user_ratings_total?: number;
   place_types?: string[];
 }
 
@@ -133,4 +134,11 @@ export interface CatalogueItem {
   saved_from_user_id: string;
   saved_from_user_name: string;
   created_at: string;
+  // Google Places data
+  place_id?: string;
+  place_name?: string;
+  place_address?: string;
+  place_rating?: number;
+  place_user_ratings_total?: number;
+  place_types?: string[];
 }
