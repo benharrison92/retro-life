@@ -48,6 +48,18 @@ export const SaveToCatalogueDialog = ({
     }
 
     if (catalogueId) {
+      console.log('Saving item to catalogue with place data:', {
+        item,
+        placeData: item.place_name ? {
+          place_id: item.place_id,
+          place_name: item.place_name,
+          place_address: item.place_address,
+          place_rating: item.place_rating,
+          place_user_ratings_total: item.place_user_ratings_total,
+          place_types: item.place_types,
+        } : 'No place data'
+      });
+
       await addItemToCatalogue(
         catalogueId,
         retroId,
