@@ -102,18 +102,22 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
                     try {
                       let mapsUrl;
                       if ((item as any).place_id) {
-                        // Use place_id for more accurate results
-                        mapsUrl = `https://www.google.com/maps/place/?q=place_id:${(item as any).place_id}`;
+                        // More reliable maps domain
+                        mapsUrl = `https://maps.google.com/?cid=${(item as any).place_id}`;
                       } else {
-                        // Fallback to search query
                         const query = encodeURIComponent(`${(item as any).place_name} ${(item as any).place_address || ''}`);
-                        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+                        mapsUrl = `https://maps.google.com/?q=${query}`;
                       }
-                      window.open(mapsUrl, '_blank');
+                      const newWindow = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                      if (!newWindow) {
+                        navigator.clipboard?.writeText(mapsUrl);
+                        alert('Link copied to clipboard! Paste it in your browser to view the location.');
+                      }
                     } catch (error) {
                       console.error('Error opening Google Maps:', error);
-                      // Fallback: copy location to clipboard
-                      navigator.clipboard?.writeText(`${(item as any).place_name} ${(item as any).place_address || ''}`);
+                      const locationText = `${(item as any).place_name} ${(item as any).place_address || ''}`;
+                      navigator.clipboard?.writeText(locationText);
+                      alert('Location copied to clipboard!');
                     }
                   }}
                 >

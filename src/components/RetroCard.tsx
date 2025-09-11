@@ -161,18 +161,26 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                 try {
                   let mapsUrl;
                   if (item.place_id) {
-                    // Use place_id for more accurate results
-                    mapsUrl = `https://www.google.com/maps/place/?q=place_id:${item.place_id}`;
+                    // Use Google Maps with place_id - more reliable format
+                    mapsUrl = `https://maps.google.com/?cid=${item.place_id}`;
                   } else {
-                    // Fallback to search query
+                    // Use direct Google Maps search URL
                     const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
-                    mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+                    mapsUrl = `https://maps.google.com/?q=${query}`;
                   }
-                  window.open(mapsUrl, '_blank');
+                  // Open in new tab with noopener for security
+                  const newWindow = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                  if (!newWindow) {
+                    // Fallback if popup blocked - copy to clipboard and show message
+                    navigator.clipboard?.writeText(mapsUrl);
+                    alert('Link copied to clipboard! Paste it in your browser to view the location.');
+                  }
                 } catch (error) {
                   console.error('Error opening Google Maps:', error);
-                  // Fallback: copy location to clipboard
-                  navigator.clipboard?.writeText(`${item.place_name} ${item.place_address || ''}`);
+                  // Final fallback: copy location name to clipboard
+                  const locationText = `${item.place_name} ${item.place_address || ''}`;
+                  navigator.clipboard?.writeText(locationText);
+                  alert('Location copied to clipboard!');
                 }
               }}
             >
