@@ -98,7 +98,8 @@ const Index = () => {
 
   console.log('Index: Rendering RetroApp for user', user.id);
   return (
-    <>
+<>
+      <div id="retro-root"><RetroApp /></div>
       {/* Primary Parent Trips Section - FIRST */}
       <section className="container py-8">
         <div className="flex items-center justify-between mb-6">
@@ -171,7 +172,6 @@ const Index = () => {
         </div>
       </section>
 
-      <div id="retro-root"><RetroApp /></div>
       
       {/* Enhanced Retro Features */}
       <section className="container py-6">
