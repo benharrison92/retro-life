@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +29,7 @@ export function FriendsList({ open, onOpenChange }: FriendsListProps) {
   
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open && user) {
@@ -237,7 +239,10 @@ export function FriendsList({ open, onOpenChange }: FriendsListProps) {
                   <Card key={friend.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 rounded-lg p-2 transition-colors" onClick={() => {
+                          onOpenChange(false);
+                          navigate(`/user/${friend.id}`);
+                        }}>
                           <Avatar>
                             <AvatarImage src={friend.avatar_url} />
                             <AvatarFallback>
@@ -245,7 +250,7 @@ export function FriendsList({ open, onOpenChange }: FriendsListProps) {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{friend.display_name}</p>
+                            <p className="font-medium hover:text-primary transition-colors">{friend.display_name}</p>
                             <p className="text-sm text-muted-foreground">{friend.email}</p>
                           </div>
                         </div>
