@@ -385,7 +385,13 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
     setAddDialogForm(prev => ({ ...prev, isOpen: false }));
   }, []);
 
-  const handleFormAddSubmit = useCallback((text: string, tags: string[]) => {
+  const handleFormAddSubmit = useCallback((text: string, tags: string[], placeData?: {
+    place_id?: string;
+    place_name?: string;
+    place_address?: string;
+    place_rating?: number;
+    place_types?: string[];
+  }) => {
     const trimmed = text.trim();
     if (!trimmed) return;
     const newItem: RBTItem = {
@@ -394,7 +400,15 @@ export const RetroForm = ({ retro, onClose, onSave, currentUserName, feedbackSpa
       tags,
       comments: [],
       ownerName: currentUserName,
-      photos: []
+      photos: [],
+      // Add place data if provided
+      ...(placeData && {
+        place_id: placeData.place_id,
+        place_name: placeData.place_name,
+        place_address: placeData.place_address,
+        place_rating: placeData.place_rating,
+        place_types: placeData.place_types,
+      })
     };
     const setters = { roses: setRoses, buds: setBuds, thorns: setThorns };
     setters[addDialogForm.type](prev => [...prev, newItem]);

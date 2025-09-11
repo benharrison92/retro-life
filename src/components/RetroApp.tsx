@@ -387,8 +387,14 @@ export const RetroApp = () => {
     });
   };
 
-  const handleSubmitNewItem = async (text: string, tags: string[]) => {
-    console.log('handleSubmitNewItem called:', { text, tags, addItemDialog });
+  const handleSubmitNewItem = async (text: string, tags: string[], placeData?: {
+    place_id?: string;
+    place_name?: string;
+    place_address?: string;
+    place_rating?: number;
+    place_types?: string[];
+  }) => {
+    console.log('handleSubmitNewItem called:', { text, tags, placeData, addItemDialog });
     const { retroId, type } = addItemDialog;
     const retro = retros.find(r => r.id === retroId);
     if (!retro) return;
@@ -399,7 +405,15 @@ export const RetroApp = () => {
       tags,
       comments: [],
       ownerName: currentUserName,
-      photos: []
+      photos: [],
+      // Add place data if provided
+      ...(placeData && {
+        place_id: placeData.place_id,
+        place_name: placeData.place_name,
+        place_address: placeData.place_address,
+        place_rating: placeData.place_rating,
+        place_types: placeData.place_types,
+      })
     };
 
     const updatedRetro = {

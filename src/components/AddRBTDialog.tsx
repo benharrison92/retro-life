@@ -5,12 +5,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, MapPin } from "lucide-react";
+import { PlaceSearch } from "./PlaceSearch";
 
 interface AddRBTDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (text: string, tags: string[]) => void;
+  onSubmit: (text: string, tags: string[], placeData?: {
+    place_id?: string;
+    place_name?: string;
+    place_address?: string;
+    place_rating?: number;
+    place_types?: string[];
+  }) => void;
   type: 'roses' | 'buds' | 'thorns';
 }
 
@@ -39,6 +46,13 @@ export const AddRBTDialog = ({ isOpen, onClose, onSubmit, type }: AddRBTDialogPr
   const [text, setText] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<{
+    place_id?: string;
+    place_name?: string;
+    place_address?: string;
+    place_rating?: number;
+    place_types?: string[];
+  } | null>(null);
 
   const config = typeConfig[type];
 
@@ -57,13 +71,24 @@ export const AddRBTDialog = ({ isOpen, onClose, onSubmit, type }: AddRBTDialogPr
   const handleSubmit = () => {
     if (!text.trim()) return;
     
-    onSubmit(text.trim(), tags);
+    onSubmit(text.trim(), tags, selectedPlace || undefined);
     
     // Reset form
     setText('');
     setTags([]);
     setTagInput('');
+    setSelectedPlace(null);
     onClose();
+  };
+
+  const handlePlaceSelect = (place: any) => {
+    setSelectedPlace({
+      place_id: place.place_id,
+      place_name: place.name,
+      place_address: place.formatted_address,
+      place_rating: place.rating,
+      place_types: place.types
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -145,6 +170,38 @@ export const AddRBTDialog = ({ isOpen, onClose, onSubmit, type }: AddRBTDialogPr
                     </Button>
                   </Badge>
                 ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              Location (optional)
+            </Label>
+            <PlaceSearch
+              onPlaceSelect={handlePlaceSelect}
+              placeholder="Search for a place related to this item..."
+              className="mt-1"
+            />
+            {selectedPlace?.place_name && (
+              <div className="mt-2 p-2 bg-muted rounded-lg text-sm">
+                <div className="font-medium">{selectedPlace.place_name}</div>
+                {selectedPlace.place_address && (
+                  <div className="text-muted-foreground text-xs">{selectedPlace.place_address}</div>
+                )}
+                {selectedPlace.place_rating && (
+                  <div className="text-muted-foreground text-xs">⭐ {selectedPlace.place_rating}/5</div>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedPlace(null)}
+                  className="h-6 px-2 text-xs mt-1"
+                >
+                  Remove location
+                </Button>
               </div>
             )}
           </div>
