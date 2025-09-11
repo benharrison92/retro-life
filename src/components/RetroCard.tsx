@@ -293,11 +293,15 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
       comments: [...(item.comments || []), newComment]
     };
 
-    onUpdateItem(retro.id, itemType, item.id, updatedItem);
+    // Prefer updating the actual source retro if this is an aggregated child item
+    const targetRetroId = (item as any)?.source?.retroId || retro.id;
+    console.log('Adding comment', { itemType, itemId: item.id, targetRetroId, newComment });
+
+    onUpdateItem(targetRetroId, itemType, item.id, updatedItem);
     setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
 
     // Notify tagged friends
-    await notifyTaggedFriends(commentText, retro.id, item.id, retro.title);
+    await notifyTaggedFriends(commentText, targetRetroId, item.id, retro.title);
   };
 
   const handleUpdateItemPhoto = async (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {

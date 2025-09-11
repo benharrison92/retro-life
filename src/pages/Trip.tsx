@@ -86,27 +86,19 @@ const Trip = () => {
 
   // Minimal handlers to support R/B/T interactions
   const handleUpdateItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: any) => {
-    // Find which retro actually contains this item (could be parent or child)
-    let targetRetro = retros.find(rr => rr.id === retroId);
-    
-    // If the main retro doesn't have this item, check child retros
-    if (targetRetro && !(targetRetro as any)[itemType]?.find((item: any) => item.id === itemId)) {
-      const childRetros = retros.filter(r => r.parent_id === retroId);
-      for (const childRetro of childRetros) {
-        if ((childRetro as any)[itemType]?.find((item: any) => item.id === itemId)) {
-          targetRetro = childRetro;
-          break;
-        }
-      }
-    }
-    
+    // Find the retro that actually contains this item (search all retros)
+    let targetRetro = retros.find(r => (r as any)[itemType]?.some((it: any) => it.id === itemId))
+      || retros.find(r => r.id === retroId);
+
     if (!targetRetro) return;
-    
-    const updated = { 
-      ...targetRetro, 
-      [itemType]: (targetRetro as any)[itemType].map((it: any) => it.id === itemId ? updatedItem : it) 
+
+    console.log('handleUpdateItem: updating', { targetRetroId: targetRetro.id, itemType, itemId });
+
+    const updated = {
+      ...targetRetro,
+      [itemType]: (targetRetro as any)[itemType].map((it: any) => it.id === itemId ? updatedItem : it)
     };
-    
+
     updateLocalRetro(targetRetro.id, updated);
     await updateRetro(targetRetro.id, updated);
     await refreshChildRetros();
