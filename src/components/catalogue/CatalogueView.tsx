@@ -136,8 +136,22 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
                     className="h-auto p-2 text-xs mb-3 w-full justify-start hover:bg-muted/50"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
-                      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                      try {
+                        let mapsUrl;
+                        if (item.place_id) {
+                          // Use place_id for more accurate results
+                          mapsUrl = `https://www.google.com/maps/place/?q=place_id:${item.place_id}`;
+                        } else {
+                          // Fallback to search query
+                          const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
+                          mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+                        }
+                        window.open(mapsUrl, '_blank');
+                      } catch (error) {
+                        console.error('Error opening Google Maps:', error);
+                        // Fallback: copy location to clipboard
+                        navigator.clipboard?.writeText(`${item.place_name} ${item.place_address || ''}`);
+                      }
                     }}
                   >
                     <MapPin className="w-3 h-3 mr-2 text-blue-600" />

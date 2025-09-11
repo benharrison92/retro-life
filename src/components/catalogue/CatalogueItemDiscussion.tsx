@@ -99,8 +99,22 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
                   size="sm"
                   className="h-auto p-2 text-xs mb-3 justify-start hover:bg-muted/50"
                   onClick={() => {
-                    const query = encodeURIComponent(`${(item as any).place_name} ${(item as any).place_address || ''}`);
-                    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                    try {
+                      let mapsUrl;
+                      if ((item as any).place_id) {
+                        // Use place_id for more accurate results
+                        mapsUrl = `https://www.google.com/maps/place/?q=place_id:${(item as any).place_id}`;
+                      } else {
+                        // Fallback to search query
+                        const query = encodeURIComponent(`${(item as any).place_name} ${(item as any).place_address || ''}`);
+                        mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+                      }
+                      window.open(mapsUrl, '_blank');
+                    } catch (error) {
+                      console.error('Error opening Google Maps:', error);
+                      // Fallback: copy location to clipboard
+                      navigator.clipboard?.writeText(`${(item as any).place_name} ${(item as any).place_address || ''}`);
+                    }
                   }}
                 >
                   <MapPin className="w-3 h-3 mr-2 text-blue-600" />
