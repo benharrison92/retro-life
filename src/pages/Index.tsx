@@ -202,6 +202,51 @@ const Index = () => {
           ))}
         </div>
       </section>
+
+      {/* All Retros Section */}
+      <section className="container py-8 border-t">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-foreground">All Retros</h2>
+          {retros.length > 9 && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/retros')}
+              className="flex items-center gap-2"
+            >
+              View All ({retros.length})
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {retros.slice(0, 9).map((retro) => {
+            const retroPost = {
+              id: retro.id,
+              title: retro.title,
+              excerpt: retro.event_type ? `${retro.event_type} — ${retro.date}` : retro.date,
+              images: [{ url: retro.primaryPhotoUrl || '/placeholder.svg', alt: retro.title }],
+              author: { id: retro.user_id, name: (retro as any).ownerName || 'You', avatarUrl: null },
+              createdAt: retro.created_at,
+              location: { name: retro.location_name || retro.city || retro.state || '' },
+              likeCount: 0,
+              commentCount: 0,
+              bookmarked: false,
+              hasLiked: false,
+            };
+            
+            return (
+              <PostCard
+                key={retro.id}
+                {...retroPost}
+                onOpen={(id) => handleOpen(id)}
+                onShare={(id) => handleShare(id)}
+                onLikeToggle={async (id, next) => console.log('like', id, next)}
+                onBookmarkToggle={async (id, next) => console.log('bookmark', id, next)}
+              />
+            );
+          })}
+         </div>
+      </section>
     </>
   );
 };
