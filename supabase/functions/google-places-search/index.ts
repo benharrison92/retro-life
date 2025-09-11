@@ -43,8 +43,8 @@ serve(async (req) => {
       searchUrl += `&location=${location.lat},${location.lng}&radius=50000`
     }
     
-    // Focus on restaurants and similar places
-    searchUrl += '&type=restaurant|cafe|food|establishment'
+    // Include all relevant place types: restaurants, hotels, attractions, museums, etc.
+    // Remove type restriction to allow broader search including hotels, attractions, landmarks
 
     console.log('Searching places with query:', query)
     
