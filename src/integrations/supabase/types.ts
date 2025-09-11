@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalogue_discussions: {
+        Row: {
+          catalogue_item_id: string
+          created_at: string
+          id: string
+          message: string
+          tagged_user_ids: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalogue_item_id: string
+          created_at?: string
+          id?: string
+          message: string
+          tagged_user_ids?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalogue_item_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          tagged_user_ids?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       catalogue_items: {
         Row: {
           catalogue_id: string

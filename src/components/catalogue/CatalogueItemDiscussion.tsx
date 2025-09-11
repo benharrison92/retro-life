@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { MessageCircle, Send, MapPin, X } from 'lucide-react';
+import { MessageCircle, Send, MapPin, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CatalogueFriendTagInput } from './CatalogueFriendTagInput';
+import { useTaggedComments } from '@/hooks/useTaggedComments';
+import { useCatalogueDiscussion } from '@/hooks/useCatalogueDiscussion';
+import { useCatalogueMembers } from '@/hooks/useCatalogueMembers';
+import { useAuth } from '@/hooks/useAuth';
 import { CatalogueItem } from '@/lib/supabase';
 
 interface CatalogueItemDiscussionProps {
@@ -13,18 +18,12 @@ interface CatalogueItemDiscussionProps {
   onClose: () => void;
 }
 
-interface DiscussionMessage {
-  id: string;
-  text: string;
-  authorName: string;
-  timestamp: string;
-  taggedMembers?: string[];
-}
-
 export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItemDiscussionProps) => {
-  const [messages, setMessages] = useState<DiscussionMessage[]>([]);
+  const { user } = useAuth();
+  const { discussions, loading, addDiscussion, deleteDiscussion } = useCatalogueDiscussion(item.id);
+  const { members } = useCatalogueMembers(item.catalogue_id);
+  const { renderCommentWithTags, extractTaggedFriends } = useTaggedComments();
   const [newMessage, setNewMessage] = useState('');
-  const [taggedMembers, setTaggedMembers] = useState<string[]>([]);
 
   const getItemTypeIcon = (type: string) => {
     switch (type) {
@@ -37,27 +36,30 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
 
   const getItemTypeColor = (type: string) => {
     switch (type) {
-      case 'rose': return 'bg-green-100 text-green-800';
-      case 'bud': return 'bg-yellow-100 text-yellow-800';
-      case 'thorn': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'rose': return 'bg-positive-muted text-positive';
+      case 'bud': return 'bg-opportunity-muted text-opportunity';
+      case 'thorn': return 'bg-negative-muted text-negative';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const message: DiscussionMessage = {
-      id: Date.now().toString(),
-      text: newMessage,
-      authorName: 'You', // TODO: Get from auth context
-      timestamp: new Date().toISOString(),
-      taggedMembers: taggedMembers.length > 0 ? [...taggedMembers] : undefined
-    };
+    // Extract tagged friend display names and map to user IDs
+    const taggedDisplayNames = extractTaggedFriends(newMessage);
+    const taggedUserIds: string[] = [];
 
-    setMessages(prev => [...prev, message]);
+    // Map display names to user IDs from catalogue members
+    taggedDisplayNames.forEach(displayName => {
+      const member = members.find(m => m.user_profile?.display_name === displayName);
+      if (member) {
+        taggedUserIds.push(member.user_id);
+      }
+    });
+    
+    await addDiscussion(newMessage, taggedUserIds);
     setNewMessage('');
-    setTaggedMembers([]);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -65,6 +67,10 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const canDeleteDiscussion = (discussion: any) => {
+    return user && (user.id === discussion.user_id);
   };
 
   return (
@@ -93,7 +99,7 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
               <p className="mb-3">{item.item_text}</p>
               
               {/* Location display if available */}
-              {(item as any).place_name && (
+              {item.place_name && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -101,11 +107,11 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
                   onClick={() => {
                     try {
                       let mapsUrl;
-                      if ((item as any).place_id) {
+                      if (item.place_id) {
                         // More reliable maps domain
-                        mapsUrl = `https://maps.google.com/?cid=${(item as any).place_id}`;
+                        mapsUrl = `https://maps.google.com/?cid=${item.place_id}`;
                       } else {
-                        const query = encodeURIComponent(`${(item as any).place_name} ${(item as any).place_address || ''}`);
+                        const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
                         mapsUrl = `https://maps.google.com/?q=${query}`;
                       }
                       const newWindow = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
@@ -115,7 +121,7 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
                       }
                     } catch (error) {
                       console.error('Error opening Google Maps:', error);
-                      const locationText = `${(item as any).place_name} ${(item as any).place_address || ''}`;
+                      const locationText = `${item.place_name} ${item.place_address || ''}`;
                       navigator.clipboard?.writeText(locationText);
                       alert('Location copied to clipboard!');
                     }
@@ -123,12 +129,12 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
                 >
                   <MapPin className="w-3 h-3 mr-2 text-blue-600" />
                   <div className="text-left flex-1">
-                    <div className="font-medium text-foreground">{(item as any).place_name}</div>
-                    {(item as any).place_address && (
-                      <div className="text-muted-foreground text-xs truncate">{(item as any).place_address}</div>
+                    <div className="font-medium text-foreground">{item.place_name}</div>
+                    {item.place_address && (
+                      <div className="text-muted-foreground text-xs truncate">{item.place_address}</div>
                     )}
-                    {(item as any).place_rating && (
-                      <div className="text-muted-foreground text-xs">⭐ {(item as any).place_rating}/5</div>
+                    {item.place_rating && (
+                      <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
                     )}
                   </div>
                 </Button>
@@ -148,28 +154,57 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
 
           {/* Discussion Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
-            {messages.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50 animate-pulse" />
+                <p>Loading discussions...</p>
+              </div>
+            ) : discussions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p>Start a discussion about including this in your trip planner</p>
                 <p className="text-sm">Tag members to get their input on this recommendation</p>
               </div>
             ) : (
-              messages.map((message) => (
-                <Card key={message.id}>
+              discussions.map((discussion) => (
+                <Card key={discussion.id}>
                   <CardContent className="pt-3">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium text-sm">{message.authorName}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={discussion.user_profiles?.avatar_url} />
+                          <AvatarFallback className="text-xs">
+                            {discussion.user_profiles?.display_name?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-sm">
+                          {discussion.user_profiles?.display_name || 'Unknown User'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(discussion.created_at).toLocaleTimeString()}
+                        </span>
+                        {canDeleteDiscussion(discussion) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-1"
+                            onClick={() => deleteDiscussion(discussion.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm">{message.text}</p>
-                    {message.taggedMembers && message.taggedMembers.length > 0 && (
+                    <div className="text-sm">
+                      {renderCommentWithTags(discussion.message)}
+                    </div>
+                    {discussion.tagged_users && discussion.tagged_users.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {message.taggedMembers.map((member, index) => (
+                        {discussion.tagged_users.map((user, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
-                            @{member}
+                            @{user.display_name}
                           </Badge>
                         ))}
                       </div>
@@ -182,30 +217,14 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
 
           {/* Message Input */}
           <div className="space-y-2">
-            {taggedMembers.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {taggedMembers.map((member, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    @{member}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 ml-1"
-                      onClick={() => setTaggedMembers(prev => prev.filter((_, i) => i !== index))}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            )}
             <div className="flex gap-2">
-              <Textarea
+              <CatalogueFriendTagInput
                 placeholder="Share your thoughts about including this in the trip planner... (Use @ to tag members)"
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onChange={setNewMessage}
+                onKeyDown={handleKeyPress}
                 className="min-h-[60px] resize-none"
+                members={members}
               />
               <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
                 <Send className="w-4 h-4" />
