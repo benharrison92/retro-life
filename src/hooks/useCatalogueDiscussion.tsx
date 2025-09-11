@@ -41,16 +41,9 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
 
       if (error) throw error;
 
-      // Fetch user profiles and tagged users for each discussion
+      // Fetch user profiles for each discussion
       const discussionsWithProfiles = await Promise.all(
         (data || []).map(async (discussion: any) => {
-          // Fetch user profile for the discussion author
-          const { data: userProfile } = await supabase
-            .from('user_profiles')
-            .select('display_name, avatar_url')
-            .eq('id', discussion.user_id)
-            .single();
-
           const typedDiscussion: CatalogueDiscussion = {
             id: discussion.id,
             catalogue_item_id: discussion.catalogue_item_id,
@@ -59,10 +52,20 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
             tagged_user_ids: discussion.tagged_user_ids || [],
             created_at: discussion.created_at,
             updated_at: discussion.updated_at,
-            user_profiles: userProfile,
           };
 
-          // Fetch tagged user profiles if any
+          // Fetch user profile for the discussion author
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('display_name, avatar_url')
+            .eq('id', discussion.user_id)
+            .single();
+
+          if (userProfile) {
+            typedDiscussion.user_profiles = userProfile;
+          }
+
+          // Fetch tagged user profiles
           if (discussion.tagged_user_ids && discussion.tagged_user_ids.length > 0) {
             const { data: taggedUsers, error: taggedError } = await supabase
               .from('user_profiles')
@@ -123,10 +126,10 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
         tagged_user_ids: data.tagged_user_ids || [],
         created_at: data.created_at,
         updated_at: data.updated_at,
-        user_profiles: userProfile,
+        user_profiles: userProfile || undefined,
       };
 
-      // Fetch tagged user profiles if any
+      // Fetch tagged user profiles
       if (taggedUserIds.length > 0) {
         const { data: taggedUsers, error: taggedError } = await supabase
           .from('user_profiles')
