@@ -20,6 +20,9 @@ interface RetroCardProps {
     country?: string;
     feedbackSpaceName?: string;
     feedbackSpaceId?: string;
+    roses: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
+    buds: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
+    thorns: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
   };
   onEdit: (retro: Retro) => void;
   onDelete: (retro: Retro) => void;
@@ -119,7 +122,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     type, 
     colorClass 
   }: { 
-    item: RBTItem; 
+    item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
     type: 'roses' | 'buds' | 'thorns';
     colorClass: string;
   }) => {
@@ -134,6 +137,18 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
 
     return (
       <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale`}>
+        {/* Source tag for child items */}
+        {item.source?.isChildItem && (
+          <div className="mb-2">
+            <Badge 
+              variant="outline" 
+              className="text-xs text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100"
+            >
+              From: {item.source.retroTitle}
+            </Badge>
+          </div>
+        )}
+        
         {/* Creator info */}
         <div className="flex justify-between items-start mb-2">
           <p className="text-sm flex-1">{item.text}</p>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRetros } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
+import { useAggregatedRetro } from '@/hooks/useAggregatedRetro';
 import TripDetail from '@/components/TripDetail';
 import { RetroCard } from '@/components/RetroCard';
 import { AppHeader } from '@/components/AppHeader';
@@ -10,7 +11,7 @@ import { ChildRetrosList } from '@/components/ChildRetrosList';
 import { SaveAsDialog } from '@/components/SaveAsDialog';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Plus, MoreVertical, Globe, Network } from 'lucide-react';
+import { Plus, MoreVertical, Globe, Network, Eye, EyeOff } from 'lucide-react';
 import { AddRBTDialog } from '@/components/AddRBTDialog';
 const Trip = () => {
   const { id } = useParams();
@@ -24,6 +25,9 @@ const Trip = () => {
 
   const retro = useMemo(() => retros.find(r => r.id === id), [retros, id]);
   const currentUserName = profile?.display_name || 'You';
+  
+  // Use aggregated retro hook to get parent + child items
+  const { aggregatedRetro, childItemsCount, showChildItems, toggleChildItems } = useAggregatedRetro(retro);
 
   if (loading) {
     return (
@@ -151,7 +155,7 @@ const Trip = () => {
     setSaveAsDialogOpen(true);
   };
 
-  // Convert to legacy Retro type expected by RetroCard
+  // Convert to legacy Retro type expected by RetroCard with aggregated items
   const legacyRetro = {
     id: retro.id,
     title: retro.title,
@@ -160,9 +164,9 @@ const Trip = () => {
     ownerName: (retro as any).ownerName || currentUserName,
     attendees: retro.attendees || [],
     attendeeUsers: (retro as any).attendeeUsers || [],
-    roses: retro.roses || [],
-    buds: retro.buds || [],
-    thorns: retro.thorns || [],
+    roses: aggregatedRetro.roses,
+    buds: aggregatedRetro.buds,
+    thorns: aggregatedRetro.thorns,
     photos: retro.photos || [],
     primaryPhotoUrl: retro.primaryPhotoUrl,
     locationName: retro.location_name,
@@ -211,7 +215,20 @@ const Trip = () => {
 
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold text-foreground">Reflection (R/B/T)</h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold text-foreground">Reflection (R/B/T)</h2>
+              {childItemsCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleChildItems}
+                  className="gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  {showChildItems ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showChildItems ? 'Hide' : 'Show'} Sub-Retro Items ({childItemsCount})
+                </Button>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
