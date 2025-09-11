@@ -33,6 +33,14 @@ export interface Retrospective {
   feedbackSpaceName?: string; // Name of the feedback space if retro is part of one
   ownerName?: string; // Display name of the user who created the retro
   is_private: boolean; // Privacy setting - when true, only owner can view
+  // Google Places data
+  place_id?: string;
+  place_name?: string;
+  place_address?: string;
+  place_rating?: number;
+  place_user_ratings_total?: number;
+  place_types?: string[];
+  place_photos?: any[];
   created_at: string;
   updated_at: string;
 }

@@ -62,7 +62,17 @@ export const useRetros = () => {
     country: appRetro.country,
     latitude: appRetro.latitude,
     longitude: appRetro.longitude,
+    parent_id: appRetro.parent_id,
     feedback_space_id: appRetro.feedback_space_id,
+    is_private: appRetro.is_private,
+    // Google Places data
+    place_id: appRetro.place_id,
+    place_name: appRetro.place_name,
+    place_address: appRetro.place_address,
+    place_rating: appRetro.place_rating,
+    place_user_ratings_total: appRetro.place_user_ratings_total,
+    place_types: appRetro.place_types,
+    place_photos: appRetro.place_photos as any,
   });
 
   // Fetch retros (own + friends') with attendee users
