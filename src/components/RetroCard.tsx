@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone, Lock } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
@@ -10,7 +9,30 @@ import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
 import { RetroPhoto } from "@/lib/supabase";
 import { SaveToCatalogueDialog } from "./catalogue/SaveToCatalogueDialog";
+import { FriendTagInput } from "./FriendTagInput";
+import { useTaggedComments } from "@/hooks/useTaggedComments";
 import { useAuth } from "@/hooks/useAuth";
+
+interface RetroCardProps {
+  retro: Retro & {
+    locationName?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    feedbackSpaceName?: string;
+    feedbackSpaceId?: string;
+    roses: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
+    buds: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
+    thorns: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
+  };
+  onEdit: (retro: Retro) => void;
+  onDelete: (retro: Retro) => void;
+  onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
+  onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
+  onUserClick?: (userName: string) => void;
+  onUpdateRetro?: (retro: Retro) => void;
+  currentUserName: string;
+}
 
 // Move RBTItemDisplay outside of RetroCard to prevent recreation on re-renders
 const RBTItemDisplay = ({ 
@@ -25,7 +47,8 @@ const RBTItemDisplay = ({
   setCommentInputs,
   onUserClick,
   retro,
-  user
+  user,
+  renderCommentWithTags
 }: { 
   item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
   type: 'roses' | 'buds' | 'thorns';
@@ -39,6 +62,7 @@ const RBTItemDisplay = ({
   onUserClick?: (userName: string) => void;
   retro: any;
   user: any;
+  renderCommentWithTags: (text: string) => JSX.Element;
 }) => {
   const isExpanded = expandedItems[item.id];
   const hasComments = item.comments && item.comments.length > 0;
@@ -195,17 +219,19 @@ const RBTItemDisplay = ({
                           ({new Date(comment.timestamp).toLocaleDateString()})
                         </span>
                       </div>
-                      <p className="text-muted-foreground mt-1">{comment.text}</p>
+                      <p className="text-muted-foreground mt-1">
+                        {renderCommentWithTags(comment.text)}
+                      </p>
                     </div>
                   ))}
                 </div>
               )}
 
               <div className="flex gap-1">
-                <Input
+                <FriendTagInput
                   placeholder="Add comment..."
                   value={commentInputs[item.id] || ''}
-                  onChange={(e) => setCommentInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
+                  onChange={(value) => setCommentInputs(prev => ({ ...prev, [item.id]: value }))}
                   className="text-xs h-7"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -230,29 +256,9 @@ const RBTItemDisplay = ({
   );
 };
 
-interface RetroCardProps {
-  retro: Retro & {
-    locationName?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    feedbackSpaceName?: string;
-    feedbackSpaceId?: string;
-    roses: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
-    buds: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
-    thorns: (RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } })[];
-  };
-  onEdit: (retro: Retro) => void;
-  onDelete: (retro: Retro) => void;
-  onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
-  onAddItem?: (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => void;
-  onUserClick?: (userName: string) => void;
-  onUpdateRetro?: (retro: Retro) => void;
-  currentUserName: string;
-}
-
 export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, onUserClick, onUpdateRetro, currentUserName }: RetroCardProps) => {
   const { user } = useAuth();
+  const { notifyTaggedFriends, renderCommentWithTags } = useTaggedComments();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
 
@@ -271,7 +277,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
   };
 
-  const handleAddComment = (itemType: 'roses' | 'buds' | 'thorns', item: RBTItem) => {
+  const handleAddComment = async (itemType: 'roses' | 'buds' | 'thorns', item: RBTItem) => {
     const commentText = commentInputs[item.id]?.trim();
     if (!commentText) return;
 
@@ -289,6 +295,9 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
 
     onUpdateItem(retro.id, itemType, item.id, updatedItem);
     setCommentInputs(prev => ({ ...prev, [item.id]: '' }));
+
+    // Notify tagged friends
+    await notifyTaggedFriends(commentText, retro.id, item.id, retro.title);
   };
 
   const handleUpdateItemPhoto = async (itemType: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => {
@@ -480,6 +489,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   onUserClick={onUserClick}
                   retro={retro}
                   user={user}
+                  renderCommentWithTags={renderCommentWithTags}
                 />
               ))}
             </div>
@@ -521,6 +531,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   onUserClick={onUserClick}
                   retro={retro}
                   user={user}
+                  renderCommentWithTags={renderCommentWithTags}
                 />
               ))}
             </div>
@@ -540,7 +551,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                 size="sm"
                 className="flex items-center gap-1 text-xs h-7"
               >
-                <span>🌿</span>
+                <span>🌵</span>
                 Add Thorn
               </Button>
             )}
@@ -562,6 +573,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   onUserClick={onUserClick}
                   retro={retro}
                   user={user}
+                  renderCommentWithTags={renderCommentWithTags}
                 />
               ))}
             </div>
@@ -569,40 +581,31 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
             <p className="text-sm text-muted-foreground italic">No thorns yet</p>
           )}
         </div>
-      </CardContent>
 
-      <div className="p-4 border-t flex justify-between items-center">
-        {/* Permission indicator for non-owners/non-attendees */}
-        {!canAddItems && user && (
-          <div className="text-sm text-muted-foreground italic">
-            You can comment and save items, but only attendees can add new ones
-          </div>
-        )}
-        
-        {/* Edit/Delete buttons - only for owner */}
+        {/* Action buttons for retro owner */}
         {canEditRetro && (
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 pt-4 border-t">
             <Button
-              onClick={() => onEdit(retro)}
               variant="outline"
               size="sm"
+              onClick={() => onEdit(retro)}
               className="flex items-center gap-1"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-3 h-3" />
               Edit
             </Button>
             <Button
-              onClick={() => onDelete(retro)}
-              variant="destructive"
+              variant="outline"
               size="sm"
-              className="flex items-center gap-1"
+              onClick={() => onDelete(retro)}
+              className="flex items-center gap-1 text-destructive hover:text-destructive"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3 h-3" />
               Delete
             </Button>
           </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 };
