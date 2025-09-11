@@ -149,6 +149,32 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
             </Button>
           )}
         </div>
+
+        {/* Location display */}
+        {item.place_name && (
+          <div className="mb-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-auto p-2 text-xs w-full justify-start hover:bg-muted/50"
+              onClick={() => {
+                const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
+                window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+              }}
+            >
+              <MapPin className="w-3 h-3 mr-2 text-blue-600" />
+              <div className="text-left flex-1">
+                <div className="font-medium text-foreground">{item.place_name}</div>
+                {item.place_address && (
+                  <div className="text-muted-foreground text-xs truncate">{item.place_address}</div>
+                )}
+                {item.place_rating && (
+                  <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
+                )}
+              </div>
+            </Button>
+          </div>
+        )}
         
         {/* Show photos for this item */}
         {hasPhotos && (
