@@ -151,6 +151,100 @@ export const useNotifications = () => {
     }
   };
 
+  // Accept friend request from notification
+  const acceptFriendRequest = async (notificationId: string, fromUserId: string) => {
+    if (!user) return;
+
+    try {
+      console.log('Accepting friend request:', { notificationId, fromUserId, currentUserId: user.id });
+
+      // Find the pending friendship record
+      const { data: existingFriendship, error: findError } = await supabase
+        .from('friendships')
+        .select('id')
+        .eq('user_id', fromUserId)
+        .eq('friend_id', user.id)
+        .eq('status', 'pending')
+        .single();
+
+      if (findError) {
+        console.error('Error finding friendship:', findError);
+        throw new Error('Could not find pending friend request');
+      }
+
+      if (!existingFriendship) {
+        throw new Error('No pending friend request found');
+      }
+
+      // Update the friendship status to accepted
+      const { error: updateError } = await supabase
+        .from('friendships')
+        .update({ status: 'accepted' })
+        .eq('id', existingFriendship.id);
+
+      if (updateError) {
+        console.error('Error updating friendship:', updateError);
+        throw updateError;
+      }
+
+      // Mark the notification as read
+      await markAsRead(notificationId);
+
+      toast({
+        title: "Friend request accepted!",
+        description: "You're now friends!",
+      });
+
+      console.log('Friend request accepted successfully');
+    } catch (error: any) {
+      console.error('Error accepting friend request:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept friend request",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Decline friend request from notification
+  const declineFriendRequest = async (notificationId: string, fromUserId: string) => {
+    if (!user) return;
+
+    try {
+      console.log('Declining friend request:', { notificationId, fromUserId, currentUserId: user.id });
+
+      // Delete the pending friendship record
+      const { error: deleteError } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', fromUserId)
+        .eq('friend_id', user.id)
+        .eq('status', 'pending');
+
+      if (deleteError) {
+        console.error('Error declining friendship:', deleteError);
+        throw deleteError;
+      }
+
+      // Delete the notification
+      await deleteNotification(notificationId);
+
+      toast({
+        title: "Friend request declined",
+        description: "The friend request has been declined.",
+      });
+
+      console.log('Friend request declined successfully');
+    } catch (error: any) {
+      console.error('Error declining friend request:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline friend request",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Set up real-time subscription
   useEffect(() => {
     if (!user) return;
@@ -201,6 +295,8 @@ export const useNotifications = () => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    acceptFriendRequest,
+    declineFriendRequest,
     refreshNotifications: fetchNotifications,
   };
 };
