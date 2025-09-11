@@ -488,10 +488,10 @@ export const useRetros = () => {
       if (updates.event_type !== undefined) dbUpdates.event_type = updates.event_type;
       if (updates.date !== undefined) dbUpdates.date = updates.date;
       if (updates.attendees !== undefined) dbUpdates.attendees = updates.attendees;
-      if (updates.roses !== undefined) dbUpdates.roses = updates.roses;
-      if (updates.buds !== undefined) dbUpdates.buds = updates.buds;
-      if (updates.thorns !== undefined) dbUpdates.thorns = updates.thorns;
-      if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
+      if (updates.roses !== undefined) dbUpdates.roses = updates.roses as any;
+      if (updates.buds !== undefined) dbUpdates.buds = updates.buds as any;
+      if (updates.thorns !== undefined) dbUpdates.thorns = updates.thorns as any;
+      if (updates.photos !== undefined) dbUpdates.photos = updates.photos as any;
       if (updates.primaryPhotoUrl !== undefined) dbUpdates.primary_photo_url = updates.primaryPhotoUrl;
       if (updates.location_name !== undefined) dbUpdates.location_name = updates.location_name;
       if (updates.city !== undefined) dbUpdates.city = updates.city;
