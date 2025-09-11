@@ -99,39 +99,7 @@ const Index = () => {
   console.log('Index: Rendering RetroApp for user', user.id);
   return (
     <>
-      <div id="retro-root"><RetroApp /></div>
-      
-      {/* Enhanced Retro Features */}
-      <section className="container py-6">
-        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-primary text-primary-foreground rounded-full">
-                  <Network className="h-6 w-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Hierarchical Retrospectives</CardTitle>
-                  <p className="text-muted-foreground">
-                    Break down your experiences into organized sub-retrospectives - from trips to cities to specific events
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Your retrospectives now support parent-child relationships. Create detailed breakdowns like:
-              <br />
-              <strong>Europe 2025</strong> → <strong>Transportation</strong> → <strong>Flight Experience</strong>
-              <br />
-              <strong>Europe 2025</strong> → <strong>Paris</strong> → <strong>Louvre Museum</strong>
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Primary Parent Trips Section */}
+      {/* Primary Parent Trips Section - FIRST */}
       <section className="container py-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -201,6 +169,38 @@ const Index = () => {
             />
           ))}
         </div>
+      </section>
+
+      <div id="retro-root"><RetroApp /></div>
+      
+      {/* Enhanced Retro Features */}
+      <section className="container py-6">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary text-primary-foreground rounded-full">
+                  <Network className="h-6 w-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Hierarchical Retrospectives</CardTitle>
+                  <p className="text-muted-foreground">
+                    Break down your experiences into organized sub-retrospectives - from trips to cities to specific events
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Your retrospectives now support parent-child relationships. Create detailed breakdowns like:
+              <br />
+              <strong>Europe 2025</strong> → <strong>Transportation</strong> → <strong>Flight Experience</strong>
+              <br />
+              <strong>Europe 2025</strong> → <strong>Paris</strong> → <strong>Louvre Museum</strong>
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
       {/* All Retros Section */}
