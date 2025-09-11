@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCatalogues, useCatalogueItems } from '@/hooks/useCatalogues';
-import { RBTItem } from '@/lib/supabase';
+import { RBTItem, supabase } from '@/lib/supabase';
 
 interface SaveToCatalogueDialogProps {
   retroId: string;
@@ -48,16 +48,54 @@ export const SaveToCatalogueDialog = ({
     }
 
     if (catalogueId) {
-      console.log('Saving item to catalogue with place data:', {
-        item,
-        placeData: item.place_name ? {
+      // Determine place data to save: prefer item-level, fallback to retro-level
+      let placeDataToSave:
+        | {
+            place_id?: string;
+            place_name?: string;
+            place_address?: string;
+            place_rating?: number;
+            place_user_ratings_total?: number;
+            place_types?: string[];
+          }
+        | undefined;
+
+      if (item.place_name) {
+        placeDataToSave = {
           place_id: item.place_id,
           place_name: item.place_name,
           place_address: item.place_address,
           place_rating: item.place_rating,
           place_user_ratings_total: item.place_user_ratings_total,
           place_types: item.place_types,
-        } : 'No place data'
+        };
+      } else {
+        const { data: retro, error } = await supabase
+          .from('retrospectives')
+          .select(
+            'place_id, place_name, place_address, place_rating, place_user_ratings_total, place_types'
+          )
+          .eq('id', retroId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('SaveToCatalogueDialog: Failed to fetch retro place data', error);
+        }
+        if (retro?.place_name) {
+          placeDataToSave = {
+            place_id: retro.place_id as string | undefined,
+            place_name: retro.place_name as string | undefined,
+            place_address: retro.place_address as string | undefined,
+            place_rating: (retro.place_rating as number | null) ?? undefined,
+            place_user_ratings_total: (retro.place_user_ratings_total as number | null) ?? undefined,
+            place_types: (retro.place_types as string[] | null) ?? undefined,
+          };
+        }
+      }
+
+      console.log('Saving item to catalogue with place data:', {
+        item,
+        placeData: placeDataToSave ?? 'No place data',
       });
 
       await addItemToCatalogue(
@@ -69,17 +107,9 @@ export const SaveToCatalogueDialog = ({
         item.tags,
         savedFromUserId,
         savedFromUserName,
-        // Include place data if available
-        item.place_name ? {
-          place_id: item.place_id,
-          place_name: item.place_name,
-          place_address: item.place_address,
-          place_rating: item.place_rating,
-          place_user_ratings_total: item.place_user_ratings_total,
-          place_types: item.place_types,
-        } : undefined
+        placeDataToSave
       );
-      
+
       // Reset and close
       setSelectedCatalogueId('');
       setIsCreatingNew(false);
