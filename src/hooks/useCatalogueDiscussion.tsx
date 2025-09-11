@@ -35,18 +35,22 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
       setLoading(true);
       const { data, error } = await supabase
         .from('catalogue_discussions')
-        .select(`
-          *,
-          user_profiles!user_id(display_name, avatar_url)
-        `)
+        .select('*')
         .eq('catalogue_item_id', catalogueItemId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      // Fetch tagged user profiles for each discussion
-      const discussionsWithTaggedUsers = await Promise.all(
+      // Fetch user profiles and tagged users for each discussion
+      const discussionsWithProfiles = await Promise.all(
         (data || []).map(async (discussion: any) => {
+          // Fetch user profile for the discussion author
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('display_name, avatar_url')
+            .eq('id', discussion.user_id)
+            .single();
+
           const typedDiscussion: CatalogueDiscussion = {
             id: discussion.id,
             catalogue_item_id: discussion.catalogue_item_id,
@@ -55,9 +59,10 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
             tagged_user_ids: discussion.tagged_user_ids || [],
             created_at: discussion.created_at,
             updated_at: discussion.updated_at,
-            user_profiles: discussion.user_profiles,
+            user_profiles: userProfile,
           };
 
+          // Fetch tagged user profiles if any
           if (discussion.tagged_user_ids && discussion.tagged_user_ids.length > 0) {
             const { data: taggedUsers, error: taggedError } = await supabase
               .from('user_profiles')
@@ -72,7 +77,7 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
         })
       );
 
-      setDiscussions(discussionsWithTaggedUsers);
+      setDiscussions(discussionsWithProfiles);
     } catch (error) {
       console.error('Error fetching discussions:', error);
       toast({
@@ -97,13 +102,17 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
           message: message.trim(),
           tagged_user_ids: taggedUserIds,
         })
-        .select(`
-          *,
-          user_profiles!user_id(display_name, avatar_url)
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
+
+      // Fetch user profile for the new discussion
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('display_name, avatar_url')
+        .eq('id', user.id)
+        .single();
 
       // Create properly typed discussion object
       const typedDiscussion: CatalogueDiscussion = {
@@ -114,10 +123,10 @@ export const useCatalogueDiscussion = (catalogueItemId: string) => {
         tagged_user_ids: data.tagged_user_ids || [],
         created_at: data.created_at,
         updated_at: data.updated_at,
-        user_profiles: data.user_profiles as any,
+        user_profiles: userProfile,
       };
 
-      // Fetch tagged user profiles
+      // Fetch tagged user profiles if any
       if (taggedUserIds.length > 0) {
         const { data: taggedUsers, error: taggedError } = await supabase
           .from('user_profiles')
