@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus, MessageCircle, Send, MapPin, Flower, Lock, Users } from "lucide-react";
 import { RBTItem, Comment, Retro } from "./RetroApp";
 import { PhotoUpload } from "./PhotoUpload";
+import { PlaceSearch } from "./PlaceSearch";
 import { RetroPhoto } from "@/lib/supabase";
 import { UserSelector } from "./UserSelector";
 import { UserProfile } from "@/hooks/useRetros";
 import { AddRBTDialog } from "./AddRBTDialog";
 import LocationPicker from "./LocationPicker";
 import { JournalPromptsDialog } from "./JournalPromptsDialog";
-import { PlaceSearch } from "./PlaceSearch";
 
 interface RetroFormProps {
   retro: Retro | null;
@@ -144,6 +144,51 @@ const RBTSection = React.memo(({
               onPhotosChange={(photos) => updateRBTItem(type, index, 'photos', photos)}
               maxPhotos={2}
             />
+
+            {/* Place Search for this item */}
+            <div>
+              <Label className="text-sm font-medium flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                Location (optional)
+              </Label>
+              <PlaceSearch
+                onPlaceSelect={(place) => {
+                  updateRBTItem(type, index, 'place_id', place.place_id);
+                  updateRBTItem(type, index, 'place_name', place.name);
+                  updateRBTItem(type, index, 'place_address', place.formatted_address);
+                  updateRBTItem(type, index, 'place_rating', place.rating);
+                  updateRBTItem(type, index, 'place_types', place.types);
+                }}
+                placeholder="Search for a place related to this item..."
+                className="mt-1"
+              />
+              {item.place_name && (
+                <div className="mt-2 p-2 bg-muted rounded-lg text-sm">
+                  <div className="font-medium">{item.place_name}</div>
+                  {item.place_address && (
+                    <div className="text-muted-foreground text-xs">{item.place_address}</div>
+                  )}
+                  {item.place_rating && (
+                    <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      updateRBTItem(type, index, 'place_id', undefined);
+                      updateRBTItem(type, index, 'place_name', undefined);
+                      updateRBTItem(type, index, 'place_address', undefined);
+                      updateRBTItem(type, index, 'place_rating', undefined);
+                      updateRBTItem(type, index, 'place_types', undefined);
+                    }}
+                    className="h-6 px-2 text-xs mt-1"
+                  >
+                    Remove location
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <div>
               <Label className="text-sm font-medium">Tags (comma-separated)</Label>

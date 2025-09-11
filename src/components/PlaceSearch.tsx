@@ -30,16 +30,20 @@ interface PlaceData {
 
 interface PlaceSearchProps {
   value?: PlaceData | null;
-  onChange: (place: PlaceData | null) => void;
+  onChange?: (place: PlaceData | null) => void;
+  onPlaceSelect?: (place: PlaceData) => void;
   placeholder?: string;
   currentLocation?: { lat: number; lng: number };
+  className?: string;
 }
 
 export const PlaceSearch: React.FC<PlaceSearchProps> = ({
   value,
   onChange,
+  onPlaceSelect,
   placeholder = "Search for a restaurant or place...",
-  currentLocation
+  currentLocation,
+  className
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,10 +101,17 @@ export const PlaceSearch: React.FC<PlaceSearchProps> = ({
 
   const handlePlaceSelect = (place: PlaceData) => {
     setSelectedPlace(place);
+    // If onPlaceSelect is provided, call it immediately (for inline usage)
+    if (onPlaceSelect) {
+      onPlaceSelect(place);
+      setIsOpen(false);
+    }
   };
 
   const handleSave = () => {
-    onChange(selectedPlace);
+    if (onChange && selectedPlace) {
+      onChange(selectedPlace);
+    }
     setIsOpen(false);
   };
 
@@ -119,7 +130,7 @@ export const PlaceSearch: React.FC<PlaceSearchProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start text-left">
+        <Button variant="outline" className={`w-full justify-start text-left ${className || ''}`}>
           <MapPin className="h-4 w-4 mr-2" />
           <span className="truncate">{displayText}</span>
         </Button>

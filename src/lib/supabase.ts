@@ -78,6 +78,12 @@ export interface RBTItem {
   comments: Comment[];
   ownerName?: string;
   photos?: RetroPhoto[];
+  // Google Places data for location tagging
+  place_id?: string;
+  place_name?: string;
+  place_address?: string;
+  place_rating?: number;
+  place_types?: string[];
 }
 
 export interface Comment {
