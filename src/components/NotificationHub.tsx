@@ -40,6 +40,12 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
 
     // Navigate based on notification type
     switch (notification.type) {
+      case 'comment_tagged':
+        if (notification.related_retro_id) {
+          setOpen(false); // Close dialog
+          navigate(`/trip/${notification.related_retro_id}`);
+        }
+        break;
       case 'retro_tagged':
         if (notification.related_retro_id) {
           setOpen(false); // Close dialog
@@ -66,6 +72,7 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
       case 'retro_tagged':
         return <User className="w-4 h-4 text-primary" />;
       case 'comment_added':
+      case 'comment_tagged':
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case 'friend_request':
         return <UserPlus className="w-4 h-4 text-green-500" />;
@@ -79,7 +86,7 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
   const isClickableNotification = (type: string, isRead: boolean) => {
     // Friend requests are only clickable when read (no action buttons)
     if (type === 'friend_request') return isRead;
-    return ['retro_tagged', 'catalogue_invitation'].includes(type);
+    return ['retro_tagged', 'catalogue_invitation', 'comment_tagged'].includes(type);
   };
 
   const NotificationItem = ({ notification }: { notification: Notification }) => {

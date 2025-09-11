@@ -6,7 +6,7 @@ import { useToast } from './use-toast';
 export interface Notification {
   id: string;
   user_id: string;
-  type: 'retro_tagged' | 'comment_added' | 'friend_request' | 'catalogue_invitation';
+  type: 'retro_tagged' | 'comment_added' | 'friend_request' | 'catalogue_invitation' | 'comment_tagged';
   title: string;
   message: string;
   is_read: boolean;
