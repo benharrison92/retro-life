@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Retrospective } from '@/lib/supabase';
 
@@ -67,33 +67,33 @@ export const useAggregatedRetro = (parentRetro: Retrospective | undefined) => {
   });
 
   // Fetch child retros
-  useEffect(() => {
-    const fetchChildRetros = async () => {
-      if (!parentRetro?.id) return;
-      
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('retrospectives')
-          .select('*')
-          .eq('parent_id', parentRetro.id)
-          .order('created_at', { ascending: false });
+  const fetchChildRetros = useCallback(async () => {
+    if (!parentRetro?.id) return;
 
-        if (error) {
-          console.error('Error fetching child retros:', error);
-          return;
-        }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('retrospectives')
+        .select('*')
+        .eq('parent_id', parentRetro.id)
+        .order('created_at', { ascending: false });
 
-        setChildRetros((data || []).map(convertDbToApp));
-      } catch (error) {
+      if (error) {
         console.error('Error fetching child retros:', error);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchChildRetros();
+      setChildRetros((data || []).map(convertDbToApp));
+    } catch (error) {
+      console.error('Error fetching child retros:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [parentRetro?.id]);
+
+  useEffect(() => {
+    fetchChildRetros();
+  }, [fetchChildRetros]);
 
   // Create aggregated retro with child items
   const aggregatedRetro = useMemo((): AggregatedRetro => {
@@ -160,6 +160,7 @@ export const useAggregatedRetro = (parentRetro: Retrospective | undefined) => {
     childItemsCount,
     showChildItems,
     toggleChildItems,
-    loading
+    loading,
+    refreshChildRetros: fetchChildRetros,
   };
 };

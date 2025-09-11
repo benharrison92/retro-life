@@ -27,7 +27,7 @@ const Trip = () => {
   const currentUserName = profile?.display_name || 'You';
   
   // Use aggregated retro hook to get parent + child items
-  const { aggregatedRetro, childItemsCount, showChildItems, toggleChildItems } = useAggregatedRetro(retro);
+  const { aggregatedRetro, childItemsCount, showChildItems, toggleChildItems, refreshChildRetros } = useAggregatedRetro(retro);
 
   if (loading) {
     return (
@@ -109,6 +109,7 @@ const Trip = () => {
     
     updateLocalRetro(targetRetro.id, updated);
     await updateRetro(targetRetro.id, updated);
+    await refreshChildRetros();
   };
 
   const handleAddItem = async (retroId: string, itemType: 'roses' | 'buds' | 'thorns') => {
