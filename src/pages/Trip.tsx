@@ -11,7 +11,7 @@ import { SaveAsDialog } from '@/components/SaveAsDialog';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, MoreVertical, Globe, Network } from 'lucide-react';
-import { AddItemDialog } from '@/components/AddItemDialog';
+import { AddRBTDialog } from '@/components/AddRBTDialog';
 const Trip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -94,16 +94,33 @@ const Trip = () => {
     setAddItemDialogOpen(true);
   };
 
-  const handleConfirmAddItem = async (text: string) => {
+  const handleConfirmAddItem = async (
+    text: string,
+    tags: string[],
+    placeData?: {
+      place_id?: string;
+      place_name?: string;
+      place_address?: string;
+      place_rating?: number;
+      place_types?: string[];
+    }
+  ) => {
     const r = retros.find(rr => rr.id === id);
     if (!r) return;
     const newItem = {
       id: `${addItemType}-${Date.now()}`,
       text,
-      tags: [],
+      tags,
       comments: [],
       ownerName: currentUserName,
-      photos: []
+      photos: [],
+      ...(placeData && {
+        place_id: placeData.place_id,
+        place_name: placeData.place_name,
+        place_address: placeData.place_address,
+        place_rating: placeData.place_rating,
+        place_types: placeData.place_types,
+      }),
     };
     const updated = { ...r, [addItemType]: [...(r as any)[addItemType], newItem] };
     updateLocalRetro(r.id, updated);
@@ -248,12 +265,12 @@ const Trip = () => {
           />
         )}
 
-        {/* Add Item Dialog */}
-        <AddItemDialog
+        {/* Add RBT Item Dialog */}
+        <AddRBTDialog
           isOpen={addItemDialogOpen}
           onClose={() => setAddItemDialogOpen(false)}
-          onConfirm={handleConfirmAddItem}
-          itemType={addItemType}
+          onSubmit={handleConfirmAddItem}
+          type={addItemType}
         />
       </div>
     </div>
