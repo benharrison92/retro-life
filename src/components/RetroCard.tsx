@@ -12,6 +12,224 @@ import { RetroPhoto } from "@/lib/supabase";
 import { SaveToCatalogueDialog } from "./catalogue/SaveToCatalogueDialog";
 import { useAuth } from "@/hooks/useAuth";
 
+// Move RBTItemDisplay outside of RetroCard to prevent recreation on re-renders
+const RBTItemDisplay = ({ 
+  item, 
+  type, 
+  colorClass,
+  expandedItems,
+  commentInputs,
+  toggleExpanded,
+  handleAddComment,
+  handleUpdateItemPhoto,
+  setCommentInputs,
+  onUserClick,
+  retro,
+  user
+}: { 
+  item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
+  type: 'roses' | 'buds' | 'thorns';
+  colorClass: string;
+  expandedItems: { [key: string]: boolean };
+  commentInputs: { [key: string]: string };
+  toggleExpanded: (itemId: string) => void;
+  handleAddComment: (itemType: 'roses' | 'buds' | 'thorns', item: RBTItem) => void;
+  handleUpdateItemPhoto: (type: 'roses' | 'buds' | 'thorns', itemId: string, photoId: string, updatedPhoto: RetroPhoto) => void;
+  setCommentInputs: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+  onUserClick?: (userName: string) => void;
+  retro: any;
+  user: any;
+}) => {
+  const isExpanded = expandedItems[item.id];
+  const hasComments = item.comments && item.comments.length > 0;
+  const hasPhotos = item.photos && item.photos.length > 0;
+  const shadowClass = type === 'roses' 
+    ? 'hover:shadow-glow-positive' 
+    : type === 'buds' 
+      ? 'hover:shadow-glow-opportunity' 
+      : 'hover:shadow-glow-negative';
+
+  return (
+    <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale`}>
+      {/* Source tag for child items */}
+      {item.source?.isChildItem && (
+        <div className="mb-2">
+          <Badge 
+            variant="outline" 
+            className="text-xs text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100"
+          >
+            From: {item.source.retroTitle}
+          </Badge>
+        </div>
+      )}
+      
+      {/* Creator info */}
+      <div className="flex justify-between items-start mb-2">
+        <p className="text-sm flex-1">{item.text}</p>
+        {item.ownerName && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onUserClick?.(item.ownerName!)}
+            className="text-xs h-auto p-1 ml-2 text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <User className="w-3 h-3" />
+            {item.ownerName}
+          </Button>
+        )}
+      </div>
+
+      {/* Location display */}
+      {item.place_name && (
+        <div className="mb-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-auto p-2 text-xs w-full justify-start hover:bg-muted/50"
+            onClick={() => {
+              try {
+                let mapsUrl;
+                if (item.place_id) {
+                  // Use Google Maps with place_id - more reliable format
+                  mapsUrl = `https://maps.google.com/?cid=${item.place_id}`;
+                } else {
+                  // Use direct Google Maps search URL
+                  const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
+                  mapsUrl = `https://maps.google.com/?q=${query}`;
+                }
+                // Open in new tab with noopener for security
+                const newWindow = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                if (!newWindow) {
+                  // Fallback if popup blocked - copy to clipboard and show message
+                  navigator.clipboard?.writeText(mapsUrl);
+                  alert('Link copied to clipboard! Paste it in your browser to view the location.');
+                }
+              } catch (error) {
+                console.error('Error opening Google Maps:', error);
+                // Final fallback: copy location name to clipboard
+                const locationText = `${item.place_name} ${item.place_address || ''}`;
+                navigator.clipboard?.writeText(locationText);
+                alert('Location copied to clipboard!');
+              }
+            }}
+          >
+            <MapPin className="w-3 h-3 mr-2 text-blue-600" />
+            <div className="text-left flex-1">
+              <div className="font-medium text-foreground">{item.place_name}</div>
+              {item.place_address && (
+                <div className="text-muted-foreground text-xs truncate">{item.place_address}</div>
+              )}
+              {item.place_rating && (
+                <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
+              )}
+            </div>
+          </Button>
+        </div>
+      )}
+      
+      {/* Show photos for this item */}
+      {hasPhotos && (
+        <div className="mb-3">
+          <PhotoDisplay
+            photos={item.photos || []}
+            readonly={false}
+            showAsGrid={true}
+            onUpdatePhoto={(photoId, updatedPhoto) => handleUpdateItemPhoto(type, item.id, photoId, updatedPhoto)}
+          />
+        </div>
+      )}
+      
+      {item.tags && item.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {item.tags.map((tag, idx) => (
+            <Badge key={idx} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {(hasComments || true) && (
+        <div className="border-t pt-2 mt-2">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleExpanded(item.id)}
+              className="flex items-center gap-1 text-xs p-1 h-auto"
+            >
+              <MessageCircle className="w-3 h-3" />
+              {item.comments?.length || 0} comment{(item.comments?.length || 0) !== 1 ? 's' : ''}
+              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
+            
+            {user && (
+              <SaveToCatalogueDialog
+                retroId={retro.id}
+                item={item}
+                itemType={type === 'roses' ? 'rose' : type === 'buds' ? 'bud' : 'thorn'}
+                savedFromUserId={user.id}
+                savedFromUserName={retro.ownerName}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 text-xs p-1 h-auto"
+                >
+                  <BookmarkPlus className="w-3 h-3" />
+                  Save
+                </Button>
+              </SaveToCatalogueDialog>
+            )}
+          </div>
+
+          {isExpanded && (
+            <div className="mt-2 space-y-2">
+              {hasComments && (
+                <div className="space-y-1 max-h-24 overflow-y-auto">
+                  {item.comments.map((comment) => (
+                    <div key={comment.id} className="bg-muted/50 p-2 rounded text-xs">
+                      <div className="font-medium text-foreground">
+                        {comment.authorName}
+                        <span className="text-muted-foreground ml-1">
+                          ({new Date(comment.timestamp).toLocaleDateString()})
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground mt-1">{comment.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-1">
+                <Input
+                  placeholder="Add comment..."
+                  value={commentInputs[item.id] || ''}
+                  onChange={(e) => setCommentInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
+                  className="text-xs h-7"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAddComment(type, item);
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => handleAddComment(type, item)}
+                  className="h-7 px-2"
+                >
+                  <Send className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface RetroCardProps {
   retro: Retro & {
     locationName?: string;
@@ -115,205 +333,6 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
     } catch (error) {
       console.error('RetroCard: Error updating general photo:', error);
     }
-  };
-
-  const RBTItemDisplay = ({ 
-    item, 
-    type, 
-    colorClass 
-  }: { 
-    item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
-    type: 'roses' | 'buds' | 'thorns';
-    colorClass: string;
-  }) => {
-    const isExpanded = expandedItems[item.id];
-    const hasComments = item.comments && item.comments.length > 0;
-    const hasPhotos = item.photos && item.photos.length > 0;
-    const shadowClass = type === 'roses' 
-      ? 'hover:shadow-glow-positive' 
-      : type === 'buds' 
-        ? 'hover:shadow-glow-opportunity' 
-        : 'hover:shadow-glow-negative';
-
-    return (
-      <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale`}>
-        {/* Source tag for child items */}
-        {item.source?.isChildItem && (
-          <div className="mb-2">
-            <Badge 
-              variant="outline" 
-              className="text-xs text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100"
-            >
-              From: {item.source.retroTitle}
-            </Badge>
-          </div>
-        )}
-        
-        {/* Creator info */}
-        <div className="flex justify-between items-start mb-2">
-          <p className="text-sm flex-1">{item.text}</p>
-          {item.ownerName && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onUserClick?.(item.ownerName!)}
-              className="text-xs h-auto p-1 ml-2 text-muted-foreground hover:text-foreground flex items-center gap-1"
-            >
-              <User className="w-3 h-3" />
-              {item.ownerName}
-            </Button>
-          )}
-        </div>
-
-        {/* Location display */}
-        {item.place_name && (
-          <div className="mb-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-auto p-2 text-xs w-full justify-start hover:bg-muted/50"
-              onClick={() => {
-                try {
-                  let mapsUrl;
-                  if (item.place_id) {
-                    // Use Google Maps with place_id - more reliable format
-                    mapsUrl = `https://maps.google.com/?cid=${item.place_id}`;
-                  } else {
-                    // Use direct Google Maps search URL
-                    const query = encodeURIComponent(`${item.place_name} ${item.place_address || ''}`);
-                    mapsUrl = `https://maps.google.com/?q=${query}`;
-                  }
-                  // Open in new tab with noopener for security
-                  const newWindow = window.open(mapsUrl, '_blank', 'noopener,noreferrer');
-                  if (!newWindow) {
-                    // Fallback if popup blocked - copy to clipboard and show message
-                    navigator.clipboard?.writeText(mapsUrl);
-                    alert('Link copied to clipboard! Paste it in your browser to view the location.');
-                  }
-                } catch (error) {
-                  console.error('Error opening Google Maps:', error);
-                  // Final fallback: copy location name to clipboard
-                  const locationText = `${item.place_name} ${item.place_address || ''}`;
-                  navigator.clipboard?.writeText(locationText);
-                  alert('Location copied to clipboard!');
-                }
-              }}
-            >
-              <MapPin className="w-3 h-3 mr-2 text-blue-600" />
-              <div className="text-left flex-1">
-                <div className="font-medium text-foreground">{item.place_name}</div>
-                {item.place_address && (
-                  <div className="text-muted-foreground text-xs truncate">{item.place_address}</div>
-                )}
-                {item.place_rating && (
-                  <div className="text-muted-foreground text-xs">⭐ {item.place_rating}/5</div>
-                )}
-              </div>
-            </Button>
-          </div>
-        )}
-        
-        {/* Show photos for this item */}
-        {hasPhotos && (
-          <div className="mb-3">
-            <PhotoDisplay
-              photos={item.photos || []}
-              readonly={false}
-              showAsGrid={true}
-              onUpdatePhoto={(photoId, updatedPhoto) => handleUpdateItemPhoto(type, item.id, photoId, updatedPhoto)}
-            />
-          </div>
-        )}
-        
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {item.tags.map((tag, idx) => (
-              <Badge key={idx} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {(hasComments || true) && (
-          <div className="border-t pt-2 mt-2">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleExpanded(item.id)}
-                className="flex items-center gap-1 text-xs p-1 h-auto"
-              >
-                <MessageCircle className="w-3 h-3" />
-                {item.comments?.length || 0} comment{(item.comments?.length || 0) !== 1 ? 's' : ''}
-                {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-              </Button>
-              
-              {user && (
-                <SaveToCatalogueDialog
-                  retroId={retro.id}
-                  item={item}
-                  itemType={type === 'roses' ? 'rose' : type === 'buds' ? 'bud' : 'thorn'}
-                  savedFromUserId={user.id} // We'll use a placeholder for now
-                  savedFromUserName={retro.ownerName}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-1 text-xs p-1 h-auto"
-                  >
-                    <BookmarkPlus className="w-3 h-3" />
-                    Save
-                  </Button>
-                </SaveToCatalogueDialog>
-              )}
-            </div>
-
-            {isExpanded && (
-              <div className="mt-2 space-y-2">
-                {hasComments && (
-                  <div className="space-y-1 max-h-24 overflow-y-auto">
-                    {item.comments.map((comment) => (
-                      <div key={comment.id} className="bg-muted/50 p-2 rounded text-xs">
-                        <div className="font-medium text-foreground">
-                          {comment.authorName}
-                          <span className="text-muted-foreground ml-1">
-                            ({new Date(comment.timestamp).toLocaleDateString()})
-                          </span>
-                        </div>
-                        <p className="text-muted-foreground mt-1">{comment.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-1">
-                  <Input
-                    placeholder="Add comment..."
-                    value={commentInputs[item.id] || ''}
-                    onChange={(e) => setCommentInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
-                    className="text-xs h-7"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleAddComment(type, item);
-                      }
-                    }}
-                  />
-                  <Button
-                    size="sm"
-                    onClick={() => handleAddComment(type, item)}
-                    className="h-7 px-2"
-                  >
-                    <Send className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -452,6 +471,15 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   item={item} 
                   type="roses"
                   colorClass="bg-positive-muted border-positive/20"
+                  expandedItems={expandedItems}
+                  commentInputs={commentInputs}
+                  toggleExpanded={toggleExpanded}
+                  handleAddComment={handleAddComment}
+                  handleUpdateItemPhoto={handleUpdateItemPhoto}
+                  setCommentInputs={setCommentInputs}
+                  onUserClick={onUserClick}
+                  retro={retro}
+                  user={user}
                 />
               ))}
             </div>
@@ -484,6 +512,15 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   item={item} 
                   type="buds"
                   colorClass="bg-opportunity-muted border-opportunity/20"
+                  expandedItems={expandedItems}
+                  commentInputs={commentInputs}
+                  toggleExpanded={toggleExpanded}
+                  handleAddComment={handleAddComment}
+                  handleUpdateItemPhoto={handleUpdateItemPhoto}
+                  setCommentInputs={setCommentInputs}
+                  onUserClick={onUserClick}
+                  retro={retro}
+                  user={user}
                 />
               ))}
             </div>
@@ -516,6 +553,15 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   item={item} 
                   type="thorns"
                   colorClass="bg-negative-muted border-negative/20"
+                  expandedItems={expandedItems}
+                  commentInputs={commentInputs}
+                  toggleExpanded={toggleExpanded}
+                  handleAddComment={handleAddComment}
+                  handleUpdateItemPhoto={handleUpdateItemPhoto}
+                  setCommentInputs={setCommentInputs}
+                  onUserClick={onUserClick}
+                  retro={retro}
+                  user={user}
                 />
               ))}
             </div>
