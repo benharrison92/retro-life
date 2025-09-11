@@ -36,15 +36,26 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
     if (!user) return;
 
     try {
-      // Get current friends and pending requests
-      const { data: friendships } = await supabase
+      // Get current friends and pending requests (both directions)
+      const { data: sentRequests } = await supabase
         .from('friendships')
         .select('friend_id, status')
         .eq('user_id', user.id);
 
-      if (friendships) {
-        setFriends(friendships.filter(f => f.status === 'accepted').map(f => f.friend_id));
-        setPendingRequests(friendships.filter(f => f.status === 'pending').map(f => f.friend_id));
+      const { data: receivedRequests } = await supabase
+        .from('friendships')
+        .select('user_id, status')
+        .eq('friend_id', user.id);
+
+      if (sentRequests) {
+        setFriends(sentRequests.filter(f => f.status === 'accepted').map(f => f.friend_id));
+        setPendingRequests(sentRequests.filter(f => f.status === 'pending').map(f => f.friend_id));
+      }
+
+      // Also check received friendships for accepted friends
+      if (receivedRequests) {
+        const receivedFriends = receivedRequests.filter(f => f.status === 'accepted').map(f => f.user_id);
+        setFriends(prev => [...prev, ...receivedFriends]);
       }
     } catch (error) {
       console.error('Error loading friends:', error);
@@ -60,40 +71,20 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
 
     setLoading(true);
     try {
-      // With new security restrictions, we can only search among friends
-      // Get user's friends first
-      const { data: friendships } = await supabase
-        .from('friendships')
-        .select(`
-          friend_id,
-          user_profiles!friendships_friend_id_fkey(id, display_name, email, avatar_url)
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'accepted');
+      // Search all users on the platform by display name or email
+      const { data: users, error } = await supabase
+        .from('user_profiles')
+        .select('id, display_name, email, avatar_url')
+        .or(`display_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .neq('id', user.id) // Exclude current user
+        .limit(10);
 
-      // Also get reverse friendships
-      const { data: reverseFriendships } = await supabase
-        .from('friendships')
-        .select(`
-          user_id,
-          user_profiles!friendships_user_id_fkey(id, display_name, email, avatar_url)
-        `)
-        .eq('friend_id', user.id)
-        .eq('status', 'accepted');
+      if (error) {
+        console.error('Search error:', error);
+        throw error;
+      }
 
-      // Combine and search among friends
-      const allFriends = [
-        ...(friendships?.map(f => (f as any).user_profiles) || []),
-        ...(reverseFriendships?.map(f => (f as any).user_profiles) || [])
-      ].filter(Boolean);
-
-      const filteredFriends = allFriends.filter(friend =>
-        (friend.display_name.toLowerCase().includes(query.toLowerCase()) ||
-         friend.email.toLowerCase().includes(query.toLowerCase())) &&
-        friend.id !== user.id
-      );
-
-      setSearchResults(filteredFriends);
+      setSearchResults(users || []);
       setShowDropdown(true);
     } catch (error) {
       console.error('Error searching users:', error);
@@ -102,6 +93,7 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
         description: "Could not search for users. Please try again.",
         variant: "destructive",
       });
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }
@@ -200,6 +192,9 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
               <CardTitle className="text-lg">Search Users</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Search for users on RetroApp to send them friend requests.
+              </p>
               <div className="relative">
                 <Input
                   placeholder="Start typing name or email..."
@@ -263,9 +258,7 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
                 {searchQuery && !loading && searchResults.length === 0 && showDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg p-3">
                     <p className="text-sm text-muted-foreground text-center">
-                      No friends found matching "{searchQuery}"
-                      <br />
-                      <span className="text-xs">Note: You can only search among your current friends. Use "Invite Friends" to add new people.</span>
+                      No users found matching "{searchQuery}"
                     </p>
                   </div>
                 )}
