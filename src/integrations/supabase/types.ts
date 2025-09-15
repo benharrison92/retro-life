@@ -748,6 +748,70 @@ export type Database = {
           },
         ]
       }
+      retrospective_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          retro_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          retro_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          retro_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retrospective_comments_retro_id_fkey"
+            columns: ["retro_id"]
+            isOneToOne: false
+            referencedRelation: "retrospectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retrospective_likes: {
+        Row: {
+          created_at: string
+          id: string
+          retro_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          retro_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          retro_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retrospective_likes_retro_id_fkey"
+            columns: ["retro_id"]
+            isOneToOne: false
+            referencedRelation: "retrospectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retrospectives: {
         Row: {
           attendees: string[] | null

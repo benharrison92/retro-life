@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useRetros } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
 import { useAggregatedRetro } from '@/hooks/useAggregatedRetro';
+import { useRetroInteractions } from '@/hooks/useRetroInteractions';
 import TripDetail from '@/components/TripDetail';
 import { RetroCard } from '@/components/RetroCard';
 import { AppHeader } from '@/components/AppHeader';
@@ -28,6 +29,9 @@ const Trip = () => {
   
   // Use aggregated retro hook to get parent + child items
   const { aggregatedRetro, childItemsCount, showChildItems, toggleChildItems, refreshChildRetros } = useAggregatedRetro(retro);
+  
+  // Use retro interactions hook for likes and comments
+  const { stats, toggleLike } = useRetroInteractions(id || '');
 
   if (loading) {
     return (
@@ -212,9 +216,9 @@ const Trip = () => {
           startDate={retro.date}
           location={location.name ? location : undefined}
           itinerary={[]}
-          stats={{ likes: 0, comments: 0, hasLiked: false }}
+          stats={stats}
           onBack={handleBack}
-          onLikeToggle={() => {}}
+          onLikeToggle={toggleLike}
           onShare={(rid) => handleShare(rid)}
         />
 
