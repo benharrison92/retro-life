@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw, Plus, Users, Calendar } from 'lucide-react';
-import { RetroApp } from '@/components/RetroApp';
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -31,9 +30,7 @@ export default function Feed() {
   };
 
   return (
-    <div>
-      <RetroApp />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
         <div className="container mx-auto px-4 py-6 max-w-2xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -72,7 +69,7 @@ export default function Feed() {
               </CardContent>
             </Card>
             
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/retros')}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/my-retros')}>
               <CardContent className="p-4 text-center">
                 <Users className="h-6 w-6 mx-auto mb-2 text-green-600" />
                 <p className="text-sm font-medium">My Retros</p>
@@ -127,7 +124,7 @@ export default function Feed() {
                     <Button onClick={() => navigate('/create-retro')}>
                       Create First Retro
                     </Button>
-                    <Button variant="outline" onClick={() => navigate('/retros')}>
+                    <Button variant="outline" onClick={() => navigate('/my-retros')}>
                       View My Retros
                     </Button>
                   </div>
@@ -136,7 +133,6 @@ export default function Feed() {
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }

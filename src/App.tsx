@@ -16,6 +16,7 @@ import Trip from "./pages/Trip";
 import MapExplore from "./pages/MapExplore";
 import FeaturedTrips from "./pages/FeaturedTrips";
 import UserProfile from "./pages/UserProfile";
+import MyRetros from "./pages/MyRetros";
 
 import RetroReadCardPage from "./pages/RetroReadCard";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Feed />} />
             <Route path="/retros" element={<Index />} />
+            <Route path="/my-retros" element={<MyRetros />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/catalogues" element={<Catalogues />} />
             <Route path="/feedback-spaces" element={<FeedbackSpaces />} />
