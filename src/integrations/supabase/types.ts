@@ -937,6 +937,160 @@ export type Database = {
           },
         ]
       }
+      trip_planner_discussions: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          tagged_user_ids: string[] | null
+          trip_planner_item_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          tagged_user_ids?: string[] | null
+          trip_planner_item_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          tagged_user_ids?: string[] | null
+          trip_planner_item_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_planner_discussions_trip_planner_item_id_fkey"
+            columns: ["trip_planner_item_id"]
+            isOneToOne: false
+            referencedRelation: "trip_planner_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_planner_items: {
+        Row: {
+          catalogue_item_id: string | null
+          created_at: string
+          description: string | null
+          estimated_cost: number | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          location_address: string | null
+          location_name: string | null
+          notes: string | null
+          scheduled_date: string | null
+          scheduled_time: string | null
+          status: Database["public"]["Enums"]["trip_status"]
+          title: string
+          trip_planner_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalogue_item_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location_address?: string | null
+          location_name?: string | null
+          notes?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          title: string
+          trip_planner_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalogue_item_id?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location_address?: string | null
+          location_name?: string | null
+          notes?: string | null
+          scheduled_date?: string | null
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          title?: string
+          trip_planner_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_planner_items_catalogue_item_id_fkey"
+            columns: ["catalogue_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalogue_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_planner_items_trip_planner_id_fkey"
+            columns: ["trip_planner_id"]
+            isOneToOne: false
+            referencedRelation: "trip_planners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_planners: {
+        Row: {
+          catalogue_id: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          start_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalogue_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalogue_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_planners_catalogue_id_fkey"
+            columns: ["catalogue_id"]
+            isOneToOne: false
+            referencedRelation: "catalogues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -1012,7 +1166,9 @@ export type Database = {
       }
     }
     Enums: {
+      event_type: "accommodation" | "travel" | "activity" | "food" | "other"
       node_type: "TRIP" | "CATEGORY" | "CITY" | "VENUE" | "EVENT" | "NOTEBOOK"
+      trip_status: "booked" | "pending_review" | "declined"
       visibility_type: "PUBLIC" | "FRIENDS" | "PRIVATE"
     }
     CompositeTypes: {
@@ -1141,7 +1297,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_type: ["accommodation", "travel", "activity", "food", "other"],
       node_type: ["TRIP", "CATEGORY", "CITY", "VENUE", "EVENT", "NOTEBOOK"],
+      trip_status: ["booked", "pending_review", "declined"],
       visibility_type: ["PUBLIC", "FRIENDS", "PRIVATE"],
     },
   },

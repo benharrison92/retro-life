@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageCircle, Send, MapPin, Trash2 } from 'lucide-react';
+import { MessageCircle, Send, MapPin, Trash2, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { useCatalogueDiscussion } from '@/hooks/useCatalogueDiscussion';
 import { useCatalogueMembers } from '@/hooks/useCatalogueMembers';
 import { useAuth } from '@/hooks/useAuth';
 import { CatalogueItem } from '@/lib/supabase';
+import { AddToTripPlannerDialog } from '@/components/trip/AddToTripPlannerDialog';
 
 interface CatalogueItemDiscussionProps {
   item: CatalogueItem;
@@ -24,6 +25,7 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
   const { members } = useCatalogueMembers(item.catalogue_id);
   const { renderCommentWithTags, extractTaggedFriends } = useTaggedComments();
   const [newMessage, setNewMessage] = useState('');
+  const [showAddToTripDialog, setShowAddToTripDialog] = useState(false);
 
   const getItemTypeIcon = (type: string) => {
     switch (type) {
@@ -79,14 +81,25 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <span className="text-2xl">{getItemTypeIcon(item.item_type)}</span>
-            <div>
-              <div className="flex items-center gap-2">
-                <Badge className={getItemTypeColor(item.item_type)}>
-                  {item.item_type.charAt(0).toUpperCase() + item.item_type.slice(1)}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  From: {item.saved_from_user_name}
-                </span>
+            <div className="flex-1">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Badge className={getItemTypeColor(item.item_type)}>
+                    {item.item_type.charAt(0).toUpperCase() + item.item_type.slice(1)}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    From: {item.saved_from_user_name}
+                  </span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowAddToTripDialog(true)}
+                  className="ml-4"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Add to Trip Planner
+                </Button>
               </div>
             </div>
           </DialogTitle>
@@ -236,6 +249,18 @@ export const CatalogueItemDiscussion = ({ item, isOpen, onClose }: CatalogueItem
           </div>
         </div>
       </DialogContent>
+      
+      <AddToTripPlannerDialog
+        isOpen={showAddToTripDialog}
+        onClose={() => setShowAddToTripDialog(false)}
+        catalogueItem={{
+          id: item.id,
+          title: item.item_text,
+          description: `${item.item_type.charAt(0).toUpperCase() + item.item_type.slice(1)} from ${item.saved_from_user_name}`,
+          location_name: item.place_name,
+          location_address: item.place_address,
+        }}
+      />
     </Dialog>
   );
 };
