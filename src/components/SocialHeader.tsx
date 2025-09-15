@@ -127,27 +127,10 @@ export function SocialHeader() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate('/feedback-spaces')}
-      >
-        <QrCode className="h-4 w-4 mr-2" />
-        Feedback Spaces
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
         onClick={() => navigate('/explore')}
       >
         <Globe className="h-4 w-4 mr-2" />
         Explore Map
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate('/retro-read')}
-      >
-        Retro Read
       </Button>
 
       {/* User dropdown menu */}
@@ -183,10 +166,6 @@ export function SocialHeader() {
           <DropdownMenuItem onClick={() => setFriendFinderOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
             Find Friends
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/feedback-spaces')}>
-            <QrCode className="mr-2 h-4 w-4" />
-            Feedback Spaces
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/catalogues')}>
             <BookOpen className="mr-2 h-4 w-4" />
