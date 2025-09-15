@@ -25,7 +25,8 @@ import {
   Bell,
   BookOpen,
   QrCode,
-  Globe
+  Globe,
+  Calendar
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -117,6 +118,15 @@ export function SocialHeader() {
       <Button
         variant="outline"
         size="sm"
+        onClick={() => navigate('/trip-planners')}
+      >
+        <Calendar className="h-4 w-4 mr-2" />
+        Trip Planners
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => navigate('/feedback-spaces')}
       >
         <QrCode className="h-4 w-4 mr-2" />
@@ -181,6 +191,10 @@ export function SocialHeader() {
           <DropdownMenuItem onClick={() => navigate('/catalogues')}>
             <BookOpen className="mr-2 h-4 w-4" />
             My Catalogues
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/trip-planners')}>
+            <Calendar className="mr-2 h-4 w-4" />
+            Trip Planners
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/explore')}>
             <Globe className="mr-2 h-4 w-4" />
