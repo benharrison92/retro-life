@@ -131,7 +131,7 @@ export function SocialHeader() {
             </p>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate(`/profile/${user.id}`)}>
+          <DropdownMenuItem onClick={() => navigate(`/user/${user.id}`)}>
             <User className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
