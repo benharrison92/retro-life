@@ -781,6 +781,13 @@ export type Database = {
             referencedRelation: "retrospectives"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "retrospective_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       retrospective_likes: {

@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft } from 'lucide-react'
+import { CommentsSection } from './CommentsSection'
+import type { RetroComment } from '@/hooks/useRetroInteractions'
 
 /**
  * TripDetail — immersive story view for a travel post.
@@ -26,9 +28,13 @@ export type TripDetailProps = {
   location?: { name: string; lat?: number; lng?: number }
   itinerary?: TDItineraryItem[]
   stats: { likes: number; comments: number; hasLiked?: boolean }
+  comments?: RetroComment[]
   onBack?: () => void
-  onLikeToggle?: (id: string, next: boolean) => Promise<void> | void
+  onLikeToggle?: () => Promise<void> | void
   onShare?: (id: string) => void
+  onAddComment?: (content: string) => Promise<void>
+  onDeleteComment?: (commentId: string) => Promise<void>
+  commentsLoading?: boolean
 }
 
 function fmtDate(input?: string | Date) {
@@ -49,9 +55,13 @@ export default function TripDetail({
   location,
   itinerary = [],
   stats,
+  comments = [],
   onBack,
   onLikeToggle,
   onShare,
+  onAddComment,
+  onDeleteComment,
+  commentsLoading = false,
 }: TripDetailProps) {
   const dateRange = useMemo(() => {
     const s = fmtDate(startDate)
@@ -119,7 +129,7 @@ export default function TripDetail({
         <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-3">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => onLikeToggle?.(id, !stats.hasLiked)}
+              onClick={() => onLikeToggle?.()}
               className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
                 stats.hasLiked
                   ? 'border-rose-200 bg-rose-50 text-rose-600'
@@ -213,12 +223,15 @@ export default function TripDetail({
         </section>
       )}
 
-      {/* Comments placeholder (hook up later) */}
+      {/* Comments */}
       <section className="mt-6">
         <h3 className="mb-3 text-base font-semibold text-neutral-900">Comments</h3>
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600 shadow-sm">
-          Comment thread goes here…
-        </div>
+        <CommentsSection
+          comments={comments}
+          onAddComment={onAddComment || (() => Promise.resolve())}
+          onDeleteComment={onDeleteComment || (() => Promise.resolve())}
+          loading={commentsLoading}
+        />
       </section>
 
       {/* Related trips placeholder */}

@@ -31,7 +31,7 @@ const Trip = () => {
   const { aggregatedRetro, childItemsCount, showChildItems, toggleChildItems, refreshChildRetros } = useAggregatedRetro(retro);
   
   // Use retro interactions hook for likes and comments
-  const { stats, toggleLike } = useRetroInteractions(id || '');
+  const { stats, comments, loading: interactionsLoading, toggleLike, addComment, deleteComment } = useRetroInteractions(id || '');
 
   if (loading) {
     return (
@@ -217,9 +217,13 @@ const Trip = () => {
           location={location.name ? location : undefined}
           itinerary={[]}
           stats={stats}
+          comments={comments}
+          commentsLoading={interactionsLoading}
           onBack={handleBack}
           onLikeToggle={toggleLike}
           onShare={(rid) => handleShare(rid)}
+          onAddComment={addComment}
+          onDeleteComment={deleteComment}
         />
 
         {/* Child Retrospectives */}

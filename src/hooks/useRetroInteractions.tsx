@@ -20,7 +20,7 @@ export interface RetroComment {
   user_profiles?: {
     display_name: string;
     avatar_url?: string;
-  };
+  } | null;
 }
 
 export interface RetroStats {
@@ -49,20 +49,27 @@ export function useRetroInteractions(retroId: string) {
 
         if (likesError) throw likesError;
 
-        // Fetch comments with user profiles
+        // Fetch comments without join for now
         const { data: commentsData, error: commentsError } = await supabase
           .from('retrospective_comments')
-          .select(`
-            *,
-            user_profiles (
-              display_name,
-              avatar_url
-            )
-          `)
+          .select('*')
           .eq('retro_id', retroId)
           .order('created_at', { ascending: true });
 
         if (commentsError) throw commentsError;
+
+        // Fetch user profiles for comments separately
+        const userIds = commentsData?.map(comment => comment.user_id) || [];
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', userIds);
+
+        // Combine comments with user profiles
+        const commentsWithProfiles = commentsData?.map(comment => ({
+          ...comment,
+          user_profiles: profiles?.find(profile => profile.id === comment.user_id) || null
+        })) || [];
 
         const hasLiked = user ? likes?.some(like => like.user_id === user.id) : false;
         
@@ -72,7 +79,7 @@ export function useRetroInteractions(retroId: string) {
           hasLiked
         });
 
-        setComments(commentsData || []);
+        setComments(commentsWithProfiles);
       } catch (error) {
         console.error('Error fetching retro interactions:', error);
         toast.error('Failed to load interactions');
@@ -148,18 +155,24 @@ export function useRetroInteractions(retroId: string) {
           user_id: user.id,
           content: content.trim()
         })
-        .select(`
-          *,
-          user_profiles (
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      setComments(prev => [...prev, data]);
+      // Get user profile for the new comment
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('id, display_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      const newComment = {
+        ...data,
+        user_profiles: userProfile || null
+      };
+
+      setComments(prev => [...prev, newComment]);
       setStats(prev => ({
         ...prev,
         comments: prev.comments + 1
