@@ -21,8 +21,6 @@ import {
   LogIn,
   MessageCircle,
   Bell,
-  BookOpen,
-  QrCode,
   Globe,
   Calendar
 } from 'lucide-react';
@@ -96,19 +94,10 @@ export function SocialHeader() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => navigate('/catalogues')}
-      >
-        <BookOpen className="h-4 w-4 mr-2" />
-        My Catalogues
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate('/trip-planners')}
+        onClick={() => navigate('/travel-planner')}
       >
         <Calendar className="h-4 w-4 mr-2" />
-        Trip Planners
+        Travel Planner
       </Button>
 
       <Button
@@ -150,13 +139,9 @@ export function SocialHeader() {
             <Users className="mr-2 h-4 w-4" />
             Friends
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/catalogues')}>
-            <BookOpen className="mr-2 h-4 w-4" />
-            My Catalogues
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/trip-planners')}>
+          <DropdownMenuItem onClick={() => navigate('/travel-planner')}>
             <Calendar className="mr-2 h-4 w-4" />
-            Trip Planners
+            Travel Planner
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/explore')}>
             <Globe className="mr-2 h-4 w-4" />
