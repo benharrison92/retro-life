@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useFeed } from '@/hooks/useFeed';
@@ -12,7 +13,13 @@ import { AppHeader } from '@/components/AppHeader';
 export default function Feed() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { activities, loading, refetch } = useFeed();
+  const [filters, setFilters] = React.useState({
+    keywords: '',
+    tags: '',
+    user: '',
+    location: ''
+  });
+  const { activities, loading, refetch } = useFeed(filters);
 
   if (authLoading) {
     return (
@@ -37,7 +44,12 @@ export default function Feed() {
       <div className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Retro App Header */}
-          <RetroHeader />
+          <RetroHeader 
+            onSearchKeywords={(keywords) => setFilters(prev => ({ ...prev, keywords }))}
+            onFilterTags={(tags) => setFilters(prev => ({ ...prev, tags }))}
+            onSearchUser={(user) => setFilters(prev => ({ ...prev, user }))}
+            onLocationSearch={(location) => setFilters(prev => ({ ...prev, location }))}
+          />
           
           {/* Feed Content */}
           <div className="max-w-2xl mx-auto">

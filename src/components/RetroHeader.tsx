@@ -7,7 +7,19 @@ import { NotificationHub } from "./NotificationHub";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from 'react-router-dom';
 
-export const RetroHeader = () => {
+interface RetroHeaderProps {
+  onSearchKeywords?: (keywords: string) => void;
+  onFilterTags?: (tags: string) => void;
+  onSearchUser?: (user: string) => void;
+  onLocationSearch?: (location: string) => void;
+}
+
+export const RetroHeader = ({ 
+  onSearchKeywords, 
+  onFilterTags, 
+  onSearchUser, 
+  onLocationSearch 
+}: RetroHeaderProps) => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [searchKeywords, setSearchKeywords] = useState('');
@@ -74,7 +86,10 @@ export const RetroHeader = () => {
               placeholder="Search keywords..."
               className="pl-10"
               value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
+              onChange={(e) => {
+                setSearchKeywords(e.target.value);
+                onSearchKeywords?.(e.target.value);
+              }}
             />
           </div>
           <div className="relative">
@@ -83,7 +98,10 @@ export const RetroHeader = () => {
               placeholder="Filter by tags..."
               className="pl-10"
               value={filterTags}
-              onChange={(e) => setFilterTags(e.target.value)}
+              onChange={(e) => {
+                setFilterTags(e.target.value);
+                onFilterTags?.(e.target.value);
+              }}
             />
           </div>
           <div className="relative">
@@ -92,7 +110,10 @@ export const RetroHeader = () => {
               placeholder="Search users..."
               className="pl-10"
               value={searchUser}
-              onChange={(e) => setSearchUser(e.target.value)}
+              onChange={(e) => {
+                setSearchUser(e.target.value);
+                onSearchUser?.(e.target.value);
+              }}
             />
           </div>
           <div className="relative">
@@ -101,7 +122,10 @@ export const RetroHeader = () => {
               placeholder="City, State..."
               className="pl-10"
               value={locationSearch}
-              onChange={(e) => setLocationSearch(e.target.value)}
+              onChange={(e) => {
+                setLocationSearch(e.target.value);
+                onLocationSearch?.(e.target.value);
+              }}
             />
           </div>
         </div>

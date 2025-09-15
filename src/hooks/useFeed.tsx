@@ -16,7 +16,14 @@ export interface Activity {
   };
 }
 
-export const useFeed = () => {
+interface FeedFilters {
+  keywords: string;
+  tags: string;
+  user: string;
+  location: string;
+}
+
+export const useFeed = (filters?: FeedFilters) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -34,7 +41,7 @@ export const useFeed = () => {
 
       if (error) throw error;
 
-      // Fetch user profiles separately
+      // Fetch user profiles and filter activities
       const activitiesWithProfiles = await Promise.all(
         (data || []).map(async (activity) => {
           const { data: profile } = await supabase
@@ -50,7 +57,55 @@ export const useFeed = () => {
         })
       );
 
-      setActivities(activitiesWithProfiles);
+      // Apply filters
+      let filteredActivities = activitiesWithProfiles;
+
+      if (filters?.location) {
+        // For location filtering, fetch retrospective data to check location fields
+        const retroActivities = filteredActivities.filter(a => a.target_type === 'retrospective');
+        const retroIds = retroActivities.map(a => a.target_id).filter(Boolean);
+        
+        if (retroIds.length > 0) {
+          const { data: retros } = await supabase
+            .from('retrospectives')
+            .select('id, title, city, state, country, location_name')
+            .in('id', retroIds);
+
+          filteredActivities = filteredActivities.filter(activity => {
+            if (activity.target_type !== 'retrospective') return true;
+            
+            const retro = retros?.find(r => r.id === activity.target_id);
+            if (!retro) return true;
+
+            const searchTerm = filters.location.toLowerCase();
+            return (
+              retro.title?.toLowerCase().includes(searchTerm) ||
+              retro.city?.toLowerCase().includes(searchTerm) ||
+              retro.state?.toLowerCase().includes(searchTerm) ||
+              retro.country?.toLowerCase().includes(searchTerm) ||
+              retro.location_name?.toLowerCase().includes(searchTerm) ||
+              (activity.data as any)?.title?.toLowerCase().includes(searchTerm)
+            );
+          });
+        }
+      }
+
+      if (filters?.keywords) {
+        const searchTerm = filters.keywords.toLowerCase();
+        filteredActivities = filteredActivities.filter(activity =>
+          (activity.data as any)?.title?.toLowerCase().includes(searchTerm) ||
+          activity.user_profiles?.display_name?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      if (filters?.user) {
+        const searchTerm = filters.user.toLowerCase();
+        filteredActivities = filteredActivities.filter(activity =>
+          activity.user_profiles?.display_name?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      setActivities(filteredActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
     } finally {
@@ -80,7 +135,7 @@ export const useFeed = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, filters]);
 
   return {
     activities,
