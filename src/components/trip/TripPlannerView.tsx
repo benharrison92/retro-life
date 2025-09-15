@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useTripPlannerItems, TripPlanner, TripPlannerItem } from '@/hooks/useTripPlanners';
 import { AddTripItemDialog } from './AddTripItemDialog';
 import { TripCalendarView } from './TripCalendarView';
+import { EditTripItemDialog } from './EditTripItemDialog';
 
 interface TripPlannerViewProps {
   tripPlanner: TripPlanner;
@@ -19,6 +20,8 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedItem, setSelectedItem] = useState<TripPlannerItem | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const getEventTypeIcon = (type: string) => {
     switch (type) {
@@ -56,6 +59,16 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
     if (filterStatus !== 'all' && item.status !== filterStatus) return false;
     return true;
   });
+
+  const handleItemClick = (item: TripPlannerItem) => {
+    setSelectedItem(item);
+    setShowEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setShowEditDialog(false);
+    setSelectedItem(null);
+  };
 
   if (loading) {
     return <div className="text-center py-8">Loading trip items...</div>;
@@ -146,7 +159,11 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
           ) : (
             <div className="space-y-4">
               {filteredItems.map((item) => (
-                <Card key={item.id}>
+                <Card 
+                  key={item.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => handleItemClick(item)}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -222,6 +239,12 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
         tripPlannerId={tripPlanner.id}
+      />
+
+      <EditTripItemDialog
+        item={selectedItem}
+        isOpen={showEditDialog}
+        onClose={handleCloseEditDialog}
       />
     </div>
   );

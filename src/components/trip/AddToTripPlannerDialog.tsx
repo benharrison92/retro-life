@@ -31,10 +31,6 @@ export const AddToTripPlannerDialog = ({
   const { tripPlanners } = useTripPlanners();
   const { addItem } = useTripPlannerItems(selectedTripPlannerId);
 
-  // Debug logging
-  console.log('AddToTripPlannerDialog: tripPlanners:', tripPlanners);
-  console.log('AddToTripPlannerDialog: tripPlanners.length:', tripPlanners.length);
-
   const handleAddToPlanner = async () => {
     if (!selectedTripPlannerId) return;
 
