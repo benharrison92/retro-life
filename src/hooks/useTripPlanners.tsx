@@ -45,13 +45,19 @@ export const useTripPlanners = () => {
 
     try {
       setLoading(true);
+      console.log('fetchTripPlanners: Starting fetch for user:', user.id);
       const { data, error } = await supabase
         .from('trip_planners')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('fetchTripPlanners: Error:', error);
+        throw error;
+      }
+      
+      console.log('fetchTripPlanners: Fetched data:', data);
       setTripPlanners(data || []);
     } catch (error) {
       console.error('Error fetching trip planners:', error);
