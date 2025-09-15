@@ -92,10 +92,10 @@ export default function Feed() {
               </CardContent>
             </Card>
             
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/catalogues')}>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/travel-planner')}>
               <CardContent className="p-4 text-center">
                 <Plus className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-                <p className="text-sm font-medium">Catalogues</p>
+                <p className="text-sm font-medium">Travel Planner</p>
               </CardContent>
             </Card>
           </div>
