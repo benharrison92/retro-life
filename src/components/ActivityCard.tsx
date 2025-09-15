@@ -104,6 +104,17 @@ export const ActivityCard = ({ activity, onRetroClick }: ActivityCardProps) => {
                 </Badge>
               )}
             </div>
+            
+            {/* Photo display if available */}
+            {activity.data.photo_url && (
+              <div className="mt-3">
+                <img 
+                  src={activity.data.photo_url} 
+                  alt="Retro photo" 
+                  className="w-full h-32 object-cover rounded-md"
+                />
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

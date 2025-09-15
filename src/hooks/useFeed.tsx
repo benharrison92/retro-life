@@ -19,9 +19,10 @@ export interface Activity {
 export const useFeed = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
 
-  const fetchActivities = async () => {
+  const fetchActivities = async (offset = 0, replace = true) => {
     if (!user) return;
 
     setLoading(true);
@@ -30,7 +31,7 @@ export const useFeed = () => {
         .from('activities')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .range(offset, offset + 19);
 
       if (error) throw error;
 
@@ -50,12 +51,23 @@ export const useFeed = () => {
         })
       );
 
-      setActivities(activitiesWithProfiles);
+      if (replace) {
+        setActivities(activitiesWithProfiles);
+      } else {
+        setActivities(prev => [...prev, ...activitiesWithProfiles]);
+      }
+      
+      setHasMore(activitiesWithProfiles.length === 20);
     } catch (error) {
       console.error('Error fetching activities:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadMore = () => {
+    if (!hasMore || loading) return;
+    fetchActivities(activities.length, false);
   };
 
   useEffect(() => {
@@ -85,6 +97,8 @@ export const useFeed = () => {
   return {
     activities,
     loading,
-    refetch: fetchActivities
+    hasMore,
+    loadMore,
+    refetch: () => fetchActivities()
   };
 };
