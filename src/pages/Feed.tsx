@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw, Plus, Users, Calendar } from 'lucide-react';
+import { RetroHeader } from '@/components/RetroHeader';
+import { AppHeader } from '@/components/AppHeader';
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -30,35 +32,37 @@ export default function Feed() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
-        <div className="container mx-auto px-4 py-6 max-w-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Your Feed
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Stay updated with your friends' latest retro activities
-              </p>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={refetch}
-                disabled={loading}
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
+    <>
+      <AppHeader />
+      <div className="min-h-screen bg-background p-4 md:p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Retro App Header */}
+          <RetroHeader />
+          
+          {/* Feed Content */}
+          <div className="max-w-2xl mx-auto">
+            {/* Feed Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Your Feed
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Stay updated with your friends' latest retro activities
+                </p>
+              </div>
               
-              <Button onClick={() => navigate('/create-retro')}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Retro
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={refetch}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
             </div>
-          </div>
 
           {/* Quick Actions */}
           <div className="grid grid-cols-3 gap-3 mb-6">
@@ -131,8 +135,10 @@ export default function Feed() {
                 </CardContent>
               </Card>
             )}
+            </div>
           </div>
         </div>
-    </div>
+      </div>
+    </>
   );
 }
