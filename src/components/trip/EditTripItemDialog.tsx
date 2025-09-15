@@ -36,7 +36,8 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
     description: '',
     event_type: 'other' as 'accommodation' | 'travel' | 'activity' | 'food' | 'other',
     status: 'pending_review' as 'booked' | 'pending_review' | 'declined',
-    scheduled_date: null as Date | null,
+    start_date: null as Date | null,
+    end_date: null as Date | null,
     scheduled_time: '',
     location_name: '',
     location_address: '',
@@ -55,7 +56,8 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
         description: item.description || '',
         event_type: item.event_type || 'other',
         status: item.status || 'pending_review',
-        scheduled_date: item.scheduled_date ? new Date(item.scheduled_date) : null,
+        start_date: item.scheduled_date ? new Date(item.scheduled_date) : null,
+        end_date: null, // We'll use scheduled_date as start_date for now
         scheduled_time: item.scheduled_time || '',
         location_name: item.location_name || '',
         location_address: item.location_address || '',
@@ -77,7 +79,7 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
         description: formData.description,
         event_type: formData.event_type,
         status: formData.status,
-        scheduled_date: formData.scheduled_date?.toISOString().split('T')[0] || null,
+        scheduled_date: formData.start_date?.toISOString().split('T')[0] || null,
         scheduled_time: formData.scheduled_time || null,
         location_name: formData.location_name,
         location_address: formData.location_address,
@@ -203,33 +205,62 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
               </div>
 
               <div className="space-y-2">
-                <Label>Scheduled Date</Label>
+                <Label>Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !formData.scheduled_date && "text-muted-foreground"
+                        !formData.start_date && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.scheduled_date ? format(formData.scheduled_date, "PPP") : "Select date"}
+                      {formData.start_date ? format(formData.start_date, "PPP") : "Select start date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={formData.scheduled_date || undefined}
-                      onSelect={(date) => setFormData(prev => ({ ...prev, scheduled_date: date || null }))}
+                      selected={formData.start_date || undefined}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, start_date: date || null }))}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="scheduled_time">Scheduled Time</Label>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.end_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.end_date ? format(formData.end_date, "PPP") : "Select end date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.end_date || undefined}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, end_date: date || null }))}
+                      disabled={(date) => formData.start_date ? date < formData.start_date : false}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="scheduled_time">Time</Label>
                 <Input
                   id="scheduled_time"
                   type="time"
