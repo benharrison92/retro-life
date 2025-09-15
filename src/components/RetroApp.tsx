@@ -613,15 +613,6 @@ export const RetroApp = () => {
                 <Plus className="w-5 h-5 mr-2" />
                 Create New Experience
               </Button>
-                <Button
-  variant="outline"
-  onClick={() => setShowQuick(true)}
-  className="w-full sm:w-auto px-6 py-3 mb-4"
-  size="lg"
->
-  Quick RBT
-</Button>
-
               <div className="flex items-center gap-4">
                 <NotificationHub className="w-full sm:w-auto" />
                 

@@ -33,11 +33,6 @@ export const RetroHeader = ({
     navigate('/create-retro');
   };
 
-  const handleQuickRBT = () => {
-    // TODO: Implement Quick RBT functionality
-    console.log('Quick RBT clicked');
-  };
-
   return (
     <Card className="shadow-elegant">
       <CardHeader className="bg-gradient-primary text-primary-foreground rounded-t-lg">
@@ -64,15 +59,6 @@ export const RetroHeader = ({
             <Plus className="w-5 h-5 mr-2" />
             Create New Experience
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleQuickRBT}
-            className="w-full sm:w-auto px-6 py-3"
-            size="lg"
-          >
-            Quick RBT
-          </Button>
-
           <div className="flex items-center gap-4">
             <NotificationHub className="w-full sm:w-auto" />
           </div>
