@@ -25,6 +25,8 @@ export interface TripPlannerItem {
   event_type: 'accommodation' | 'travel' | 'activity' | 'food' | 'other';
   status: 'booked' | 'pending_review' | 'declined';
   scheduled_date?: string;
+  start_date?: string;
+  end_date?: string;
   scheduled_time?: string;
   location_name?: string;
   location_address?: string;

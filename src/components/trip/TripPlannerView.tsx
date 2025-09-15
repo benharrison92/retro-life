@@ -189,11 +189,14 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      {(item.scheduled_date || item.scheduled_time) && (
+                      {(item.start_date || item.end_date || item.scheduled_date || item.scheduled_time) && (
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <span>
-                            {item.scheduled_date && new Date(item.scheduled_date).toLocaleDateString()}
+                            {(item.start_date || item.scheduled_date) && 
+                              new Date(item.start_date || item.scheduled_date).toLocaleDateString()}
+                            {item.end_date && item.start_date && ' - '}
+                            {item.end_date && new Date(item.end_date).toLocaleDateString()}
                             {item.scheduled_time && ` at ${item.scheduled_time}`}
                           </span>
                         </div>

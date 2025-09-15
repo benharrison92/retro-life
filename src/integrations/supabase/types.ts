@@ -980,6 +980,7 @@ export type Database = {
           catalogue_item_id: string | null
           created_at: string
           description: string | null
+          end_date: string | null
           estimated_cost: number | null
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
@@ -988,6 +989,7 @@ export type Database = {
           notes: string | null
           scheduled_date: string | null
           scheduled_time: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["trip_status"]
           title: string
           trip_planner_id: string
@@ -998,6 +1000,7 @@ export type Database = {
           catalogue_item_id?: string | null
           created_at?: string
           description?: string | null
+          end_date?: string | null
           estimated_cost?: number | null
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
@@ -1006,6 +1009,7 @@ export type Database = {
           notes?: string | null
           scheduled_date?: string | null
           scheduled_time?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
           title: string
           trip_planner_id: string
@@ -1016,6 +1020,7 @@ export type Database = {
           catalogue_item_id?: string | null
           created_at?: string
           description?: string | null
+          end_date?: string | null
           estimated_cost?: number | null
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
@@ -1024,6 +1029,7 @@ export type Database = {
           notes?: string | null
           scheduled_date?: string | null
           scheduled_time?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
           title?: string
           trip_planner_id?: string
