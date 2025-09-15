@@ -10,14 +10,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { FriendFinder } from '@/components/social/FriendFinder';
-import { FriendsList } from '@/components/social/FriendsList';
+import { FriendsManager } from '@/components/social/FriendsManager';
 import { UserProfile } from '@/components/social/UserProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
-  UserPlus, 
   User, 
   LogOut, 
   LogIn,
@@ -36,8 +34,7 @@ export function SocialHeader() {
   const navigate = useNavigate();
   
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [friendFinderOpen, setFriendFinderOpen] = useState(false);
-  const [friendsListOpen, setFriendsListOpen] = useState(false);
+  const [friendsManagerOpen, setFriendsManagerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -72,7 +69,6 @@ export function SocialHeader() {
           size="sm"
           onClick={() => navigate('/auth')}
         >
-          <UserPlus className="h-4 w-4 mr-2" />
           Sign Up
         </Button>
         
@@ -90,16 +86,7 @@ export function SocialHeader() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => setFriendFinderOpen(true)}
-      >
-        <UserPlus className="h-4 w-4 mr-2" />
-        Find Friends
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setFriendsListOpen(true)}
+        onClick={() => setFriendsManagerOpen(true)}
         className="relative"
       >
         <Users className="h-4 w-4 mr-2" />
@@ -159,13 +146,9 @@ export function SocialHeader() {
             <User className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setFriendsListOpen(true)}>
+          <DropdownMenuItem onClick={() => setFriendsManagerOpen(true)}>
             <Users className="mr-2 h-4 w-4" />
             Friends
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setFriendFinderOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Find Friends
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/catalogues')}>
             <BookOpen className="mr-2 h-4 w-4" />
@@ -188,13 +171,9 @@ export function SocialHeader() {
       </DropdownMenu>
 
       {/* Modals */}
-      <FriendFinder 
-        open={friendFinderOpen} 
-        onOpenChange={setFriendFinderOpen} 
-      />
-      <FriendsList 
-        open={friendsListOpen} 
-        onOpenChange={setFriendsListOpen} 
+      <FriendsManager 
+        open={friendsManagerOpen} 
+        onOpenChange={setFriendsManagerOpen} 
       />
       <UserProfile 
         open={profileOpen} 
