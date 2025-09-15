@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft } from 'lucide-react'
 import { CommentsSection } from './CommentsSection'
@@ -35,8 +35,6 @@ export type TripDetailProps = {
   onAddComment?: (content: string) => Promise<void>
   onDeleteComment?: (commentId: string) => Promise<void>
   commentsLoading?: boolean
-  // Sub-retrospectives section
-  subRetrosSection?: React.ReactNode
 }
 
 function fmtDate(input?: string | Date) {
@@ -64,10 +62,7 @@ export default function TripDetail({
   onAddComment,
   onDeleteComment,
   commentsLoading = false,
-  subRetrosSection,
 }: TripDetailProps) {
-  const [showComments, setShowComments] = useState(false)
-  
   const dateRange = useMemo(() => {
     const s = fmtDate(startDate)
     const e = fmtDate(endDate)
@@ -144,17 +139,10 @@ export default function TripDetail({
               <Heart className={`h-4 w-4 ${stats.hasLiked ? 'fill-current' : ''}`} />
               <span>{stats.likes}</span>
             </button>
-            <button
-              onClick={() => setShowComments(!showComments)}
-              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
-                showComments
-                  ? 'border-blue-200 bg-blue-50 text-blue-600'
-                  : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
-              }`}
-            >
+            <div className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
               <MessageCircle className="h-4 w-4" />
               <span>{stats.comments}</span>
-            </button>
+            </div>
           </div>
 
           <button
@@ -166,8 +154,8 @@ export default function TripDetail({
         </div>
       </div>
 
-      {/* Map + quick facts + sub-retros */}
-      {(hasMap || dateRange || subRetrosSection) && (
+      {/* Map + quick facts */}
+      {(hasMap || dateRange) && (
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           {hasMap && (
             <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm md:col-span-2">
@@ -183,22 +171,18 @@ export default function TripDetail({
             </div>
           )}
 
-          <div className="space-y-4">
-            {dateRange && (
-              <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-                <h3 className="mb-2 text-sm font-semibold text-neutral-900">Trip facts</h3>
-                <ul className="space-y-2 text-sm text-neutral-700">
-                  <li className="inline-flex items-center gap-2"><Calendar className="h-4 w-4" /> {dateRange}</li>
-                  {location?.name && (
-                    <li className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" /> {location.name}</li>
-                  )}
-                  <li className="inline-flex items-center gap-2"><Clock className="h-4 w-4" /> {itinerary.length} {itinerary.length === 1 ? 'day' : 'days'}</li>
-                </ul>
-              </div>
-            )}
-            
-            {subRetrosSection}
-          </div>
+          {dateRange && (
+            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+              <h3 className="mb-2 text-sm font-semibold text-neutral-900">Trip facts</h3>
+              <ul className="space-y-2 text-sm text-neutral-700">
+                <li className="inline-flex items-center gap-2"><Calendar className="h-4 w-4" /> {dateRange}</li>
+                {location?.name && (
+                  <li className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" /> {location.name}</li>
+                )}
+                <li className="inline-flex items-center gap-2"><Clock className="h-4 w-4" /> {itinerary.length} {itinerary.length === 1 ? 'day' : 'days'}</li>
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -240,17 +224,15 @@ export default function TripDetail({
       )}
 
       {/* Comments */}
-      {showComments && (
-        <section className="mt-6">
-          <h3 className="mb-3 text-base font-semibold text-neutral-900">Comments</h3>
-          <CommentsSection
-            comments={comments}
-            onAddComment={onAddComment || (() => Promise.resolve())}
-            onDeleteComment={onDeleteComment || (() => Promise.resolve())}
-            loading={commentsLoading}
-          />
-        </section>
-      )}
+      <section className="mt-6">
+        <h3 className="mb-3 text-base font-semibold text-neutral-900">Comments</h3>
+        <CommentsSection
+          comments={comments}
+          onAddComment={onAddComment || (() => Promise.resolve())}
+          onDeleteComment={onDeleteComment || (() => Promise.resolve())}
+          loading={commentsLoading}
+        />
+      </section>
 
       {/* Related trips placeholder */}
       <section className="mt-6">

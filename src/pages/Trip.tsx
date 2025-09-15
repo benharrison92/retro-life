@@ -224,15 +224,12 @@ const Trip = () => {
           onShare={(rid) => handleShare(rid)}
           onAddComment={addComment}
           onDeleteComment={deleteComment}
-          subRetrosSection={
-            <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-              <h3 className="mb-2 text-sm font-semibold text-neutral-900">Sub-Retrospectives</h3>
-              <ChildRetrosList
-                parentRetroId={retro.id}
-                onAddChild={handleAddChildRetro}
-              />
-            </div>
-          }
+        />
+
+        {/* Child Retrospectives */}
+        <ChildRetrosList
+          parentRetroId={retro.id}
+          onAddChild={handleAddChildRetro}
         />
 
         <section>
