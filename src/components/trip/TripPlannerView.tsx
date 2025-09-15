@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Calendar, MapPin, DollarSign, MessageCircle, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,7 @@ interface TripPlannerViewProps {
 }
 
 export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) => {
-  const { items, loading } = useTripPlannerItems(tripPlanner.id);
+  const { items, loading, refreshItems } = useTripPlannerItems(tripPlanner.id);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -68,7 +68,19 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
   const handleCloseEditDialog = () => {
     setShowEditDialog(false);
     setSelectedItem(null);
+    // Refresh items to get updated data
+    refreshItems();
   };
+
+  // Update selectedItem when items are refreshed and we have a selected item
+  useEffect(() => {
+    if (selectedItem && items.length > 0) {
+      const updatedItem = items.find(item => item.id === selectedItem.id);
+      if (updatedItem) {
+        setSelectedItem(updatedItem);
+      }
+    }
+  }, [items, selectedItem?.id]);
 
   if (loading) {
     return <div className="text-center py-8">Loading trip items...</div>;
