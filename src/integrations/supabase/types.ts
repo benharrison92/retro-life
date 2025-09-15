@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          data: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       catalogue_discussions: {
         Row: {
           catalogue_item_id: string
@@ -878,6 +908,16 @@ export type Database = {
       are_users_friends: {
         Args: { _user1: string; _user2: string }
         Returns: boolean
+      }
+      create_activity: {
+        Args: {
+          p_activity_type: string
+          p_data?: Json
+          p_target_id?: string
+          p_target_type?: string
+          p_user_id: string
+        }
+        Returns: string
       }
       generate_unique_code: {
         Args: Record<PropertyKey, never>
