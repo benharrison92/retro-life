@@ -23,6 +23,7 @@ import RetroReadCardPage from "./pages/RetroReadCard";
 
 const queryClient = new QueryClient();
 
+// Force cache refresh
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
