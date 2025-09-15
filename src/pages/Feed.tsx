@@ -6,6 +6,7 @@ import { ActivityCard } from '@/components/ActivityCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RefreshCw, Plus, Users, Calendar, Heart, Home, MapPin, Clock } from 'lucide-react';
 import { RetroApp } from '@/components/RetroApp';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 export default function Feed() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { activities, loading: feedLoading, hasMore, loadMore, refetch } = useFeed();
+  const { activities, loading: feedLoading, refetch } = useFeed();
   const { retros, loading: retrosLoading, fetchRetros } = useRetros();
 
   if (authLoading) {
@@ -69,102 +70,97 @@ export default function Feed() {
             </Button>
           </div>
 
-          {/* Activity Feed Section - Top Priority */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                <Heart className="h-5 w-5 text-rose-500" />
-                Recent Activity
-              </h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refetch}
-                disabled={feedLoading}
-              >
-                <RefreshCw className={`h-4 w-4 ${feedLoading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+          <Tabs defaultValue="feed" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="feed" className="flex items-center gap-2">
+                <Heart className="h-4 w-4" />
+                Activity Feed
+              </TabsTrigger>
+              <TabsTrigger value="retros" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                My Retros
+              </TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-3">
-              {feedLoading && activities.length === 0 ? (
-                // Loading skeletons
-                [...Array(5)].map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <div className="flex-1 space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/4" />
+            <TabsContent value="feed" className="mt-6">
+              {/* Feed Section */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800">Recent Activity</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refetch}
+                    disabled={feedLoading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${feedLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {feedLoading ? (
+                    // Loading skeletons
+                    [...Array(5)].map((_, i) => (
+                      <Card key={i}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-3 w-1/4" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : activities.length > 0 ? (
+                    activities.map((activity) => (
+                      <ActivityCard
+                        key={activity.id}
+                        activity={activity}
+                        onRetroClick={handleRetroClick}
+                      />
+                    ))
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-center text-gray-500">
+                          No recent activity
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-center pb-6">
+                        <p className="text-gray-600 mb-4">
+                          Follow friends or create retrospectives to see activities here!
+                        </p>
+                        <div className="flex gap-2 justify-center">
+                          <Button onClick={() => navigate('/create-retro')}>
+                            Create First Retro
+                          </Button>
+                          <Button variant="outline" onClick={() => navigate('/retros')}>
+                            View All Retros
+                          </Button>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : activities.length > 0 ? (
-                <>
-                  {activities.map((activity) => (
-                    <ActivityCard
-                      key={activity.id}
-                      activity={activity}
-                      onRetroClick={handleRetroClick}
-                    />
-                  ))}
-                  
-                  {hasMore && (
-                    <div className="flex justify-center pt-4">
-                      <Button 
-                        variant="outline" 
-                        onClick={loadMore}
-                        disabled={feedLoading}
-                      >
-                        {feedLoading ? 'Loading...' : 'Load More'}
-                      </Button>
-                    </div>
+                      </CardContent>
+                    </Card>
                   )}
-                </>
-              ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-center text-gray-500">
-                      No recent activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center pb-6">
-                    <p className="text-gray-600 mb-4">
-                      Follow friends or create retrospectives to see activities here!
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      <Button onClick={() => navigate('/create-retro')}>
-                        Create First Retro
-                      </Button>
-                      <Button variant="outline" onClick={() => navigate('/retros')}>
-                        View All Retros
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
+                </div>
+              </div>
+            </TabsContent>
 
-          {/* Individual Retros Section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-500" />
-                Your Retrospectives
-              </h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchRetros}
-                disabled={retrosLoading}
-              >
-                <RefreshCw className={`h-4 w-4 ${retrosLoading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+            <TabsContent value="retros" className="mt-6">
+              {/* Individual Retros Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800">Your Retrospectives</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={fetchRetros}
+                    disabled={retrosLoading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${retrosLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
 
                 {/* Quick Actions for Retros */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -279,6 +275,8 @@ export default function Feed() {
                   )}
                 </div>
               </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
