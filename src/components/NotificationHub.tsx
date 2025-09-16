@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus, FolderOpen, ExternalLink, CheckCircle, XCircle } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, User, Calendar, MessageCircle, UserPlus, FolderOpen, ExternalLink, CheckCircle, XCircle, MapPin } from "lucide-react";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -22,14 +22,16 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
     deleteNotification,
     acceptFriendRequest,
     declineFriendRequest,
+    acceptTripPlannerInvitation,
+    declineTripPlannerInvitation,
   } = useNotifications();
   
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleNotificationClick = async (notification: Notification) => {
-    // Don't auto-click for friend requests with action buttons
-    if (notification.type === 'friend_request' && !notification.is_read) {
+    // Don't auto-click for invitations with action buttons
+    if ((notification.type === 'friend_request' || notification.type === 'trip_planner_invitation') && !notification.is_read) {
       return; // Let the user use the Accept/Decline buttons instead
     }
 
@@ -56,6 +58,10 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
         setOpen(false); // Close dialog
         navigate('/catalogues');
         break;
+      case 'trip_planner_invitation':
+        setOpen(false); // Close dialog
+        navigate('/travel-planner');
+        break;
       case 'friend_request':
         setOpen(false); // Close dialog
         // Navigate to friends section where they can accept/decline
@@ -78,14 +84,16 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
         return <UserPlus className="w-4 h-4 text-green-500" />;
       case 'catalogue_invitation':
         return <FolderOpen className="w-4 h-4 text-purple-500" />;
+      case 'trip_planner_invitation':
+        return <MapPin className="w-4 h-4 text-orange-500" />;
       default:
         return <Bell className="w-4 h-4" />;
     }
   };
 
   const isClickableNotification = (type: string, isRead: boolean) => {
-    // Friend requests are only clickable when read (no action buttons)
-    if (type === 'friend_request') return isRead;
+    // Invitations are only clickable when read (no action buttons)
+    if (type === 'friend_request' || type === 'trip_planner_invitation') return isRead;
     return ['retro_tagged', 'catalogue_invitation', 'comment_tagged'].includes(type);
   };
 
@@ -151,6 +159,29 @@ export const NotificationHub = ({ className }: NotificationHubProps) => {
               </div>
             )}
             
+            {/* Trip planner invitation action buttons */}
+            {notification.type === 'trip_planner_invitation' && !notification.is_read && (
+              <div className="flex gap-2 mb-3" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => acceptTripPlannerInvitation(notification.id, notification.related_item_id)}
+                  className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => declineTripPlannerInvitation(notification.id, notification.related_item_id)}
+                  className="h-7 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  <XCircle className="w-3 h-3 mr-1" />
+                  Decline
+                </Button>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
