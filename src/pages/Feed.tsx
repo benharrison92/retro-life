@@ -17,7 +17,9 @@ export default function Feed() {
     keywords: '',
     tags: '',
     user: '',
-    location: ''
+    location: '',
+    rbtType: '',
+    eventType: ''
   });
   const { activities, loading, refetch } = useFeed(filters);
 
@@ -49,6 +51,8 @@ export default function Feed() {
             onFilterTags={(tags) => setFilters(prev => ({ ...prev, tags }))}
             onSearchUser={(user) => setFilters(prev => ({ ...prev, user }))}
             onLocationSearch={(location) => setFilters(prev => ({ ...prev, location }))}
+            onFilterRBTType={(rbtType) => setFilters(prev => ({ ...prev, rbtType }))}
+            onFilterEventType={(eventType) => setFilters(prev => ({ ...prev, eventType }))}
           />
           
           {/* Feed Content */}

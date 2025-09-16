@@ -72,97 +72,101 @@ export const RetroHeader = ({
         </div>
 
         {/* Search and Filter Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search keywords..."
-              className="pl-10"
-              value={searchKeywords}
-              onChange={(e) => {
-                setSearchKeywords(e.target.value);
-                onSearchKeywords?.(e.target.value);
-              }}
-            />
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search keywords..."
+                className="pl-10"
+                value={searchKeywords}
+                onChange={(e) => {
+                  setSearchKeywords(e.target.value);
+                  onSearchKeywords?.(e.target.value);
+                }}
+              />
+            </div>
+            
+            <div className="relative">
+              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Filter by tags..."
+                className="pl-10"
+                value={filterTags}
+                onChange={(e) => {
+                  setFilterTags(e.target.value);
+                  onFilterTags?.(e.target.value);
+                }}
+              />
+            </div>
+            
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search users..."
+                className="pl-10"
+                value={searchUser}
+                onChange={(e) => {
+                  setSearchUser(e.target.value);
+                  onSearchUser?.(e.target.value);
+                }}
+              />
+            </div>
           </div>
           
-          <div className="relative">
-            <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Filter by tags..."
-              className="pl-10"
-              value={filterTags}
-              onChange={(e) => {
-                setFilterTags(e.target.value);
-                onFilterTags?.(e.target.value);
-              }}
-            />
-          </div>
-          
-          <Select value={rbtTypeFilter} onValueChange={(value) => {
-            setRbtTypeFilter(value);
-            onFilterRBTType?.(value);
-          }}>
-            <SelectTrigger>
-              <div className="flex items-center">
-                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="RBT Type" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
-              <SelectItem value="roses">🌹 Roses</SelectItem>
-              <SelectItem value="buds">🌱 Buds</SelectItem>
-              <SelectItem value="thorns">🌵 Thorns</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={eventTypeFilter} onValueChange={(value) => {
-            setEventTypeFilter(value);
-            onFilterEventType?.(value);
-          }}>
-            <SelectTrigger>
-              <div className="flex items-center">
-                <Tag className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Event Type" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Events</SelectItem>
-              <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
-              <SelectItem value="food">🍽️ Food</SelectItem>
-              <SelectItem value="activity">🎯 Activity</SelectItem>
-              <SelectItem value="transportation">🚗 Transportation</SelectItem>
-              <SelectItem value="shopping">🛍️ Shopping</SelectItem>
-              <SelectItem value="entertainment">🎭 Entertainment</SelectItem>
-              <SelectItem value="other">📝 Other</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search users..."
-              className="pl-10"
-              value={searchUser}
-              onChange={(e) => {
-                setSearchUser(e.target.value);
-                onSearchUser?.(e.target.value);
-              }}
-            />
-          </div>
-          
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="City, State..."
-              className="pl-10"
-              value={locationSearch}
-              onChange={(e) => {
-                setLocationSearch(e.target.value);
-                onLocationSearch?.(e.target.value);
-              }}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Select value={rbtTypeFilter} onValueChange={(value) => {
+              setRbtTypeFilter(value);
+              onFilterRBTType?.(value);
+            }}>
+              <SelectTrigger className="h-10">
+                <div className="flex items-center">
+                  <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Filter by Type (Rose/Bud/Thorn)" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-popover">
+                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="roses">🌹 Roses</SelectItem>
+                <SelectItem value="buds">🌱 Buds</SelectItem>
+                <SelectItem value="thorns">🌵 Thorns</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={eventTypeFilter} onValueChange={(value) => {
+              setEventTypeFilter(value);
+              onFilterEventType?.(value);
+            }}>
+              <SelectTrigger className="h-10">
+                <div className="flex items-center">
+                  <Tag className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Filter by Event Type" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-popover">
+                <SelectItem value="">All Events</SelectItem>
+                <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
+                <SelectItem value="food">🍽️ Food</SelectItem>
+                <SelectItem value="activity">🎯 Activity</SelectItem>
+                <SelectItem value="transportation">🚗 Transportation</SelectItem>
+                <SelectItem value="shopping">🛍️ Shopping</SelectItem>
+                <SelectItem value="entertainment">🎭 Entertainment</SelectItem>
+                <SelectItem value="other">📝 Other</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="City, State..."
+                className="pl-10"
+                value={locationSearch}
+                onChange={(e) => {
+                  setLocationSearch(e.target.value);
+                  onLocationSearch?.(e.target.value);
+                }}
+              />
+            </div>
           </div>
         </div>
       </CardContent>
