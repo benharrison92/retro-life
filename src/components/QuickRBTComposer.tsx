@@ -57,7 +57,7 @@ export default function QuickRBTComposer({ open, onClose, onSave }: { open: bool
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Tags (comma separated)</label>
-              <Input value={tags} onChange={e=>setTags(e.target.value)} placeholder="Travel, Hotel, Hawaii" />
+              <Input value={tags} onChange={e=>setTags(e.target.value)} placeholder="accommodation, food, activity, travel" />
             </div>
           </div>
           <div>

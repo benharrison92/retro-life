@@ -193,7 +193,7 @@ const RBTSection = React.memo(({
             <div>
               <Label className="text-sm font-medium">Tags (comma-separated)</Label>
               <Input
-                placeholder="e.g., beach, kids, fun"
+                placeholder="e.g., accommodation, food, activity, travel"
                 value={item.tags?.join(', ') || ''}
                 onChange={(e) => updateRBTItem(type, index, 'tags', e.target.value.split(',').map(tag => tag.trim()))}
                 className="mt-1"
