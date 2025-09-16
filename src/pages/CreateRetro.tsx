@@ -191,6 +191,8 @@ const CreateRetro = () => {
     );
   }
 
+  console.log('CreateRetro render: showCreationFlow=', showCreationFlow, 'loading=', loading, 'type=', type, 'isCreatingParent=', isCreatingParent);
+
   return (
     <>
       <AppHeader />
