@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import { RetroForm } from '@/components/RetroForm';
+import { RetroCreationFlow } from '@/components/RetroCreationFlow';
 import { useFeedbackSpaces } from '@/hooks/useFeedbackSpaces';
 import { useRetros, UserProfile } from '@/hooks/useRetros';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +25,9 @@ const CreateRetro = () => {
   const [editRetro, setEditRetro] = useState(null);
   const [loading, setLoading] = useState(!!feedbackSpaceId || !!parentId || !!editId);
   const [isCreatingParent, setIsCreatingParent] = useState(type === 'parent');
+  const [showCreationFlow, setShowCreationFlow] = useState(
+    !feedbackSpaceId && !parentId && !editId && type !== 'parent'
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -144,6 +148,10 @@ const CreateRetro = () => {
     }
   };
 
+  const handleCloseCreationFlow = () => {
+    navigate('/');
+  };
+
   if (!user) {
     return (
       <>
@@ -170,6 +178,15 @@ const CreateRetro = () => {
             <div className="h-32 bg-muted rounded"></div>
           </div>
         </div>
+      </>
+    );
+  }
+
+  if (showCreationFlow) {
+    return (
+      <>
+        <AppHeader />
+        <RetroCreationFlow onClose={handleCloseCreationFlow} />
       </>
     );
   }
