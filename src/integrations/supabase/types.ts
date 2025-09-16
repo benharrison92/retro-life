@@ -1225,6 +1225,14 @@ export type Database = {
         Args: { retro_uuid: string; user_uuid: string }
         Returns: boolean
       }
+      is_trip_planner_member: {
+        Args: { trip_planner_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      is_trip_planner_owner: {
+        Args: { trip_planner_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       event_type: "accommodation" | "travel" | "activity" | "food" | "other"
