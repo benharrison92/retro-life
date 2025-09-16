@@ -71,20 +71,22 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
 
     setLoading(true);
     try {
-      // Search all users on the platform by display name or email
+      // Use secure search function that only exposes display names and avatars
       const { data: users, error } = await supabase
-        .from('user_profiles')
-        .select('id, display_name, email, avatar_url')
-        .or(`display_name.ilike.%${query}%,email.ilike.%${query}%`)
-        .neq('id', user.id) // Exclude current user
-        .limit(10);
+        .rpc('search_users_for_friend_discovery', { search_query: query });
 
       if (error) {
         console.error('Search error:', error);
         throw error;
       }
 
-      setSearchResults(users || []);
+      // Add email field as empty since the interface expects it, but it's not exposed for security
+      const usersWithEmailField = (users || []).map(user => ({
+        ...user,
+        email: '' // Email is hidden for security - users can only search by display name
+      }));
+
+      setSearchResults(usersWithEmailField);
       setShowDropdown(true);
     } catch (error) {
       console.error('Error searching users:', error);
