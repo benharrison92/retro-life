@@ -9,6 +9,9 @@ import { useTripPlannerItems, TripPlanner, TripPlannerItem } from '@/hooks/useTr
 import { AddTripItemDialog } from './AddTripItemDialog';
 import { TripCalendarView } from './TripCalendarView';
 import { EditTripItemDialog } from './EditTripItemDialog';
+import { TripPlannerMembersDialog } from './TripPlannerMembersDialog';
+import { InviteToTripPlannerDialog } from './InviteToTripPlannerDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TripPlannerViewProps {
   tripPlanner: TripPlanner;
@@ -16,12 +19,15 @@ interface TripPlannerViewProps {
 }
 
 export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) => {
+  const { user } = useAuth();
   const { items, loading, refreshItems } = useTripPlannerItems(tripPlanner.id);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedItem, setSelectedItem] = useState<TripPlannerItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  const isOwner = user?.id === tripPlanner.user_id;
 
   const getEventTypeIcon = (type: string) => {
     switch (type) {
@@ -112,10 +118,25 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
           </div>
         </div>
         
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Item
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
+
+          <TripPlannerMembersDialog 
+            tripPlannerId={tripPlanner.id}
+            tripPlannerName={tripPlanner.title}
+            isOwner={isOwner}
+          />
+
+          {isOwner && (
+            <InviteToTripPlannerDialog 
+              tripPlannerId={tripPlanner.id}
+              tripPlannerName={tripPlanner.title}
+            />
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="list" className="w-full">

@@ -47,17 +47,51 @@ export const useTripPlanners = () => {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch trip planners owned by user
+      const { data: ownedPlanners, error: ownedError } = await supabase
         .from('trip_planners')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('user_id', user.id);
 
-      if (error) {
-        throw error;
-      }
-      
-      setTripPlanners(data || []);
+      if (ownedError) throw ownedError;
+
+      // Fetch trip planners where user is a member
+      const { data: memberPlanners, error: memberError } = await supabase
+        .from('trip_planners')
+        .select(`
+          *,
+          trip_planner_members!inner(user_id, status)
+        `)
+        .eq('trip_planner_members.user_id', user.id)
+        .eq('trip_planner_members.status', 'accepted');
+
+      if (memberError) throw memberError;
+
+      // Combine and deduplicate
+      const allPlanners = [
+        ...(ownedPlanners || []),
+        ...(memberPlanners || []).map(planner => ({
+          id: planner.id,
+          title: planner.title,
+          description: planner.description,
+          user_id: planner.user_id,
+          catalogue_id: planner.catalogue_id,
+          start_date: planner.start_date,
+          end_date: planner.end_date,
+          created_at: planner.created_at,
+          updated_at: planner.updated_at
+        }))
+      ];
+
+      // Remove duplicates and sort by created_at
+      const uniquePlanners = allPlanners
+        .filter((planner, index, self) => 
+          index === self.findIndex(p => p.id === planner.id)
+        )
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setTripPlanners(uniquePlanners);
     } catch (error) {
       console.error('Error fetching trip planners:', error);
       toast({

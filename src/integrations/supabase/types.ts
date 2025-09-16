@@ -1053,6 +1053,61 @@ export type Database = {
           },
         ]
       }
+      trip_planner_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by_user_id: string
+          role: string
+          status: string
+          trip_planner_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by_user_id: string
+          role?: string
+          status?: string
+          trip_planner_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by_user_id?: string
+          role?: string
+          status?: string
+          trip_planner_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_planner_members_invited_by_user_id_fkey"
+            columns: ["invited_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_planner_members_trip_planner_id_fkey"
+            columns: ["trip_planner_id"]
+            isOneToOne: false
+            referencedRelation: "trip_planners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_planner_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_planners: {
         Row: {
           catalogue_id: string | null

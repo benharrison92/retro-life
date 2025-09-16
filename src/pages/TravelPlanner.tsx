@@ -5,6 +5,7 @@ import { CatalogueView } from '@/components/catalogue/CatalogueView';
 import { PendingCatalogueInvitations } from '@/components/catalogue/PendingCatalogueInvitations';
 import { TripPlannerManager } from '@/components/trip/TripPlannerManager';
 import { TripPlannerView } from '@/components/trip/TripPlannerView';
+import { PendingTripPlannerInvitations } from '@/components/trip/PendingTripPlannerInvitations';
 import { Catalogue } from '@/lib/supabase';
 import { TripPlanner } from '@/hooks/useTripPlanners';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -235,7 +236,10 @@ export default function TravelPlanner() {
             </TabsContent>
 
             <TabsContent value="trip-planners" className="animate-fade-in">
-              <TripPlannerManager onSelectTripPlanner={setSelectedTripPlanner} />
+              <div className="space-y-6">
+                <PendingTripPlannerInvitations />
+                <TripPlannerManager onSelectTripPlanner={setSelectedTripPlanner} />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
