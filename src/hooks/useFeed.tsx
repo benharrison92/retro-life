@@ -21,6 +21,8 @@ interface FeedFilters {
   tags: string;
   user: string;
   location: string;
+  rbtType: string;
+  eventType: string;
 }
 
 export const useFeed = (filters?: FeedFilters) => {
@@ -103,6 +105,53 @@ export const useFeed = (filters?: FeedFilters) => {
         filteredActivities = filteredActivities.filter(activity =>
           activity.user_profiles?.display_name?.toLowerCase().includes(searchTerm)
         );
+      }
+
+      if (filters?.tags) {
+        const searchTerm = filters.tags.toLowerCase();
+        filteredActivities = filteredActivities.filter(activity =>
+          (activity.data as any)?.tags?.some((tag: string) => 
+            tag.toLowerCase().includes(searchTerm)
+          )
+        );
+      }
+
+      if (filters?.rbtType) {
+        filteredActivities = filteredActivities.filter(activity => {
+          const activityType = activity.activity_type;
+          switch (filters.rbtType) {
+            case 'roses':
+              return activityType === 'rose_added';
+            case 'buds':
+              return activityType === 'bud_added';
+            case 'thorns':
+              return activityType === 'thorn_added';
+            default:
+              return true;
+          }
+        });
+      }
+
+      if (filters?.eventType) {
+        // For event type filtering, fetch retrospective data to check event_type
+        const retroActivities = filteredActivities.filter(a => a.target_type === 'retrospective');
+        const retroIds = retroActivities.map(a => a.target_id).filter(Boolean);
+        
+        if (retroIds.length > 0) {
+          const { data: retros } = await supabase
+            .from('retrospectives')
+            .select('id, event_type')
+            .in('id', retroIds);
+
+          filteredActivities = filteredActivities.filter(activity => {
+            if (activity.target_type !== 'retrospective') return true;
+            
+            const retro = retros?.find(r => r.id === activity.target_id);
+            if (!retro) return true;
+
+            return retro.event_type === filters.eventType;
+          });
+        }
       }
 
       setActivities(filteredActivities);

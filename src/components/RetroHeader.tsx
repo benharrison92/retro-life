@@ -151,6 +151,7 @@ export const RetroHeader = ({
                 <SelectItem value="transportation">🚗 Transportation</SelectItem>
                 <SelectItem value="shopping">🛍️ Shopping</SelectItem>
                 <SelectItem value="entertainment">🎭 Entertainment</SelectItem>
+                <SelectItem value="event">🎉 Event</SelectItem>
                 <SelectItem value="other">📝 Other</SelectItem>
               </SelectContent>
             </Select>
