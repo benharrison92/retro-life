@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Tag, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Tag, User, Filter } from "lucide-react";
 import { NotificationHub } from "./NotificationHub";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from 'react-router-dom';
@@ -12,13 +13,17 @@ interface RetroHeaderProps {
   onFilterTags?: (tags: string) => void;
   onSearchUser?: (user: string) => void;
   onLocationSearch?: (location: string) => void;
+  onFilterRBTType?: (type: string) => void;
+  onFilterEventType?: (type: string) => void;
 }
 
 export const RetroHeader = ({ 
   onSearchKeywords, 
   onFilterTags, 
   onSearchUser, 
-  onLocationSearch 
+  onLocationSearch,
+  onFilterRBTType,
+  onFilterEventType
 }: RetroHeaderProps) => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -26,6 +31,8 @@ export const RetroHeader = ({
   const [filterTags, setFilterTags] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
+  const [rbtTypeFilter, setRbtTypeFilter] = useState('');
+  const [eventTypeFilter, setEventTypeFilter] = useState('');
   
   const currentUserName = profile?.display_name || 'You';
 
@@ -65,7 +72,7 @@ export const RetroHeader = ({
         </div>
 
         {/* Search and Filter Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
@@ -78,6 +85,7 @@ export const RetroHeader = ({
               }}
             />
           </div>
+          
           <div className="relative">
             <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
@@ -90,6 +98,47 @@ export const RetroHeader = ({
               }}
             />
           </div>
+          
+          <Select value={rbtTypeFilter} onValueChange={(value) => {
+            setRbtTypeFilter(value);
+            onFilterRBTType?.(value);
+          }}>
+            <SelectTrigger>
+              <div className="flex items-center">
+                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="RBT Type" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="roses">🌹 Roses</SelectItem>
+              <SelectItem value="buds">🌱 Buds</SelectItem>
+              <SelectItem value="thorns">🌵 Thorns</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={eventTypeFilter} onValueChange={(value) => {
+            setEventTypeFilter(value);
+            onFilterEventType?.(value);
+          }}>
+            <SelectTrigger>
+              <div className="flex items-center">
+                <Tag className="w-4 h-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Event Type" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Events</SelectItem>
+              <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
+              <SelectItem value="food">🍽️ Food</SelectItem>
+              <SelectItem value="activity">🎯 Activity</SelectItem>
+              <SelectItem value="transportation">🚗 Transportation</SelectItem>
+              <SelectItem value="shopping">🛍️ Shopping</SelectItem>
+              <SelectItem value="entertainment">🎭 Entertainment</SelectItem>
+              <SelectItem value="other">📝 Other</SelectItem>
+            </SelectContent>
+          </Select>
+          
           <div className="relative">
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
@@ -102,6 +151,7 @@ export const RetroHeader = ({
               }}
             />
           </div>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
