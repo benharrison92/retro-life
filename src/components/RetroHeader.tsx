@@ -31,8 +31,8 @@ export const RetroHeader = ({
   const [filterTags, setFilterTags] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
-  const [rbtTypeFilter, setRbtTypeFilter] = useState('');
-  const [eventTypeFilter, setEventTypeFilter] = useState('');
+  const [rbtTypeFilter, setRbtTypeFilter] = useState('all');
+  const [eventTypeFilter, setEventTypeFilter] = useState('all');
   
   const currentUserName = profile?.display_name || 'You';
 
@@ -117,7 +117,7 @@ export const RetroHeader = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Select value={rbtTypeFilter} onValueChange={(value) => {
               setRbtTypeFilter(value);
-              onFilterRBTType?.(value);
+              onFilterRBTType?.(value === 'all' ? '' : value);
             }}>
               <SelectTrigger className="h-10">
                 <div className="flex items-center">
@@ -126,7 +126,7 @@ export const RetroHeader = ({
                 </div>
               </SelectTrigger>
               <SelectContent className="z-50 bg-popover">
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="roses">🌹 Roses</SelectItem>
                 <SelectItem value="buds">🌱 Buds</SelectItem>
                 <SelectItem value="thorns">🌵 Thorns</SelectItem>
@@ -135,7 +135,7 @@ export const RetroHeader = ({
             
             <Select value={eventTypeFilter} onValueChange={(value) => {
               setEventTypeFilter(value);
-              onFilterEventType?.(value);
+              onFilterEventType?.(value === 'all' ? '' : value);
             }}>
               <SelectTrigger className="h-10">
                 <div className="flex items-center">
@@ -144,7 +144,7 @@ export const RetroHeader = ({
                 </div>
               </SelectTrigger>
               <SelectContent className="z-50 bg-popover">
-                <SelectItem value="">All Events</SelectItem>
+                <SelectItem value="all">All Events</SelectItem>
                 <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
                 <SelectItem value="food">🍽️ Food</SelectItem>
                 <SelectItem value="activity">🎯 Activity</SelectItem>
