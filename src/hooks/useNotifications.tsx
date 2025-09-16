@@ -6,7 +6,7 @@ import { useToast } from './use-toast';
 export interface Notification {
   id: string;
   user_id: string;
-  type: 'retro_tagged' | 'comment_added' | 'friend_request' | 'catalogue_invitation' | 'comment_tagged';
+  type: 'retro_tagged' | 'comment_added' | 'friend_request' | 'catalogue_invitation' | 'comment_tagged' | 'trip_planner_invitation';
   title: string;
   message: string;
   is_read: boolean;
@@ -245,6 +245,139 @@ export const useNotifications = () => {
     }
   };
 
+  // Accept trip planner invitation
+  const acceptTripPlannerInvitation = async (notificationId: string, relatedId?: string) => {
+    if (!user) return;
+
+    try {
+      console.log('Accepting trip planner invitation:', { notificationId, relatedId, userId: user.id });
+
+      let updated = false;
+
+      // Try by member id first
+      if (relatedId) {
+        const { data: updateByIdData, error: updateByIdError } = await supabase
+          .from('trip_planner_members')
+          .update({ status: 'accepted' })
+          .eq('id', relatedId)
+          .eq('user_id', user.id)
+          .select('id')
+          .maybeSingle();
+
+        if (updateByIdError) {
+          console.warn('Update by member id failed, will try by trip_planner_id:', updateByIdError);
+        } else if (updateByIdData) {
+          updated = true;
+        }
+      }
+
+      // Fallback: try by trip_planner_id
+      if (!updated && relatedId) {
+        const { data: pendingMember, error: findError } = await supabase
+          .from('trip_planner_members')
+          .select('id')
+          .eq('trip_planner_id', relatedId)
+          .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .single();
+
+        if (!findError && pendingMember) {
+          const { error: updateError } = await supabase
+            .from('trip_planner_members')
+            .update({ status: 'accepted' })
+            .eq('id', pendingMember.id);
+          if (updateError) throw updateError;
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        throw new Error('Invitation not found for this trip planner');
+      }
+
+      await markAsRead(notificationId);
+
+      toast({
+        title: 'Invitation accepted!',
+        description: 'You have joined the trip planner.',
+      });
+    } catch (error: any) {
+      console.error('Error accepting trip planner invitation:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to accept invitation',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Decline trip planner invitation
+  const declineTripPlannerInvitation = async (notificationId: string, relatedId?: string) => {
+    if (!user) return;
+
+    try {
+      console.log('Declining trip planner invitation:', { notificationId, relatedId, userId: user.id });
+
+      let updated = false;
+
+      // Try by member id first
+      if (relatedId) {
+        const { data: updateByIdData, error: updateByIdError } = await supabase
+          .from('trip_planner_members')
+          .update({ status: 'declined' })
+          .eq('id', relatedId)
+          .eq('user_id', user.id)
+          .select('id')
+          .maybeSingle();
+
+        if (updateByIdError) {
+          console.warn('Decline by member id failed, will try by trip_planner_id:', updateByIdError);
+        } else if (updateByIdData) {
+          updated = true;
+        }
+      }
+
+      // Fallback: try by trip_planner_id
+      if (!updated && relatedId) {
+        const { data: pendingMember, error: findError } = await supabase
+          .from('trip_planner_members')
+          .select('id')
+          .eq('trip_planner_id', relatedId)
+          .eq('user_id', user.id)
+          .eq('status', 'pending')
+          .single();
+
+        if (!findError && pendingMember) {
+          const { error: updateError } = await supabase
+            .from('trip_planner_members')
+            .update({ status: 'declined' })
+            .eq('id', pendingMember.id);
+          if (updateError) throw updateError;
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        throw new Error('Invitation not found for this trip planner');
+      }
+
+      // Delete the notification after declining
+      await deleteNotification(notificationId);
+
+      toast({
+        title: 'Invitation declined',
+        description: 'The trip planner invitation has been declined.',
+      });
+    } catch (error: any) {
+      console.error('Error declining trip planner invitation:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to decline invitation',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Set up real-time subscription
   useEffect(() => {
     if (!user) return;
@@ -297,6 +430,9 @@ export const useNotifications = () => {
     deleteNotification,
     acceptFriendRequest,
     declineFriendRequest,
+    // New: trip planner invitation actions
+    acceptTripPlannerInvitation,
+    declineTripPlannerInvitation,
     refreshNotifications: fetchNotifications,
   };
 };
