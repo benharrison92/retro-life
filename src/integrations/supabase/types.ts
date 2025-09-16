@@ -1233,6 +1233,14 @@ export type Database = {
         Args: { trip_planner_uuid: string; user_uuid: string }
         Returns: boolean
       }
+      search_users_for_friend_discovery: {
+        Args: { search_query: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+        }[]
+      }
     }
     Enums: {
       event_type: "accommodation" | "travel" | "activity" | "food" | "other"
