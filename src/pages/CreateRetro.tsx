@@ -29,6 +29,12 @@ const CreateRetro = () => {
     !feedbackSpaceId && !parentId && !editId && type !== 'parent'
   );
 
+  // Keep selection flow in sync with URL query params
+  useEffect(() => {
+    setIsCreatingParent(type === 'parent');
+    setShowCreationFlow(!feedbackSpaceId && !parentId && !editId && type !== 'parent');
+  }, [feedbackSpaceId, parentId, editId, type]);
+
   useEffect(() => {
     const loadData = async () => {
       try {
