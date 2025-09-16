@@ -80,10 +80,9 @@ export function FriendFinder({ open, onOpenChange }: FriendFinderProps) {
         throw error;
       }
 
-      // Add email field as empty since the interface expects it, but it's not exposed for security
-      const usersWithEmailField = (users || []).map(user => ({
-        ...user,
-        email: '' // Email is hidden for security - users can only search by display name
+      const usersWithEmailField = ((users || []) as Array<{ id: string; display_name: string; avatar_url?: string | null }>).map(u => ({
+        ...u,
+        email: '' as string
       }));
 
       setSearchResults(usersWithEmailField);
