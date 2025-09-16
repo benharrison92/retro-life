@@ -193,56 +193,84 @@ const RBTSection = React.memo(({
             <div>
               <Label className="text-sm font-medium">Event Type Tags</Label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                {[
-                  { value: 'accommodation', label: '🏨 Accommodation', color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
-                  { value: 'food', label: '🍽️ Food', color: 'bg-orange-100 text-orange-800 hover:bg-orange-200' },
-                  { value: 'activity', label: '🎯 Activity', color: 'bg-green-100 text-green-800 hover:bg-green-200' },
-                  { value: 'travel', label: '🚗 Travel', color: 'bg-purple-100 text-purple-800 hover:bg-purple-200' },
-                  { value: 'entertainment', label: '🎭 Entertainment', color: 'bg-pink-100 text-pink-800 hover:bg-pink-200' },
-                  { value: 'shopping', label: '🛍️ Shopping', color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' },
-                  { value: 'event', label: '🎉 Event', color: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' },
-                  { value: 'other', label: '📝 Other', color: 'bg-gray-100 text-gray-800 hover:bg-gray-200' }
-                ].map((tag) => {
-                  const isSelected = item.tags?.includes(tag.value) || false;
-                  return (
-                    <button
-                      key={tag.value}
-                      type="button"
-                      onClick={() => {
-                        const currentTags = item.tags || [];
-                        const newTags = isSelected 
-                          ? currentTags.filter(t => t !== tag.value)
-                          : [...currentTags, tag.value];
-                        updateRBTItem(type, index, 'tags', newTags);
-                      }}
-                      className={`
-                        px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-200 border-2
-                        ${isSelected 
-                          ? `${tag.color} border-current` 
-                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                        }
-                      `}
-                    >
-                      {tag.label}
-                    </button>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentTags = item.tags || [];
+                    const newTags = currentTags.includes('accommodation') 
+                      ? currentTags.filter(t => t !== 'accommodation')
+                      : [...currentTags, 'accommodation'];
+                    updateRBTItem(type, index, 'tags', newTags);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-200 border-2 ${
+                    item.tags?.includes('accommodation') 
+                      ? 'bg-blue-100 text-blue-800 border-blue-300' 
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  🏨 Accommodation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentTags = item.tags || [];
+                    const newTags = currentTags.includes('food') 
+                      ? currentTags.filter(t => t !== 'food')
+                      : [...currentTags, 'food'];
+                    updateRBTItem(type, index, 'tags', newTags);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-200 border-2 ${
+                    item.tags?.includes('food') 
+                      ? 'bg-orange-100 text-orange-800 border-orange-300' 
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  🍽️ Food
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentTags = item.tags || [];
+                    const newTags = currentTags.includes('activity') 
+                      ? currentTags.filter(t => t !== 'activity')
+                      : [...currentTags, 'activity'];
+                    updateRBTItem(type, index, 'tags', newTags);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-200 border-2 ${
+                    item.tags?.includes('activity') 
+                      ? 'bg-green-100 text-green-800 border-green-300' 
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  🎯 Activity
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentTags = item.tags || [];
+                    const newTags = currentTags.includes('travel') 
+                      ? currentTags.filter(t => t !== 'travel')
+                      : [...currentTags, 'travel'];
+                    updateRBTItem(type, index, 'tags', newTags);
+                  }}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-200 border-2 ${
+                    item.tags?.includes('travel') 
+                      ? 'bg-purple-100 text-purple-800 border-purple-300' 
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  🚗 Travel
+                </button>
               </div>
               {item.tags && item.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-3">
                   <span className="text-xs text-muted-foreground">Selected:</span>
                   {item.tags.map((tag, tagIndex) => (
                     <Badge key={tagIndex} variant="secondary" className="text-xs">
-                      {[
-                        { value: 'accommodation', label: '🏨 Accommodation' },
-                        { value: 'food', label: '🍽️ Food' },
-                        { value: 'activity', label: '🎯 Activity' },
-                        { value: 'travel', label: '🚗 Travel' },
-                        { value: 'entertainment', label: '🎭 Entertainment' },
-                        { value: 'shopping', label: '🛍️ Shopping' },
-                        { value: 'event', label: '🎉 Event' },
-                        { value: 'other', label: '📝 Other' }
-                      ].find(t => t.value === tag)?.label || tag}
+                      {tag === 'accommodation' ? '🏨 Accommodation' :
+                       tag === 'food' ? '🍽️ Food' :
+                       tag === 'activity' ? '🎯 Activity' :
+                       tag === 'travel' ? '🚗 Travel' : tag}
                     </Badge>
                   ))}
                 </div>

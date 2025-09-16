@@ -167,7 +167,10 @@ const RBTItemDisplay = ({
         <div className="flex flex-wrap gap-1 mb-2">
           {item.tags.map((tag, idx) => (
             <Badge key={idx} variant="secondary" className="text-xs">
-              {tag}
+              {tag === 'accommodation' ? '🏨 Accommodation' :
+               tag === 'food' ? '🍽️ Food' :
+               tag === 'activity' ? '🎯 Activity' :
+               tag === 'travel' ? '🚗 Travel' : tag}
             </Badge>
           ))}
         </div>
