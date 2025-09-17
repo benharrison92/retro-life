@@ -43,7 +43,7 @@ export const useFeed = (filters?: FeedFilters) => {
 
       if (error) throw error;
 
-      // Fetch user profiles and filter activities
+      // Fetch user profiles and validate target existence
       const activitiesWithProfiles = await Promise.all(
         (data || []).map(async (activity) => {
           const { data: profile } = await supabase
@@ -52,15 +52,38 @@ export const useFeed = (filters?: FeedFilters) => {
             .eq('id', activity.user_id)
             .single();
 
-          return {
+          // Validate that the target still exists
+          let targetExists = true;
+          if (activity.target_id && activity.target_type) {
+            if (activity.target_type === 'retrospective') {
+              const { data: retro } = await supabase
+                .from('retrospectives')
+                .select('id')
+                .eq('id', activity.target_id)
+                .single();
+              targetExists = !!retro;
+            } else if (activity.target_type === 'trip_planner') {
+              const { data: trip } = await supabase
+                .from('trip_planners')
+                .select('id')
+                .eq('id', activity.target_id)
+                .single();
+              targetExists = !!trip;
+            }
+          }
+
+          return targetExists ? {
             ...activity,
             user_profiles: profile || undefined,
-          };
+          } : null;
         })
       );
 
+      // Filter out null entries (activities with deleted targets)
+      const validActivities = activitiesWithProfiles.filter(Boolean) as Activity[];
+
       // Apply filters
-      let filteredActivities = activitiesWithProfiles;
+      let filteredActivities = validActivities;
 
       if (filters?.location) {
         // For location filtering, fetch retrospective data to check location fields
