@@ -22,24 +22,27 @@ export const TripPlannerManager = ({ onSelectTripPlanner }: TripPlannerManagerPr
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Trip Planners</h2>
-          <p className="text-muted-foreground">Create and manage your travel itineraries</p>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Calendar className="h-6 w-6 text-blue-600" />
+            Trip Planners
+          </h2>
+          <p className="text-muted-foreground">Transform your catalogues into detailed travel itineraries</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
+        <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="h-4 w-4 mr-2" />
           New Trip Planner
         </Button>
       </div>
 
       {tripPlanners.length === 0 ? (
-        <Card>
+        <Card className="border-dashed border-2">
           <CardContent className="py-12 text-center">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No trip planners yet</h3>
             <p className="text-muted-foreground mb-4">
-              Create your first trip planner to start organizing your travel itinerary
+              Create your first trip planner to organize items from your catalogues into detailed itineraries
             </p>
-            <Button onClick={() => setShowCreateDialog(true)}>
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="h-4 w-4 mr-2" />
               Create Trip Planner
             </Button>

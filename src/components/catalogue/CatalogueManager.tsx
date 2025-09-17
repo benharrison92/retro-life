@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Folder, Edit, Trash2 } from 'lucide-react';
+import { Plus, Folder, Edit, Trash2, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -55,10 +55,16 @@ export const CatalogueManager = ({ onSelectCatalogue }: CatalogueManagerProps) =
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">My Catalogues</h2>
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Archive className="h-6 w-6 text-orange-600" />
+            My Travel Backlog
+          </h2>
+          <p className="text-muted-foreground">Save places and experiences to organize for future trips</p>
+        </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-orange-600 hover:bg-orange-700">
               <Plus className="h-4 w-4 mr-2" />
               New Catalogue
             </Button>

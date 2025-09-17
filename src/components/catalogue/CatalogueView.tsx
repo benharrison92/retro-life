@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Trash2, MapPin, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, MapPin, MessageCircle, Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useCatalogueItems } from '@/hooks/useCatalogues';
 import { useCatalogueDiscussion } from '@/hooks/useCatalogueDiscussion';
 import { CatalogueMembersDialog } from './CatalogueMembersDialog';
 import { CatalogueItemDiscussion } from './CatalogueItemDiscussion';
+import { AddToTripPlannerDialog } from '../trip/AddToTripPlannerDialog';
 import { Catalogue, CatalogueItem } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,6 +21,7 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
   const { items, loading, removeItemFromCatalogue } = useCatalogueItems(catalogue.id);
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
+  const [selectedItemForTrip, setSelectedItemForTrip] = useState<CatalogueItem | null>(null);
   
   const isOwner = user?.id === catalogue.user_id;
 
@@ -51,22 +53,57 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Catalogues
+            Back to Travel Planning
           </Button>
           <div>
-            <h2 className="text-2xl font-bold">{catalogue.name}</h2>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              📂 {catalogue.name}
+            </h2>
             {catalogue.description && (
               <p className="text-muted-foreground">{catalogue.description}</p>
             )}
           </div>
         </div>
         
-        <CatalogueMembersDialog
-          catalogueId={catalogue.id}
-          catalogueName={catalogue.name}
-          isOwner={isOwner}
-        />
+        <div className="flex items-center gap-3">
+          <CatalogueMembersDialog
+            catalogueId={catalogue.id}
+            catalogueName={catalogue.name}
+            isOwner={isOwner}
+          />
+        </div>
       </div>
+
+      {/* Quick Action Banner */}
+      {items.length > 0 && (
+        <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">Ready to plan your trip?</h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">Add items from this backlog to your trip planners</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => {
+                  // For now, just show we could add the first item
+                  if (items.length > 0) {
+                    setSelectedItemForTrip(items[0]);
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add to Trip
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {items.length === 0 ? (
         <Card>
@@ -92,6 +129,18 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedItemForTrip(item);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Calendar className="h-4 w-4 mr-1" />
+                      Add to Trip
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -192,6 +241,21 @@ export const CatalogueView = ({ catalogue, onBack }: CatalogueViewProps) => {
           item={selectedItem}
           isOpen={!!selectedItem}
           onClose={() => setSelectedItem(null)}
+        />
+      )}
+
+      {/* Add to Trip Planner Dialog */}
+      {selectedItemForTrip && (
+        <AddToTripPlannerDialog
+          isOpen={!!selectedItemForTrip}
+          onClose={() => setSelectedItemForTrip(null)}
+          catalogueItem={{
+            id: selectedItemForTrip.id,
+            title: selectedItemForTrip.item_text,
+            description: selectedItemForTrip.place_name,
+            location_name: selectedItemForTrip.place_name,
+            location_address: selectedItemForTrip.place_address,
+          }}
         />
       )}
     </div>
