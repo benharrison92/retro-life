@@ -12,6 +12,7 @@ import { SaveToCatalogueDialog } from "./catalogue/SaveToCatalogueDialog";
 import { FriendTagInput } from "./FriendTagInput";
 import { useTaggedComments } from "@/hooks/useTaggedComments";
 import { useAuth } from "@/hooks/useAuth";
+import { RBTItemDetailModal } from "./RBTItemDetailModal";
 
 interface RetroCardProps {
   retro: Retro & {
@@ -48,7 +49,8 @@ const RBTItemDisplay = ({
   onUserClick,
   retro,
   user,
-  renderCommentWithTags
+  renderCommentWithTags,
+  onItemClick
 }: { 
   item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
   type: 'roses' | 'buds' | 'thorns';
@@ -63,6 +65,7 @@ const RBTItemDisplay = ({
   retro: any;
   user: any;
   renderCommentWithTags: (text: string) => JSX.Element;
+  onItemClick: (item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }, type: 'roses' | 'buds' | 'thorns') => void;
 }) => {
   const isExpanded = expandedItems[item.id];
   const hasComments = item.comments && item.comments.length > 0;
@@ -74,7 +77,7 @@ const RBTItemDisplay = ({
       : 'hover:shadow-glow-negative';
 
   return (
-    <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale`}>
+    <div className={`p-3 rounded-lg border ${colorClass} transition-all duration-200 ${shadowClass} hover-scale cursor-pointer`}>
       {/* Source tag for child items */}
       {item.source?.isChildItem && (
         <div className="mb-2">
@@ -89,7 +92,12 @@ const RBTItemDisplay = ({
       
       {/* Creator info */}
       <div className="flex justify-between items-start mb-2">
-        <p className="text-sm flex-1">{item.text}</p>
+        <p 
+          className="text-sm flex-1 hover:text-primary transition-colors" 
+          onClick={() => onItemClick(item, type)}
+        >
+          {item.text}
+        </p>
         {item.ownerName && (
           <Button
             variant="ghost"
@@ -264,6 +272,10 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
   const { notifyTaggedFriends, renderCommentWithTags } = useTaggedComments();
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({});
   const [commentInputs, setCommentInputs] = useState<{ [key: string]: string }>({});
+  const [selectedRBTItem, setSelectedRBTItem] = useState<{
+    item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } };
+    type: 'roses' | 'buds' | 'thorns';
+  } | null>(null);
 
   // Check if current user can add items (owner or tagged attendee)
   const canAddItems = user && (
@@ -278,6 +290,14 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const handleItemClick = (item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }, type: 'roses' | 'buds' | 'thorns') => {
+    setSelectedRBTItem({ item, type });
+  };
+
+  const handleCloseModal = () => {
+    setSelectedRBTItem(null);
   };
 
   const handleAddComment = async (itemType: 'roses' | 'buds' | 'thorns', item: RBTItem) => {
@@ -497,6 +517,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   retro={retro}
                   user={user}
                   renderCommentWithTags={renderCommentWithTags}
+                  onItemClick={handleItemClick}
                 />
               ))}
             </div>
@@ -539,6 +560,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   retro={retro}
                   user={user}
                   renderCommentWithTags={renderCommentWithTags}
+                  onItemClick={handleItemClick}
                 />
               ))}
             </div>
@@ -581,6 +603,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   retro={retro}
                   user={user}
                   renderCommentWithTags={renderCommentWithTags}
+                  onItemClick={handleItemClick}
                 />
               ))}
             </div>
@@ -613,6 +636,22 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
           </div>
         )}
       </CardContent>
+
+      {/* RBT Item Detail Modal */}
+      {selectedRBTItem && (
+        <RBTItemDetailModal
+          item={selectedRBTItem.item}
+          type={selectedRBTItem.type}
+          retroId={retro.id}
+          retroTitle={retro.title}
+          retroOwnerName={retro.ownerName}
+          isOpen={!!selectedRBTItem}
+          onClose={handleCloseModal}
+          onUpdateItem={onUpdateItem}
+          onUserClick={onUserClick}
+          currentUserName={currentUserName}
+        />
+      )}
     </Card>
   );
 };
