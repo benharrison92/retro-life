@@ -104,7 +104,7 @@ export const SaveToCatalogueDialog = ({
         item.id,
         itemType,
         item.text,
-        item.tags,
+        item.tags || [],
         savedFromUserId,
         savedFromUserName,
         placeDataToSave
@@ -134,7 +134,7 @@ export const SaveToCatalogueDialog = ({
               {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
             </div>
             <div className="text-sm">{item.text}</div>
-            {item.tags.length > 0 && (
+            {item.tags && item.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {item.tags.map((tag, index) => (
                   <span key={index} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs">
@@ -157,11 +157,17 @@ export const SaveToCatalogueDialog = ({
                     <SelectValue placeholder="Choose a catalogue" />
                   </SelectTrigger>
                   <SelectContent>
-                    {catalogues.map((catalogue) => (
-                      <SelectItem key={catalogue.id} value={catalogue.id}>
-                        {catalogue.name}
+                    {catalogues && catalogues.length > 0 ? (
+                      catalogues.map((catalogue) => (
+                        <SelectItem key={catalogue.id} value={catalogue.id}>
+                          {catalogue.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        No catalogues available
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
