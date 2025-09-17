@@ -11,6 +11,7 @@ import { RefreshCw, Plus, Users, Calendar } from 'lucide-react';
 import { RetroHeader } from '@/components/RetroHeader';
 import { AppHeader } from '@/components/AppHeader';
 import { RBTItem } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function Feed() {
     navigate(`/trip/${retroId}`);
   };
 
-  const handleRBTItemClick = (activity: any) => {
+  const handleRBTItemClick = async (activity: any) => {
     // Extract R/B/T item data from activity
     const itemData = activity.data;
     const activityType = activity.activity_type;
@@ -69,27 +70,40 @@ export default function Feed() {
         return; // Should not happen for R/B/T activities
     }
 
-    // Create RBTItem from data
-    const rbtItem: RBTItem = {
-      id: itemData.itemId || activity.id,
-      text: itemData.text || itemData.content || '',
-      ownerName: activity.user_profiles?.display_name || 'Unknown',
-      photos: itemData.photos || [],
-      place_name: itemData.place_name,
-      place_address: itemData.place_address,
-      place_rating: itemData.place_rating,
-      place_id: itemData.place_id,
-      tags: itemData.tags || [],
-      comments: itemData.comments || []
-    };
+    // Fetch actual retrospective data to get R/B/T items
+    try {
+      const { data: retroData, error } = await supabase
+        .from('retrospectives')
+        .select('*')
+        .eq('id', activity.target_id)
+        .single();
 
-    setSelectedRBTItem({
-      item: rbtItem,
-      type,
-      retroId: activity.target_id,
-      retroTitle: itemData.title || 'Untitled Retro',
-      retroOwnerName: activity.user_profiles?.display_name || 'Unknown'
-    });
+      if (error || !retroData) {
+        console.error('Error fetching retro data:', error);
+        return;
+      }
+
+      // Get the items array for the type
+      const items = (retroData[type] as unknown as RBTItem[]) || [];
+      
+      if (items.length === 0) {
+        console.error('No items found for type:', type);
+        return;
+      }
+
+      // Get the most recent item (last in array, as new items are typically added to the end)
+      const rbtItem = items[items.length - 1];
+
+      setSelectedRBTItem({
+        item: rbtItem,
+        type,
+        retroId: activity.target_id,
+        retroTitle: itemData.title || retroData.title || 'Untitled Retro',
+        retroOwnerName: activity.user_profiles?.display_name || 'Unknown'
+      });
+    } catch (error) {
+      console.error('Error fetching R/B/T item details:', error);
+    }
   };
 
   return (
