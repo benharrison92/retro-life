@@ -15,9 +15,10 @@ import {
 interface ActivityCardProps {
   activity: Activity;
   onRetroClick?: (retroId: string) => void;
+  onRBTItemClick?: (activity: Activity) => void;
 }
 
-export const ActivityCard = ({ activity, onRetroClick }: ActivityCardProps) => {
+export const ActivityCard = ({ activity, onRetroClick, onRBTItemClick }: ActivityCardProps) => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'retro_created':
@@ -66,7 +67,10 @@ export const ActivityCard = ({ activity, onRetroClick }: ActivityCardProps) => {
   };
 
   const handleClick = () => {
-    if (activity.target_id && onRetroClick) {
+    // Handle R/B/T item clicks differently from retro clicks
+    if (['rose_added', 'bud_added', 'thorn_added'].includes(activity.activity_type) && onRBTItemClick) {
+      onRBTItemClick(activity);
+    } else if (activity.target_id && onRetroClick) {
       onRetroClick(activity.target_id);
     }
   };

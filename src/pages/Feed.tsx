@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useFeed } from '@/hooks/useFeed';
 import { ActivityCard } from '@/components/ActivityCard';
+import { RBTItemDetailModal } from '@/components/RBTItemDetailModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw, Plus, Users, Calendar } from 'lucide-react';
 import { RetroHeader } from '@/components/RetroHeader';
 import { AppHeader } from '@/components/AppHeader';
+import { RBTItem } from '@/lib/supabase';
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -21,6 +23,13 @@ export default function Feed() {
     rbtType: '',
     eventType: ''
   });
+  const [selectedRBTItem, setSelectedRBTItem] = useState<{
+    item: RBTItem;
+    type: 'roses' | 'buds' | 'thorns';
+    retroId: string;
+    retroTitle: string;
+    retroOwnerName: string;
+  } | null>(null);
   const { activities, loading, refetch } = useFeed(filters);
 
   if (authLoading) {
@@ -38,6 +47,49 @@ export default function Feed() {
 
   const handleRetroClick = (retroId: string) => {
     navigate(`/trip/${retroId}`);
+  };
+
+  const handleRBTItemClick = (activity: any) => {
+    // Extract R/B/T item data from activity
+    const itemData = activity.data;
+    const activityType = activity.activity_type;
+    
+    let type: 'roses' | 'buds' | 'thorns';
+    switch (activityType) {
+      case 'rose_added':
+        type = 'roses';
+        break;
+      case 'bud_added':
+        type = 'buds';
+        break;
+      case 'thorn_added':
+        type = 'thorns';
+        break;
+      default:
+        return; // Should not happen for R/B/T activities
+    }
+
+    // Create RBTItem from data
+    const rbtItem: RBTItem = {
+      id: itemData.itemId || activity.id,
+      text: itemData.text || itemData.content || '',
+      ownerName: activity.user_profiles?.display_name || 'Unknown',
+      photos: itemData.photos || [],
+      place_name: itemData.place_name,
+      place_address: itemData.place_address,
+      place_rating: itemData.place_rating,
+      place_id: itemData.place_id,
+      tags: itemData.tags || [],
+      comments: itemData.comments || []
+    };
+
+    setSelectedRBTItem({
+      item: rbtItem,
+      type,
+      retroId: activity.target_id,
+      retroTitle: itemData.title || 'Untitled Retro',
+      retroOwnerName: activity.user_profiles?.display_name || 'Unknown'
+    });
   };
 
   return (
@@ -127,6 +179,7 @@ export default function Feed() {
                   key={activity.id}
                   activity={activity}
                   onRetroClick={handleRetroClick}
+                  onRBTItemClick={handleRBTItemClick}
                 />
               ))
             ) : (
@@ -154,6 +207,21 @@ export default function Feed() {
             </div>
           </div>
         </div>
+
+        {/* R/B/T Item Detail Modal */}
+        {selectedRBTItem && (
+          <RBTItemDetailModal
+            item={selectedRBTItem.item}
+            type={selectedRBTItem.type}
+            retroId={selectedRBTItem.retroId}
+            retroTitle={selectedRBTItem.retroTitle}
+            retroOwnerName={selectedRBTItem.retroOwnerName}
+            isOpen={true}
+            onClose={() => setSelectedRBTItem(null)}
+            onUpdateItem={() => {}} // Read-only from feed
+            currentUserName={user?.user_metadata?.display_name || 'You'}
+          />
+        )}
       </div>
     </>
   );

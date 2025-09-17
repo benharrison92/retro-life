@@ -149,17 +149,36 @@ export function RBTItemDetailModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Source tag for child items */}
-          {item.source?.isChildItem && (
-            <Badge 
-              variant="outline" 
-              className="text-sm text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 w-fit"
-            >
-              <Calendar className="w-3 h-3 mr-1" />
-              From: {item.source.retroTitle}
-            </Badge>
-          )}
+          <div className="space-y-6">
+            {/* Navigation to full retro */}
+            <div className="flex items-center justify-between">
+              <Badge 
+                variant="outline" 
+                className="text-sm text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 w-fit"
+              >
+                <Calendar className="w-3 h-3 mr-1" />
+                From: {retroTitle}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/trip/${retroId}`, '_blank')}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                View Full Retro
+              </Button>
+            </div>
+
+            {/* Source tag for child items */}
+            {item.source?.isChildItem && (
+              <Badge 
+                variant="outline" 
+                className="text-sm text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 w-fit"
+              >
+                <Calendar className="w-3 h-3 mr-1" />
+                From: {item.source.retroTitle}
+              </Badge>
+            )}
 
           {/* Main content */}
           <div className={`p-4 rounded-lg ${typeInfo.bgColor} ${typeInfo.borderColor} border-2`}>
