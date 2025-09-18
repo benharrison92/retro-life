@@ -32,6 +32,7 @@ export interface TripPlannerItem {
   location_address?: string;
   estimated_cost?: number;
   notes?: string;
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }

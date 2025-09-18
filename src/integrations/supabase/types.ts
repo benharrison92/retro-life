@@ -991,6 +991,7 @@ export type Database = {
           scheduled_time: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["trip_status"]
+          tags: string[] | null
           title: string
           trip_planner_id: string
           updated_at: string
@@ -1011,6 +1012,7 @@ export type Database = {
           scheduled_time?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
+          tags?: string[] | null
           title: string
           trip_planner_id: string
           updated_at?: string
@@ -1031,6 +1033,7 @@ export type Database = {
           scheduled_time?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
+          tags?: string[] | null
           title?: string
           trip_planner_id?: string
           updated_at?: string

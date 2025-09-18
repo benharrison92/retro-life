@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Plus, Calendar, MapPin, DollarSign } from 'lucide-react';
+import { Plus, Calendar, MapPin, DollarSign, Tag, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useTripPlannerItems } from '@/hooks/useTripPlanners';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -41,6 +42,8 @@ export const AddTripItemDialog = ({
   const [locationAddress, setLocationAddress] = useState(catalogueItem?.location_address || '');
   const [estimatedCost, setEstimatedCost] = useState('');
   const [notes, setNotes] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { addItem } = useTripPlannerItems(tripPlannerId);
@@ -61,6 +64,7 @@ export const AddTripItemDialog = ({
         location_address: locationAddress.trim() || undefined,
         estimated_cost: estimatedCost ? parseFloat(estimatedCost) : undefined,
         notes: notes.trim() || undefined,
+        tags: tags,
         catalogue_item_id: catalogueItem?.id,
       });
       
@@ -75,6 +79,8 @@ export const AddTripItemDialog = ({
       setLocationAddress('');
       setEstimatedCost('');
       setNotes('');
+      setTags([]);
+      setNewTag('');
       onClose();
     } finally {
       setLoading(false);
@@ -215,6 +221,62 @@ export const AddTripItemDialog = ({
                 value={estimatedCost}
                 onChange={(e) => setEstimatedCost(e.target.value)}
               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tags">Trip Tags</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add a tag (e.g., Florence, Italy, California)"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (newTag.trim() && !tags.includes(newTag.trim())) {
+                        setTags([...tags, newTag.trim()]);
+                        setNewTag('');
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (newTag.trim() && !tags.includes(newTag.trim())) {
+                      setTags([...tags, newTag.trim()]);
+                      setNewTag('');
+                    }
+                  }}
+                >
+                  <Tag className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {tag}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 ml-1 hover:bg-transparent"
+                        onClick={() => {
+                          setTags(tags.filter((_, i) => i !== index));
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

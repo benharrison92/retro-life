@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Calendar, MapPin, DollarSign, MessageCircle, Filter } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, MapPin, DollarSign, MessageCircle, Filter, Search, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTripPlannerItems, TripPlanner, TripPlannerItem } from '@/hooks/useTripPlanners';
@@ -24,6 +25,7 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<TripPlannerItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -63,6 +65,21 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
   const filteredItems = items.filter(item => {
     if (filterType !== 'all' && item.event_type !== filterType) return false;
     if (filterStatus !== 'all' && item.status !== filterStatus) return false;
+    
+    // Search filter - check title, description, location, and tags
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesTitle = item.title.toLowerCase().includes(query);
+      const matchesDescription = item.description?.toLowerCase().includes(query);
+      const matchesLocation = item.location_name?.toLowerCase().includes(query) || 
+                             item.location_address?.toLowerCase().includes(query);
+      const matchesTags = item.tags?.some(tag => tag.toLowerCase().includes(query));
+      
+      if (!matchesTitle && !matchesDescription && !matchesLocation && !matchesTags) {
+        return false;
+      }
+    }
+    
     return true;
   });
 
@@ -147,32 +164,44 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
 
         <TabsContent value="list" className="space-y-4">
           {/* Filters */}
-          <div className="flex gap-4">
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
-                <SelectItem value="travel">✈️ Travel</SelectItem>
-                <SelectItem value="activity">🎯 Activity</SelectItem>
-                <SelectItem value="food">🍽️ Food</SelectItem>
-                <SelectItem value="other">📝 Other</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by location, keyword, or tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <div className="flex gap-4">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="accommodation">🏨 Accommodation</SelectItem>
+                  <SelectItem value="travel">✈️ Travel</SelectItem>
+                  <SelectItem value="activity">🎯 Activity</SelectItem>
+                  <SelectItem value="food">🍽️ Food</SelectItem>
+                  <SelectItem value="other">📝 Other</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="booked">✅ Booked</SelectItem>
-                <SelectItem value="pending_review">⏳ Pending Review</SelectItem>
-                <SelectItem value="declined">❌ Declined</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="booked">✅ Booked</SelectItem>
+                  <SelectItem value="pending_review">⏳ Pending Review</SelectItem>
+                  <SelectItem value="declined">❌ Declined</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {filteredItems.length === 0 ? (
@@ -249,6 +278,18 @@ export const TripPlannerView = ({ tripPlanner, onBack }: TripPlannerViewProps) =
                         </div>
                       )}
                     </div>
+                    
+                    {/* Tags */}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Tag className="h-3 w-3 text-muted-foreground inline mr-1" />
+                        {item.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                     
                     {item.notes && (
                       <div className="mt-3 p-3 bg-muted/50 rounded-md text-sm">

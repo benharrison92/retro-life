@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CalendarIcon, MapPin, DollarSign, MessageCircle, Send, Edit, Trash2 } from 'lucide-react';
+import { CalendarIcon, MapPin, DollarSign, MessageCircle, Send, Edit, Trash2, X, Tag } from 'lucide-react';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -43,11 +43,13 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
     location_address: '',
     estimated_cost: '',
     notes: '',
+    tags: [] as string[],
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [newMessage, setNewMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     if (item) {
@@ -63,6 +65,7 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
         location_address: item.location_address || '',
         estimated_cost: item.estimated_cost ? item.estimated_cost.toString() : '',
         notes: item.notes || '',
+        tags: item.tags || [],
       });
     } else {
       setFormData(initialFormData);
@@ -86,6 +89,7 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
         location_address: formData.location_address,
         estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : null,
         notes: formData.notes,
+        tags: formData.tags,
       });
 
       toast({
@@ -312,6 +316,71 @@ export const EditTripItemDialog = ({ item, isOpen, onClose }: EditTripItemDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, location_address: e.target.value }))}
                 placeholder="Enter full address"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Trip Tags</Label>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add a tag (e.g., Florence, Italy, California)"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            tags: [...prev.tags, newTag.trim()] 
+                          }));
+                          setNewTag('');
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          tags: [...prev.tags, newTag.trim()] 
+                        }));
+                        setNewTag('');
+                      }
+                    }}
+                  >
+                    <Tag className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 ml-1 hover:bg-transparent"
+                          onClick={() => {
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              tags: prev.tags.filter((_, i) => i !== index) 
+                            }));
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
