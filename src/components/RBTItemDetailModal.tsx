@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ export function RBTItemDetailModal({
   onUserClick,
   currentUserName,
 }: RBTItemDetailModalProps) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { notifyTaggedFriends, renderCommentWithTags } = useTaggedComments();
   const [commentInput, setCommentInput] = useState('');
@@ -162,7 +164,7 @@ export function RBTItemDetailModal({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open(`/trip/${retroId}`, '_blank')}
+                onClick={() => navigate(`/trip/${retroId}`)}
                 className="text-blue-600 border-blue-200 hover:bg-blue-50"
               >
                 View Full Retro
