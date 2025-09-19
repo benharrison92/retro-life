@@ -39,6 +39,7 @@ export const useRetros = () => {
     country: dbRetro.country || undefined,
     latitude: dbRetro.latitude || undefined,
     longitude: dbRetro.longitude || undefined,
+    parent_id: dbRetro.parent_id || undefined,
     feedback_space_id: dbRetro.feedback_space_id || undefined,
     is_private: (dbRetro as any).is_private || false, // Default to public for backward compatibility
     created_at: dbRetro.created_at || '',
