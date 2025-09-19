@@ -123,16 +123,7 @@ export function RBTItemDetailModal({
 
   const handleToggleVisibility = () => {
     const currentVisibility = (item as any).visibility || 'PRIVATE';
-    let newVisibility: 'PUBLIC' | 'PRIVATE' | 'FRIENDS';
-    
-    // Cycle through visibility options: PRIVATE -> FRIENDS -> PUBLIC -> PRIVATE
-    if (currentVisibility === 'PRIVATE') {
-      newVisibility = 'FRIENDS';
-    } else if (currentVisibility === 'FRIENDS') {
-      newVisibility = 'PUBLIC';
-    } else {
-      newVisibility = 'PRIVATE';
-    }
+    const newVisibility = currentVisibility === 'PRIVATE' ? 'PUBLIC' : 'PRIVATE';
 
     const updatedItem = { ...item, visibility: newVisibility };
     const targetRetroId = (item as any)?.source?.retroId || retroId;
@@ -143,8 +134,6 @@ export function RBTItemDetailModal({
     switch (visibility) {
       case 'PUBLIC':
         return { icon: Globe, label: 'Public', color: 'text-green-600', bgColor: 'bg-green-50' };
-      case 'FRIENDS':
-        return { icon: Users, label: 'Friends', color: 'text-blue-600', bgColor: 'bg-blue-50' };
       default:
         return { icon: Lock, label: 'Private', color: 'text-amber-600', bgColor: 'bg-amber-50' };
     }

@@ -103,7 +103,7 @@ const RBTItemDisplay = ({
           {item.text}
         </p>
         <div className="flex items-center gap-1 ml-2">
-          {canEditItems && item.ownerName === retro.ownerName && (
+          {canEditItems && (
             <Button
               variant="ghost"
               size="sm"
@@ -114,9 +114,9 @@ const RBTItemDisplay = ({
                 onToggleItemVisibility(type, item.id, newVisibility);
               }}
               className="text-xs h-auto p-1 text-muted-foreground hover:text-foreground"
-              title={`Make ${(item as any).visibility === 'PRIVATE' ? 'public' : 'private'}`}
+              title={`Currently ${(item as any).visibility === 'PRIVATE' ? 'private' : 'public'}. Click to toggle.`}
             >
-              {(item as any).visibility === 'PRIVATE' ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+              {(item as any).visibility === 'PRIVATE' ? <Lock className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
             </Button>
           )}
           {item.ownerName && (
@@ -549,7 +549,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                 onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
               }
             }}
-            canEditItems={canEditRetro}
+            canEditItems={true}
                 />
               ))}
             </div>
@@ -602,7 +602,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                 onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
               }
             }}
-            canEditItems={canEditRetro}
+            canEditItems={true}
                 />
               ))}
             </div>
@@ -655,7 +655,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                       onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
                     }
                   }}
-                  canEditItems={canEditRetro}
+                  canEditItems={true}
                 />
               ))}
             </div>
@@ -702,7 +702,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
           onUpdateItem={onUpdateItem}
           onUserClick={onUserClick}
           currentUserName={currentUserName}
-          canEditItem={canEditRetro && selectedRBTItem.item.ownerName === retro.ownerName}
+          canEditItem={true}
         />
       )}
     </Card>

@@ -169,10 +169,10 @@ export default function TripDetail({
                 onClick={onTogglePrivacy}
                 className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
                   isPrivate
-                    ? 'border-amber-200 bg-amber-50 text-amber-700'
-                    : 'border-green-200 bg-green-50 text-green-700'
+                    ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                    : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
                 }`}
-                title={isPrivate ? 'Make public' : 'Make private'}
+                title={`Currently ${isPrivate ? 'private' : 'public'}. Click to toggle.`}
               >
                 {isPrivate ? <Lock className="h-4 w-4" /> : <Globe className="h-4 w-4" />}
                 <span>{isPrivate ? 'Private' : 'Public'}</span>
