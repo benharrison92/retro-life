@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft, Users, MapIcon } from 'lucide-react'
+import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft, Users, MapIcon, Lock, Globe } from 'lucide-react'
 import { CommentsSection } from './CommentsSection'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { RetroComment } from '@/hooks/useRetroInteractions'
@@ -39,6 +39,9 @@ export type TripDetailProps = {
   onSubRetrosClick?: () => void
   onRelatedTripsClick?: () => void
   subRetrosCount?: number
+  isPrivate?: boolean
+  onTogglePrivacy?: () => void
+  canEditRetro?: boolean
 }
 
 function fmtDate(input?: string | Date) {
@@ -69,6 +72,9 @@ export default function TripDetail({
   onSubRetrosClick,
   onRelatedTripsClick,
   subRetrosCount = 0,
+  isPrivate = false,
+  onTogglePrivacy,
+  canEditRetro = false,
 }: TripDetailProps) {
   const [showCommentsDialog, setShowCommentsDialog] = useState(false);
   const dateRange = useMemo(() => {
@@ -136,27 +142,43 @@ export default function TripDetail({
         {/* Actions */}
         <div className="border-t border-neutral-100 px-4 py-3">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onLikeToggle?.()}
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
+                stats.hasLiked
+                  ? 'border-rose-200 bg-rose-50 text-rose-600'
+                  : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+              }`}
+            >
+              <Heart className={`h-4 w-4 ${stats.hasLiked ? 'fill-current' : ''}`} />
+              <span>{stats.likes}</span>
+            </button>
+            
+            <button
+              onClick={() => setShowCommentsDialog(true)}
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition active:scale-95"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>{stats.comments}</span>
+            </button>
+
+            {/* Privacy toggle */}
+            {canEditRetro && onTogglePrivacy && (
               <button
-                onClick={() => onLikeToggle?.()}
+                onClick={onTogglePrivacy}
                 className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
-                  stats.hasLiked
-                    ? 'border-rose-200 bg-rose-50 text-rose-600'
-                    : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+                  isPrivate
+                    ? 'border-amber-200 bg-amber-50 text-amber-700'
+                    : 'border-green-200 bg-green-50 text-green-700'
                 }`}
+                title={isPrivate ? 'Make public' : 'Make private'}
               >
-                <Heart className={`h-4 w-4 ${stats.hasLiked ? 'fill-current' : ''}`} />
-                <span>{stats.likes}</span>
+                {isPrivate ? <Lock className="h-4 w-4" /> : <Globe className="h-4 w-4" />}
+                <span>{isPrivate ? 'Private' : 'Public'}</span>
               </button>
-              
-              <button
-                onClick={() => setShowCommentsDialog(true)}
-                className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition active:scale-95"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>{stats.comments}</span>
-              </button>
-            </div>
+            )}
+          </div>
 
             <button
               onClick={() => onShare?.(id)}

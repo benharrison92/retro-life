@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone, Lock } from "lucide-react";
+import { Edit2, Trash2, Calendar, User, Users, MessageCircle, Send, ChevronDown, ChevronUp, MapPin, Navigation, BookmarkPlus, UserCheck, Megaphone, Lock, Globe, Eye, EyeOff } from "lucide-react";
 import { Retro, RBTItem } from "./RetroApp";
 import { LocationBadge, LocationInfo } from "./LocationDisplay";
 import { PhotoDisplay } from "./PhotoDisplay";
@@ -50,7 +50,9 @@ const RBTItemDisplay = ({
   retro,
   user,
   renderCommentWithTags,
-  onItemClick
+  onItemClick,
+  onToggleItemVisibility,
+  canEditItems
 }: { 
   item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }; 
   type: 'roses' | 'buds' | 'thorns';
@@ -66,6 +68,8 @@ const RBTItemDisplay = ({
   user: any;
   renderCommentWithTags: (text: string) => JSX.Element;
   onItemClick: (item: RBTItem & { source?: { retroId: string; retroTitle: string; isChildItem: boolean; } }, type: 'roses' | 'buds' | 'thorns') => void;
+  onToggleItemVisibility: (itemType: 'roses' | 'buds' | 'thorns', itemId: string, visibility: 'PUBLIC' | 'PRIVATE' | 'FRIENDS') => void;
+  canEditItems: boolean;
 }) => {
   const isExpanded = expandedItems[item.id];
   const hasComments = item.comments && item.comments.length > 0;
@@ -90,7 +94,7 @@ const RBTItemDisplay = ({
         </div>
       )}
       
-      {/* Creator info */}
+      {/* Creator info and privacy controls */}
       <div className="flex justify-between items-start mb-2">
         <p 
           className="text-sm flex-1 hover:text-primary transition-colors" 
@@ -98,17 +102,35 @@ const RBTItemDisplay = ({
         >
           {item.text}
         </p>
-        {item.ownerName && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onUserClick?.(item.ownerName!)}
-            className="text-xs h-auto p-1 ml-2 text-muted-foreground hover:text-foreground flex items-center gap-1"
-          >
-            <User className="w-3 h-3" />
-            {item.ownerName}
-          </Button>
-        )}
+        <div className="flex items-center gap-1 ml-2">
+          {canEditItems && item.ownerName === retro.ownerName && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                const currentVisibility = (item as any).visibility || 'PRIVATE';
+                const newVisibility = currentVisibility === 'PRIVATE' ? 'PUBLIC' : 'PRIVATE';
+                onToggleItemVisibility(type, item.id, newVisibility);
+              }}
+              className="text-xs h-auto p-1 text-muted-foreground hover:text-foreground"
+              title={`Make ${(item as any).visibility === 'PRIVATE' ? 'public' : 'private'}`}
+            >
+              {(item as any).visibility === 'PRIVATE' ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+            </Button>
+          )}
+          {item.ownerName && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onUserClick?.(item.ownerName!)}
+              className="text-xs h-auto p-1 text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <User className="w-3 h-3" />
+              {item.ownerName}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Location display */}
@@ -511,13 +533,23 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   commentInputs={commentInputs}
                   toggleExpanded={toggleExpanded}
                   handleAddComment={handleAddComment}
-                  handleUpdateItemPhoto={handleUpdateItemPhoto}
-                  setCommentInputs={setCommentInputs}
-                  onUserClick={onUserClick}
-                  retro={retro}
-                  user={user}
-                  renderCommentWithTags={renderCommentWithTags}
-                  onItemClick={handleItemClick}
+            handleUpdateItemPhoto={handleUpdateItemPhoto}
+            setCommentInputs={setCommentInputs}
+            onUserClick={onUserClick}
+            retro={retro}
+            user={user}
+            renderCommentWithTags={renderCommentWithTags}
+            onItemClick={handleItemClick}
+            onToggleItemVisibility={(itemType, itemId, visibility) => {
+              const targetRetroId = retro.id;
+              const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
+              const item = items?.find(i => i.id === itemId);
+              if (item) {
+                const updatedItem = { ...item, visibility };
+                onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
+              }
+            }}
+            canEditItems={canEditRetro}
                 />
               ))}
             </div>
@@ -554,13 +586,23 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   commentInputs={commentInputs}
                   toggleExpanded={toggleExpanded}
                   handleAddComment={handleAddComment}
-                  handleUpdateItemPhoto={handleUpdateItemPhoto}
-                  setCommentInputs={setCommentInputs}
-                  onUserClick={onUserClick}
-                  retro={retro}
-                  user={user}
-                  renderCommentWithTags={renderCommentWithTags}
-                  onItemClick={handleItemClick}
+            handleUpdateItemPhoto={handleUpdateItemPhoto}
+            setCommentInputs={setCommentInputs}
+            onUserClick={onUserClick}
+            retro={retro}
+            user={user}
+            renderCommentWithTags={renderCommentWithTags}
+            onItemClick={handleItemClick}
+            onToggleItemVisibility={(itemType, itemId, visibility) => {
+              const targetRetroId = retro.id;
+              const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
+              const item = items?.find(i => i.id === itemId);
+              if (item) {
+                const updatedItem = { ...item, visibility };
+                onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
+              }
+            }}
+            canEditItems={canEditRetro}
                 />
               ))}
             </div>
@@ -604,6 +646,16 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
                   user={user}
                   renderCommentWithTags={renderCommentWithTags}
                   onItemClick={handleItemClick}
+                  onToggleItemVisibility={(itemType, itemId, visibility) => {
+                    const targetRetroId = retro.id;
+                    const items = itemType === 'roses' ? retro.roses : itemType === 'buds' ? retro.buds : retro.thorns;
+                    const item = items?.find(i => i.id === itemId);
+                    if (item) {
+                      const updatedItem = { ...item, visibility };
+                      onUpdateItem(targetRetroId, itemType, itemId, updatedItem);
+                    }
+                  }}
+                  canEditItems={canEditRetro}
                 />
               ))}
             </div>
@@ -650,6 +702,7 @@ export const RetroCard = ({ retro, onEdit, onDelete, onUpdateItem, onAddItem, on
           onUpdateItem={onUpdateItem}
           onUserClick={onUserClick}
           currentUserName={currentUserName}
+          canEditItem={canEditRetro && selectedRBTItem.item.ownerName === retro.ownerName}
         />
       )}
     </Card>

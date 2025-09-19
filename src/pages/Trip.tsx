@@ -154,6 +154,17 @@ const Trip = () => {
     await updateRetro(updatedRetro.id, updatedRetro);
   };
 
+  const handleToggleRetroPrivacy = async () => {
+    if (!retro || !profile) return;
+    
+    const updatedRetro = {
+      ...retro,
+      is_private: !retro.is_private
+    };
+    
+    await updateRetro(retro.id, updatedRetro);
+  };
+
   const handleAddChildRetro = () => {
     navigate(`/create-retro?parent_id=${retro?.id}`);
   };
@@ -239,9 +250,12 @@ const Trip = () => {
           onShare={(rid) => handleShare(rid)}
           onAddComment={addComment}
           onDeleteComment={deleteComment}
-          onSubRetrosClick={handleSubRetrosClick}
-          onRelatedTripsClick={handleRelatedTripsClick}
+          onSubRetrosClick={() => setShowSubRetrosDialog(true)}
+          onRelatedTripsClick={() => setShowRelatedTripsDialog(true)}
           subRetrosCount={subRetrosCount}
+          isPrivate={retro.is_private}
+          onTogglePrivacy={handleToggleRetroPrivacy}
+          canEditRetro={profile?.id === retro.user_id}
         />
 
         <section>

@@ -18,7 +18,12 @@ import {
   X, 
   BookmarkPlus,
   Calendar,
-  Tag
+  Tag,
+  Eye,
+  EyeOff,
+  Globe,
+  Users,
+  Lock
 } from "lucide-react";
 import { RBTItem } from "@/lib/supabase";
 import { PhotoDisplay } from "@/components/PhotoDisplay";
@@ -38,6 +43,7 @@ interface RBTItemDetailModalProps {
   onUpdateItem: (retroId: string, itemType: 'roses' | 'buds' | 'thorns', itemId: string, updatedItem: RBTItem) => void;
   onUserClick?: (userName: string) => void;
   currentUserName: string;
+  canEditItem?: boolean;
 }
 
 export function RBTItemDetailModal({
@@ -51,6 +57,7 @@ export function RBTItemDetailModal({
   onUpdateItem,
   onUserClick,
   currentUserName,
+  canEditItem = false,
 }: RBTItemDetailModalProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -114,6 +121,38 @@ export function RBTItemDetailModal({
     await notifyTaggedFriends(commentText, targetRetroId, item.id, retroTitle);
   };
 
+  const handleToggleVisibility = () => {
+    const currentVisibility = (item as any).visibility || 'PRIVATE';
+    let newVisibility: 'PUBLIC' | 'PRIVATE' | 'FRIENDS';
+    
+    // Cycle through visibility options: PRIVATE -> FRIENDS -> PUBLIC -> PRIVATE
+    if (currentVisibility === 'PRIVATE') {
+      newVisibility = 'FRIENDS';
+    } else if (currentVisibility === 'FRIENDS') {
+      newVisibility = 'PUBLIC';
+    } else {
+      newVisibility = 'PRIVATE';
+    }
+
+    const updatedItem = { ...item, visibility: newVisibility };
+    const targetRetroId = (item as any)?.source?.retroId || retroId;
+    onUpdateItem(targetRetroId, type, item.id, updatedItem);
+  };
+
+  const getVisibilityInfo = (visibility?: string) => {
+    switch (visibility) {
+      case 'PUBLIC':
+        return { icon: Globe, label: 'Public', color: 'text-green-600', bgColor: 'bg-green-50' };
+      case 'FRIENDS':
+        return { icon: Users, label: 'Friends', color: 'text-blue-600', bgColor: 'bg-blue-50' };
+      default:
+        return { icon: Lock, label: 'Private', color: 'text-amber-600', bgColor: 'bg-amber-50' };
+    }
+  };
+
+  const currentVisibility = (item as any).visibility || 'PRIVATE';
+  const visibilityInfo = getVisibilityInfo(currentVisibility);
+
   const openGoogleMaps = () => {
     try {
       let mapsUrl;
@@ -145,9 +184,23 @@ export function RBTItemDetailModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <span className="text-2xl">{typeInfo.emoji}</span>
-            <span className={`${typeInfo.color} font-semibold`}>{typeInfo.title} Details</span>
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xl">
+              <span className="text-2xl">{typeInfo.emoji}</span>
+              <span className={`${typeInfo.color} font-semibold`}>{typeInfo.title} Details</span>
+            </div>
+            {canEditItem && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleVisibility}
+                className={`flex items-center gap-2 ${visibilityInfo.color} ${visibilityInfo.bgColor} border-current`}
+                title={`Currently ${visibilityInfo.label.toLowerCase()}. Click to change visibility.`}
+              >
+                <visibilityInfo.icon className="w-4 h-4" />
+                <span>{visibilityInfo.label}</span>
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 
