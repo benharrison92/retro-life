@@ -11,6 +11,7 @@ import { RetroBreadcrumb } from '@/components/RetroBreadcrumb';
 import { ChildRetrosList } from '@/components/ChildRetrosList';
 import { SaveAsDialog } from '@/components/SaveAsDialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, MoreVertical, Globe, Network, Eye, EyeOff } from 'lucide-react';
 import { AddRBTDialog } from '@/components/AddRBTDialog';
@@ -23,6 +24,8 @@ const Trip = () => {
   const [saveAsMode, setSaveAsMode] = useState<'featured' | 'child' | 'make_child'>('featured');
   const [addItemDialogOpen, setAddItemDialogOpen] = useState(false);
   const [addItemType, setAddItemType] = useState<'roses' | 'buds' | 'thorns'>('roses');
+  const [showSubRetrosDialog, setShowSubRetrosDialog] = useState(false);
+  const [showRelatedTripsDialog, setShowRelatedTripsDialog] = useState(false);
 
   const retro = useMemo(() => retros.find(r => r.id === id), [retros, id]);
   const currentUserName = profile?.display_name || 'You';
@@ -170,6 +173,18 @@ const Trip = () => {
     setSaveAsDialogOpen(true);
   };
 
+  const handleSubRetrosClick = () => {
+    setShowSubRetrosDialog(true);
+  };
+
+  const handleRelatedTripsClick = () => {
+    setShowRelatedTripsDialog(true);
+  };
+
+  // Get count of child retros
+  const childRetros = retros.filter(r => (r as any).parent_id === retro?.id);
+  const subRetrosCount = childRetros.length;
+
   // Convert to legacy Retro type expected by RetroCard with aggregated items
   const legacyRetro = {
     id: retro.id,
@@ -205,7 +220,7 @@ const Trip = () => {
         </div>
       )}
       
-      <div className="container py-6 space-y-6">
+      <div className="container py-6 space-y-3">
         <TripDetail
           id={retro.id}
           title={retro.title}
@@ -224,12 +239,9 @@ const Trip = () => {
           onShare={(rid) => handleShare(rid)}
           onAddComment={addComment}
           onDeleteComment={deleteComment}
-        />
-
-        {/* Child Retrospectives */}
-        <ChildRetrosList
-          parentRetroId={retro.id}
-          onAddChild={handleAddChildRetro}
+          onSubRetrosClick={handleSubRetrosClick}
+          onRelatedTripsClick={handleRelatedTripsClick}
+          subRetrosCount={subRetrosCount}
         />
 
         <section>
@@ -308,6 +320,35 @@ const Trip = () => {
           onSubmit={handleConfirmAddItem}
           type={addItemType}
         />
+
+        {/* Sub-Retros Dialog */}
+        <Dialog open={showSubRetrosDialog} onOpenChange={setShowSubRetrosDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Sub-Retrospectives</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-y-auto">
+              <ChildRetrosList
+                parentRetroId={retro.id}
+                onAddChild={handleAddChildRetro}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Related Trips Dialog */}
+        <Dialog open={showRelatedTripsDialog} onOpenChange={setShowRelatedTripsDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Related Trips</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-y-auto p-4">
+              <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500">
+                Show similar posts by location or tags.
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

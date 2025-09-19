@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft } from 'lucide-react'
+import { MapPin, Calendar, Clock, Heart, MessageCircle, Share2, ArrowLeft, Users, MapIcon } from 'lucide-react'
 import { CommentsSection } from './CommentsSection'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { RetroComment } from '@/hooks/useRetroInteractions'
 
 /**
@@ -35,6 +36,9 @@ export type TripDetailProps = {
   onAddComment?: (content: string) => Promise<void>
   onDeleteComment?: (commentId: string) => Promise<void>
   commentsLoading?: boolean
+  onSubRetrosClick?: () => void
+  onRelatedTripsClick?: () => void
+  subRetrosCount?: number
 }
 
 function fmtDate(input?: string | Date) {
@@ -62,7 +66,11 @@ export default function TripDetail({
   onAddComment,
   onDeleteComment,
   commentsLoading = false,
+  onSubRetrosClick,
+  onRelatedTripsClick,
+  subRetrosCount = 0,
 }: TripDetailProps) {
+  const [showCommentsDialog, setShowCommentsDialog] = useState(false);
   const dateRange = useMemo(() => {
     const s = fmtDate(startDate)
     const e = fmtDate(endDate)
@@ -126,31 +134,55 @@ export default function TripDetail({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onLikeToggle?.()}
-              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
-                stats.hasLiked
-                  ? 'border-rose-200 bg-rose-50 text-rose-600'
-                  : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
-              }`}
-            >
-              <Heart className={`h-4 w-4 ${stats.hasLiked ? 'fill-current' : ''}`} />
-              <span>{stats.likes}</span>
-            </button>
-            <div className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
-              <MessageCircle className="h-4 w-4" />
-              <span>{stats.comments}</span>
+        <div className="border-t border-neutral-100 px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => onLikeToggle?.()}
+                className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-95 ${
+                  stats.hasLiked
+                    ? 'border-rose-200 bg-rose-50 text-rose-600'
+                    : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50'
+                }`}
+              >
+                <Heart className={`h-4 w-4 ${stats.hasLiked ? 'fill-current' : ''}`} />
+                <span>{stats.likes}</span>
+              </button>
+              
+              <button
+                onClick={() => setShowCommentsDialog(true)}
+                className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition active:scale-95"
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>{stats.comments}</span>
+              </button>
             </div>
+
+            <button
+              onClick={() => onShare?.(id)}
+              className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-95"
+            >
+              <Share2 className="h-4 w-4" /> Share
+            </button>
           </div>
 
-          <button
-            onClick={() => onShare?.(id)}
-            className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-95"
-          >
-            <Share2 className="h-4 w-4" /> Share
-          </button>
+          <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+            <button
+              onClick={onSubRetrosClick}
+              className="flex-1 inline-flex items-center justify-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition active:scale-95"
+            >
+              <Users className="h-4 w-4" />
+              <span>Sub-Retros ({subRetrosCount})</span>
+            </button>
+            
+            <button
+              onClick={onRelatedTripsClick}
+              className="flex-1 inline-flex items-center justify-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition active:scale-95"
+            >
+              <MapIcon className="h-4 w-4" />
+              <span>Related Trips</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -223,24 +255,22 @@ export default function TripDetail({
         </section>
       )}
 
-      {/* Comments */}
-      <section className="mt-6">
-        <h3 className="mb-3 text-base font-semibold text-neutral-900">Comments</h3>
-        <CommentsSection
-          comments={comments}
-          onAddComment={onAddComment || (() => Promise.resolve())}
-          onDeleteComment={onDeleteComment || (() => Promise.resolve())}
-          loading={commentsLoading}
-        />
-      </section>
-
-      {/* Related trips placeholder */}
-      <section className="mt-6">
-        <h3 className="mb-3 text-base font-semibold text-neutral-900">Related trips</h3>
-        <div className="rounded-2xl border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500">
-          Show similar posts by location or tags.
-        </div>
-      </section>
+      {/* Comments Dialog */}
+      <Dialog open={showCommentsDialog} onOpenChange={setShowCommentsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1">
+            <CommentsSection
+              comments={comments}
+              onAddComment={onAddComment || (() => Promise.resolve())}
+              onDeleteComment={onDeleteComment || (() => Promise.resolve())}
+              loading={commentsLoading}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
