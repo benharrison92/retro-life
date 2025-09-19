@@ -162,6 +162,9 @@ const Trip = () => {
       is_private: !retro.is_private
     };
     
+    // Update local state first for immediate UI feedback
+    updateLocalRetro(retro.id, updatedRetro);
+    // Then update the database
     await updateRetro(retro.id, updatedRetro);
   };
 
