@@ -500,6 +500,7 @@ export const useRetros = () => {
       if (updates.country !== undefined) dbUpdates.country = updates.country;
       if (updates.latitude !== undefined) dbUpdates.latitude = updates.latitude;
       if (updates.longitude !== undefined) dbUpdates.longitude = updates.longitude;
+      if (updates.is_private !== undefined) dbUpdates.is_private = updates.is_private;
 
       console.log('updateRetro: DB updates to apply:', dbUpdates);
 
