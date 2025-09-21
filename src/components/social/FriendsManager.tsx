@@ -383,7 +383,7 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
                           <Avatar>
                             <AvatarImage src={friend.avatar_url} />
                             <AvatarFallback>
-                              {friend.display_name.charAt(0).toUpperCase()}
+                              {friend.display_name?.charAt(0)?.toUpperCase() || '?'}
                             </AvatarFallback>
                           </Avatar>
                           <div>
@@ -426,7 +426,7 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
                           <Avatar>
                             <AvatarImage src={request.avatar_url} />
                             <AvatarFallback>
-                              {request.display_name.charAt(0).toUpperCase()}
+                              {request.display_name?.charAt(0)?.toUpperCase() || '?'}
                             </AvatarFallback>
                           </Avatar>
                           <div>
@@ -478,7 +478,7 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
                           <Avatar>
                             <AvatarImage src={request.avatar_url} />
                             <AvatarFallback>
-                              {request.display_name.charAt(0).toUpperCase()}
+                              {request.display_name?.charAt(0)?.toUpperCase() || '?'}
                             </AvatarFallback>
                           </Avatar>
                           <div>
@@ -525,7 +525,7 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
                               <Avatar className="h-8 w-8">
                                 <AvatarImage src={userResult.avatar_url} />
                                 <AvatarFallback className="text-xs">
-                                  {userResult.display_name.charAt(0).toUpperCase()}
+                                  {userResult.display_name?.charAt(0)?.toUpperCase() || '?'}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
