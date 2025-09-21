@@ -1237,7 +1237,7 @@ export type Database = {
         Returns: boolean
       }
       search_users_for_friend_discovery: {
-        Args: { search_query: string }
+        Args: { search_query?: string }
         Returns: {
           avatar_url: string
           display_name: string
