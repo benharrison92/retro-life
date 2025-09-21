@@ -66,11 +66,21 @@ export const useTaggedComments = () => {
 
   // Render comment text with highlighted tags
   const renderCommentWithTags = (commentText: string): JSX.Element => {
+    // Add safety check for undefined/null commentText
+    if (!commentText) {
+      return <span></span>;
+    }
+    
     const parts = commentText.split(/(@\w+(?:\s+\w+)*)/g);
     
     return (
       <>
         {parts.map((part, index) => {
+          // Add safety check for undefined parts
+          if (!part) {
+            return <span key={index}></span>;
+          }
+          
           if (part.startsWith('@')) {
             return (
               <span key={index} className="text-primary font-medium bg-primary/10 px-1 rounded">
