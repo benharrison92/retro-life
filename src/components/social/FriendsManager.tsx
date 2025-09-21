@@ -202,18 +202,19 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
     }
   };
 
-  const searchUsers = async (query: string) => {
-    if (!query.trim() || !user) {
+  const searchUsers = async (query: string = '') => {
+    if (!user) {
       setSearchResults([]);
-      setShowDropdown(false);
       return;
     }
 
     setSearchLoading(true);
     try {
-      // Use secure search function that only exposes display names and avatars
+      // Use secure search function - now returns results even with empty query
       const { data: users, error } = await supabase
-        .rpc('search_users_for_friend_discovery', { search_query: query });
+        .rpc('search_users_for_friend_discovery', { 
+          search_query: query.trim() || '' 
+        });
 
       if (error) {
         console.error('Search error:', error);
@@ -227,7 +228,6 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
       }));
 
       setSearchResults(usersWithEmailField);
-      setShowDropdown(true);
     } catch (error) {
       console.error('Error searching users:', error);
       toast({
@@ -241,15 +241,17 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
     }
   };
 
-  // Debounced search
+  // Load initial results and debounced search
+  useEffect(() => {
+    if (open && user) {
+      // Load some initial users when the tab opens
+      searchUsers('');
+    }
+  }, [open, user]);
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchQuery) {
-        searchUsers(searchQuery);
-      } else {
-        setSearchResults([]);
-        setShowDropdown(false);
-      }
+      searchUsers(searchQuery);
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -499,77 +501,106 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
             {/* Search existing users */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Search Users</CardTitle>
+                <CardTitle className="text-lg">Find People on RetroApp</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Search for users on RetroApp to send them friend requests.
+                  Search for people to connect with. Start typing a name or browse all users.
                 </p>
-                <div className="relative">
-                  <Input
-                    placeholder="Start typing name or email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => searchQuery && setShowDropdown(true)}
-                    className="pr-10"
-                  />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  
-                  {showDropdown && searchResults.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {searchResults.map((userResult) => {
-                        const status = getUserStatus(userResult.id);
-                        return (
-                          <div key={userResult.id} className="flex items-center justify-between p-3 hover:bg-accent border-b last:border-b-0">
-                            <div className="flex items-center gap-3 flex-1">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={userResult.avatar_url} />
-                                <AvatarFallback className="text-xs">
-                                  {userResult.display_name?.charAt(0)?.toUpperCase() || '?'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{userResult.display_name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{userResult.email}</p>
-                              </div>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant={status === 'friend' ? 'secondary' : status === 'pending' ? 'outline' : 'default'}
-                              disabled={status !== 'none'}
-                              onClick={() => {
-                                sendFriendRequest(userResult.id);
-                                setShowDropdown(false);
-                                setSearchQuery('');
-                              }}
-                              className="ml-2 h-8 px-2 text-xs"
-                            >
-                              {status === 'friend' && 'Friends'}
-                              {status === 'pending' && 'Sent'}
-                              {status === 'none' && (
-                                <>
-                                  <UserPlus className="h-3 w-3 mr-1" />
-                                  Add
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Input
+                      placeholder="Search by name or browse all users..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pr-10"
+                    />
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                   
                   {searchLoading && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg p-3">
-                      <p className="text-sm text-muted-foreground text-center">Searching...</p>
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                        <p className="text-sm text-muted-foreground mt-2">Searching for people...</p>
+                      </div>
                     </div>
                   )}
                   
-                  {searchQuery && !searchLoading && searchResults.length === 0 && showDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg p-3">
-                      <p className="text-sm text-muted-foreground text-center">
-                        No users found matching "{searchQuery}"
-                      </p>
+                  {!searchLoading && (
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {searchResults.length > 0 ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            {searchQuery ? `Found ${searchResults.length} people matching "${searchQuery}"` : `Showing ${searchResults.length} people on RetroApp`}
+                          </p>
+                          {searchResults.map((userResult) => {
+                            const status = getUserStatus(userResult.id);
+                            return (
+                              <Card key={userResult.id} className="transition-all hover:shadow-md">
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3 flex-1">
+                                      <Avatar className="h-12 w-12">
+                                        <AvatarImage src={userResult.avatar_url} />
+                                        <AvatarFallback className="text-sm font-medium">
+                                          {userResult.display_name?.charAt(0)?.toUpperCase() || '?'}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-base truncate">{userResult.display_name}</p>
+                                        <p className="text-sm text-muted-foreground">RetroApp User</p>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      size="default"
+                                      variant={status === 'friend' ? 'secondary' : status === 'pending' ? 'outline' : 'default'}
+                                      disabled={status !== 'none'}
+                                      onClick={() => {
+                                        sendFriendRequest(userResult.id);
+                                      }}
+                                      className="ml-4"
+                                    >
+                                      {status === 'friend' && (
+                                        <>
+                                          <Check className="h-4 w-4 mr-2" />
+                                          Friends
+                                        </>
+                                      )}
+                                      {status === 'pending' && (
+                                        <>
+                                          <Users className="h-4 w-4 mr-2" />
+                                          Request Sent
+                                        </>
+                                      )}
+                                      {status === 'none' && (
+                                        <>
+                                          <UserPlus className="h-4 w-4 mr-2" />
+                                          Add Friend
+                                        </>
+                                      )}
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </>
+                      ) : (
+                        !searchLoading && (
+                          <Card>
+                            <CardContent className="p-8 text-center">
+                              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                              <p className="text-muted-foreground">
+                                {searchQuery ? `No users found matching "${searchQuery}"` : 'No users found'}
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-2">
+                                Try searching for a different name or invite friends to join RetroApp.
+                              </p>
+                            </CardContent>
+                          </Card>
+                        )
+                      )}
                     </div>
                   )}
                 </div>
