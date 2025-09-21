@@ -261,6 +261,31 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
     if (!user) return;
 
     try {
+      // First check if a friendship already exists (in either direction)
+      const { data: existingFriendship } = await supabase
+        .from('friendships')
+        .select('*')
+        .or(`and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (existingFriendship) {
+        if (existingFriendship.status === 'accepted') {
+          toast({
+            title: "Already friends",
+            description: "You are already friends with this person.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Request already sent",
+            description: "A friend request is already pending with this person.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      // Create new friendship request
       const { error } = await supabase
         .from('friendships')
         .insert({
@@ -280,9 +305,10 @@ export function FriendsManager({ open, onOpenChange }: FriendsManagerProps) {
       // Reload friends to update the UI
       loadFriends();
     } catch (error: any) {
+      console.error('Error sending friend request:', error);
       toast({
         title: "Failed to send request",
-        description: error.message,
+        description: error.message || "Could not send friend request. Please try again.",
         variant: "destructive",
       });
     }
